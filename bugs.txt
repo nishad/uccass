@@ -1,0 +1,26 @@
+BUGS:
+
+  2003-11-04
+  
+    BUG #5 (Fixed 2003-11-04): Error when trying 
+    to delete answers to unselected demographics. 
+    Unknown column "aid" in table.
+
+  2003-11-03
+  
+    BUG #4 (Fixed 2003-11-04): Cannot create an 
+    answer value of 0 (zero).
+
+  2003-10-31
+  
+    BUG #3 (Fixed 2003-11-03): Dependencies 
+    based upong "MM" questions do not work.
+    
+    BUG #2: Cannot add new question to survey
+    after question with "None" answer is 
+    added to end of survey. Must move questions
+    around.
+    
+    BUG #1 (Fixed 2003-11-03): "Question is 
+    being used in XX surveys" shows an 
+    incorrect number.

@@ -1,0 +1,416 @@
+Version 1.04
+
+  2004-04-21
+
+    Intial Public Release
+  
+  2004-04-20
+
+    Removed DELETE ... USING queries and replaced them
+    with separate SELECT and DELETE queries to make
+    the script compatible with MySQL 3.23 and other databases
+    
+    Modified edit_survey_edit_answer_type template to
+    include a count of all questions using the requested
+    answer type. If the answer type is being used, a warning
+    is shown detailing how changes will affect already supplied
+    results of the survey. The answer type cannot be deleted
+    if it is in use within the survey.
+    
+    Fixed bug that caused image selections to be reset when
+    new answer values were added to answer type.
+    
+Version 1.02
+
+  2004-03-15
+
+    Added Affero General Public License, Initial Copyrighted Version
+  
+    Fixed bug in  take_survey_question_MM templates
+    that prevented answer values from being displayed  
+    
+Version 1.0
+
+  2004-02-09
+  
+    Final Public Domain release
+
+    Modified default template from simple
+    orange tables to a nice gray/white, 
+    rounded table layout. 
+    
+    Completed documentation. docs/index.html
+    contains installation instructions as
+    well as explanations of all actions
+    and features.
+
+  2004-01-31
+  
+    Added ability for administrator, once logged in, to 
+    take private surveys without supplying a password
+    
+Version 0.95.6
+
+  2004-01-13
+  
+    Modified results page to look for "_left" and "_right"
+    image in bar graphs (to allow for "rounded images"). 
+    For example, an image setting of "bar.gif" will look for
+    "bar_left.gif" and "bar_right.gif" and if they exist,
+    put them on the left and/or right of the stretched bar
+    graph image. 
+  
+  2004-01-12
+  
+    DB: Changed answer_values.color to answer_values.image
+        VARCHAR(255) NOT NULL DEFAULT '' column
+        
+    Modified answer values to list images from the
+    template image directory as possible bar graph
+    images. Any file matching the "image_extensions"
+    configuration setting is listed in a dropdown.
+    
+    Modified results page to use new, full image name
+    and grab height from the image (so it does not 
+    change). 
+    
+Version 0.95.5
+
+  2004-01-09
+
+    The following bug fixes deal with cleaning up
+    the moving of answer types and values under
+    a specific survey instead of being global. 
+
+    Fixed multiple bugs dealing with copying an
+    existing survey. All questions, dependencies,
+    and answer types and values are now copied
+    from the old survey to the new one.
+
+    Fixed bug that did not properly display
+    dependent question numbers when editing a question
+
+    Modified Delete Survey actions to also delete
+    answer types and values associated with the 
+    deleted survey.
+
+    Fixed bug in get_answer_values() method that
+    prevented the correct values for the specific
+    survey from being retrieved. 
+
+  2004-01-07
+
+    Added question number to Text Results page
+    
+    Added display of total number of answers
+    to Text Results page and each question
+    on main Results page
+
+  2004-01-06
+
+    DB: Added "sid" INT column to answer_types table
+
+    Moved adding and editing of answers and values
+    under the "edit survey" page and permissions. 
+
+    Answers and answer values are now related
+    to a specific survey instead of being global.
+    This change was made so that each survey can have
+    it's own "yes/no" question and modify it without
+    modifying the answer type or value for every
+    other survey.
+
+Version 0.95.4 
+
+  2003-12-16
+  
+    Added new template files for each question
+    type and orientation to be used when taking
+    the surveys.
+    
+    Added ability to create Matrix questions
+
+  2003-12-14
+  
+    Added replication of dependencies when choosing
+    to copy an existing survey when creating a new survey
+    
+    Fixed bug that did not properly ensure text
+    questions were answered when they were required
+    
+  2003-12-10
+  
+    Fixed bug with program adding extra slash
+    to web address when installed at the root level
+    
+    Fixed bug with handling quotes in answers
+    and passwords
+    
+    Fixed bug with creating an answer value of
+    zero and it's display
+
+Version 0.95.3
+
+  2003-12-08
+  
+    Added ability to delete specific dependencies
+    from questions and add additional dependencies
+    (more than three) from the "edit question" page    
+    
+  2003-12-06
+  
+    DB: Added "template" field to "survey" table
+    
+    DB: Added "color" field to "answer_values" table
+    
+    DB: Added "dep_id" field to "dependencies" table
+
+  2003-12-01
+
+    Upgraded included ADOdb version to ADOdb 4.04
+    
+    Added ability to choose between 7 basic colors
+    for the bar graph for each answer value
+
+  2003-11-13
+  
+    Removed all demographics from survey. 
+    Demographics will now be added as regular 
+    MM or MS questions with the appropriate
+    answer type and will enable them to
+    have dependencies.
+    
+    Adjusted options on "view results" page
+    to work from a dropdown box instead
+    of individual buttons.
+
+  2003-11-12
+  
+    Added removal of dependecies when deleting
+    a survey.
+  
+  2003-11-04
+  
+    Added code to prevent the movement of
+    questions up or down when it'll affect
+    the dependencies of the questions. Also
+    added checks so that page breaks cannot
+    be deleted when they'll break dependencies.
+    
+    Fixed Bug #4, the answer value of 0 (zero)
+    is now accepted.
+    
+    Fixed Bug #5, unchecked demographics
+    are now deleted correctly when chosen
+    to do so from the Edit Demographics
+    page. Added multi-table DELETE query
+    that is only compatible with MySQL 4.0.0+
+  
+    Added text filter to INI file. This is a
+    comma separated list of words that will
+    not be saved as answers if they are given
+    as the sole text in text boxes. For example,
+    answers such as "no" "n/a" and "none" will
+    not be saved (for text answers) since they 
+    don't contribute anything to the results. 
+    
+  2003-11-03
+    
+    Added ability to delete answers from the
+    Edit Answer page.
+         
+    Fixed table references in queries that did not
+    include prefix variable.
+    
+    Fixed Bug #3, dependencies based upon
+    multiple choice or MM questions now
+    work correctly. 
+    
+    Fixed Bug #1, proper number of surveys
+    that use the answer set being edited
+    is displayed.
+    
+    Fixed bug in dependency logic preventing
+    questions from being properly hid or required
+    when dependencies were based upon two or more
+    questions.
+
+Version 0.95.2
+
+  2003-10-29
+  
+    Added ability to hide question results from
+    the survey results page
+    
+  2003-10-28
+  
+    Fixed bug that did not correctly remember
+    demographic selections when coming back to
+    them.
+    
+    Added feature to Hide or Require a question
+    based upon answers to previous questions. 
+    Page break is automatically added if previous
+    question is on same page. (Moving questions up
+    or down or removing page breaks may break
+    dependencies at this time.)
+    
+  2003-10-27
+  
+    Fixed bug that did not properly retain the
+    chosen number of answers required when adding
+    a question and an error occurred.
+    
+    Added ability to view results of surveys
+    with answers "grouped" or "ungrouped" 
+    according to the groups set up when the 
+    answer type was created.
+    
+  2003-10-22
+  
+    Modified result viewing to do header() redirect
+    to results page when password was POSTed to page.
+    Prevents "Page cannot be displayed" errors/messages
+    seen with some browsers.
+    
+    Fixed bug with viewing "sentence" results that
+    referenced a table that was removed (results_char)
+    
+    Disabled showing "Next" button for text results when the 
+    number of answers retrieved from query was less than
+    the limit for "number of text results per page" in
+    the survey.ini file
+    
+  2003-10-21
+  
+    DB: Added `dependencies` table
+  
+  2003-09-29
+  
+    Added nl2br() function when displaying the
+    text of the questions to preserve formatting.
+    
+  2003-09-25
+  
+    Modified creating survey, taking survey,
+    survey results, and survey filters to work
+    with new answer_values table. 
+    
+    Moved tracking of all demographic questions
+    to Questions table on page 1. Regular questions
+    start on page 2. Moved storage of demographic
+    results to Results table. 
+    
+    DB: Deleted Demographics and Results_dg tables.
+    
+    Added get_answer_values() method to survey class
+    to retrieve different answer values for a specific
+    answer ID (aid). Function will run a query to retrieve
+    values for the aid and store result in static array.
+    Subsequent requests for the answer values will come
+    from the array and will not trigger a query.
+    
+  2003-09-18
+  
+    Added JavaScript focus() call to admin_password
+    text box on admin login page.
+    
+    Modified answer deletion code to work with
+    answer_values table and pass message to template
+    upon successful deletion.
+  
+  2003-09-15
+  
+    Modified adding new answer type to include a single
+    text box for each answer and allow grouping of answers.
+    Up to 99 answers are allowed for MM, MS, and D type
+    questions.
+    
+    DB: Added answer_values table to database
+
+  2003-09-12
+  
+    Added header and footer functions calls to
+    new_answer_type.php
+
+  2003-09-02
+  
+    Changed multiple calls of $smarty->assign() to 
+    $smarty->assign_by_ref() for performance increase
+    for large arrays.
+    
+    Split edit_survey template into multiple templates, one
+    for each area of editing (questions, demographics, etc)
+
+Version 0.95.1
+
+  2003-05-02
+  
+    Fixed bug that did not correctly copy first question after 
+    page breaks when creating new survey and copying existing 
+    survey
+    
+    Fixed bug that did not correctly move questions up in the 
+    question list
+    
+    Added addslashes() call to question text when creating new
+    survey and copying an existing survey
+    
+    Added display of Demographics to "display answers" page
+    
+    Added code to make questions require an answer
+    chosen when taking the survey. Uncommented code in template
+    files to include "num_required" dropdown select box. Added
+    "markers" to designate questions that were required when
+    taking surveys or viewing results.
+    
+    Added validation to prevent the number of required answers
+    for a question from being more than the number of answer
+    blocks
+    
+Version 0.95
+
+  2003-05-01:
+
+    Fixed bug that would not remove all demographic questions
+    if all demographic checkboxes were unchecked
+
+    Fixed template error that would not allow users to take
+    private surveys
+
+    Fixed bug where results filter and filter text did not properly
+    clear when empty filter form was submitted
+
+    Added style.css and link in smarty/main_header.tpl file
+
+    Changed name of survey2.inc to survey.sql.inc
+
+    Added "Quit" survey button to final question page of survey
+
+    Changed Entire "add survey" process. The initial create page will
+    create a survey with default values and then redirect to the edit
+    page for the survey. This stops what is basically a "duplicating"
+    of code, one for creation and one for editing. The only drawback
+    to this change is that more "blank" surveys could be created as
+    people create surveys but do not add questions to them.
+
+    Fixed bug that did not create page breaks correctly when creating
+    new surveys by copying another
+
+    Fixed template error that created incorrect link to "Return to
+    Main" after completing or quitting a survey
+
+    Added ability to move questions up and down in the survey from the
+    edit page
+
+    Survey System tested in alternate browsers including Netscape,
+    Opera, Mozilla, and Lynx with no display problems except for one.
+    Lynx will choose the first option of a radio button group as
+    the default, even though no option was checked. This could lead
+    to skewed results if people accept the "default" answer instead
+    of taking the time to choose their own. All other browsers tested
+    leave all radio buttons unchecked when loading the page. 
+
+Version 0.90
+
+    Initial private release

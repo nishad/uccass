@@ -1,0 +1,15 @@
+<?php
+
+include('survey.class.php');
+
+$survey = new Survey;
+
+$output = $survey->com_header("Survey Results");
+
+$output .= $survey->survey_results();
+
+$output .= $survey->com_footer();
+
+echo $output;
+
+?>
