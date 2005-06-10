@@ -1,7 +1,4 @@
-<<<<<<< todo.txt
 TODO:
-
-CVS Test
 
   2004-07-07
 
@@ -33,4 +30,3 @@ CVS Test
 
     Add more graphical representations of the answers
     to questions, such as pie graph, etc
->>>>>>> 1.4

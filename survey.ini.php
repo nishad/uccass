@@ -75,7 +75,7 @@ page_break = "%PAGE BREAK%"
 ; Number of text results to show
 ; per page when viewing text answers
 ; to surveys.
-text_results_per_page = 5
+text_results_per_page = 50
 
 ; Image Extensions
 ;
@@ -117,7 +117,7 @@ filter_limit = 3
 ; react to the stored IP addresses
 ; 0 = OFF
 ; 1 = ON
-track_ip = 1
+track_ip = 0
 
 ; Text Filter
 ;

@@ -75,7 +75,7 @@ class Survey
         { $this->error("Cannot find {$ini_file}"); return; }
 
         //Version of Survey System
-        $this->CONF['version'] = 'v1.05';
+        $this->CONF['version'] = 'v1.06';
 
         //Default path to Smarty
         if(!isset($this->CONF['smarty_path']) || $this->CONF['smarty_path'] == '')
@@ -1514,7 +1514,7 @@ class Survey
                         $seq_list = implode(',',$sequence);
 
                         $_SESSION['filter'][$sid] = " AND r.sequence IN ($seq_list) ";
-                        $_SESSION['filter_total'][$sid] = " AND (r.sequence IN ($seq_list) OR rt.sequence IN ($seq_list) OR (".$this->db->IfNull('r.sequence',1)." AND ".$this->db->IfNull('rt.sequence',1).")) ";
+                        $_SESSION['filter_total'][$sid] = " AND (r.sequence IN ($seq_list) OR rt.sequence IN ($seq_list) OR (NOT ".$this->db->IfNull('r.sequence',0)." AND NOT ".$this->db->IfNull('rt.sequence',0).")) ";
                     }
                     else
                     { $_SESSION['filter_text'][$sid] = "<span class=\"error\">Number of completed surveys matching filter is below the Filter Limit set in the configuration. Showing all results.</span><br>\n"; }
@@ -1574,8 +1574,8 @@ class Survey
                   ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid,
                   {$this->CONF['db_tbl_prefix']}answer_types a
                 WHERE q.sid = $sid and q.aid = a.aid
-                  and ((q.qid = r.qid AND ".$this->db->IfNull('rt.qid',1).") OR (q.qid = rt.qid AND ".$this->db->IfNull('r.qid',1).")
-                  OR (".$this->db->IfNull('r.qid',1)." AND ".$this->db->IfNull('rt.qid',1)."))
+                  and ((q.qid = r.qid AND NOT ".$this->db->IfNull('rt.qid',0).") OR (q.qid = rt.qid AND NOT ".$this->db->IfNull('r.qid',0).")
+                  OR (NOT ".$this->db->IfNull('r.qid',0)." AND NOT ".$this->db->IfNull('rt.qid',0)."))
                   $hide_show_where {$_SESSION['filter_total'][$sid]}
                 GROUP BY q.qid
                 ORDER BY q.page, q.oid";
@@ -2241,7 +2241,7 @@ class Survey
                     ///////////////////
                     if(isset($_REQUEST['clear_answers']))
                     {
-                        $tables = array("results","results_text","ip_track");
+                        $tables = array('results','results_text','ip_track','time_limit');
                         foreach($tables as $tbl)
                         { $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}$tbl WHERE sid = $sid"); }
                     }
@@ -2740,7 +2740,8 @@ class Survey
                             else
                             {
                                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
-                                          (page > $page) OR (page = $page AND oid > $oid)";
+                                          (page > $page OR (page = $page AND oid > $oid))";
+
                                 $rs = $this->db->Execute($query);
                                 if($rs === FALSE)
                                 { $this->error("Cannot insert page break: " . $this->db->ErrorMsg()); return; }

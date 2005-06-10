@@ -65,6 +65,7 @@ class Config
                                    <option value=\"\">Choose...</option>
                                    <option value=\"updateconfigonly\">Update Configuration Only</option>
                                    <option value=\"newinstallation\">New Installation</option>
+                                   <option value=\"upgrade_105\">Upgrade From v1.05</option>
                                    <option value=\"upgrade_104\">Upgrade From v1.04</option>
                                  </select>
                                </td></tr><tr><td>

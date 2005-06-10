@@ -32,6 +32,7 @@ if(count($_POST) > 0)
                 break;
 
                 case 'updateconfigonly':
+                case 'upgrade_105':
                 break;
 
                 default:

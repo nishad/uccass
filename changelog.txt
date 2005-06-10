@@ -1,3 +1,20 @@
+Version 1.06
+
+  2004-07-20
+
+    Fixed bug that that caused page breaks to be
+    added to multiple surveys when adding to one
+    survey
+
+    Fixed bug that did not clear timing data
+    when clearing the results of the survey
+
+    Fixed bug on incorrect formed HTML labels
+    on MM and MS (Vertical and Horizontal)
+    answer types so clicking on the answer
+    values will select the appropriate radio
+    or checkbox button
+
 Version 1.05
 
   2004-07-13
