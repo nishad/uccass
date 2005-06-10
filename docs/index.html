@@ -47,6 +47,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   <h4><a href="#installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
   <h4><a href="#installation_upgrade105_106">2.5 Upgrade from v1.05 to v1.06</a></h4>
   <h4><a href="#installation_upgrade106_180">2.6 Upgrade from v1.06 to v1.8.0</a></h4>
+  <h4><a href="#installation_upgrade180_181">2.7 Upgrade from v1.8.0 to v1.8.1</a></h4>
 </blockquote>
 
 
@@ -77,7 +78,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
     <blockquote>
       <h4><a href="#question_list">3.3.2.1 The Question List</a></h4>
       <h4><a href="#new_question">3.3.2.2 Adding A New Question</a></h4>
-      <h4><a href="#lookbacks">3.3.2.3 Lookbacks</a> <strong>** New with v1.8.0! **</strong></h4>
+      <h4><a href="#lookbacks">3.3.2.3 Lookbacks</a></h4>
       <h4><a href="#dependencies">3.3.2.4 Dependencies</a></h4>
       <h4><a href="#page_break">3.3.2.5 Adding A Page Break</a></h4>
       <h4><a href="#edit_question">3.3.2.6 Editing A Question</a></h4>
@@ -89,7 +90,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
       <h4><a href="#edit_answer_type">3.3.3.2 Editing An Answer Type or Value</a></h4>
     </blockquote>
 
-    <h4><a href="#access_control">3.3.4 Access Control</a> <strong>** New with v1.8.0! **</strong></h4>
+    <h4><a href="#access_control">3.3.4 Access Control</a></h4>
     <blockquote>
       <h4><a href="#ac_type">3.3.4.1 Access Control Types</a></h4>
       <h4><a href="#ac_hidden">3.3.4.2 Hidden Survey Control</a></h4>
@@ -143,7 +144,8 @@ details, documentation, demo and download can be found at <a href="http://www.bi
     <h4><a href="#text_modes">4.2.13 Survey and User Text Modes</a></h4>
     <h4><a href="#date_format">4.2.14 Date Format</a></h4>
     <h4><a href="#database_settings">4.2.15 Database Settings</a></h4>
-    <h4><a href="#smarty_adodb">4.2.16 Smarty and ADOdb Paths</a></h4>
+    <h4><a href="#character_set">4.2.16 Character Set</a> <strong>** New with v1.8.1 **</strong></h4>
+    <h4><a href="#smarty_adodb">4.2.17 Smarty and ADOdb Paths</a></h4>
   </blockquote>
   <h4><a href="#site_templates">4.3 Site Templates</a></h4>
 </blockquote>
@@ -175,19 +177,19 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>* Unlimited surveys, unlimited questions per survey and unlimited answer types.
   Theme based system allows surveys to have their own look and feel once new themes
   are made.</p>
-<p>* <strong>New with v1.8.0:</strong> Complete access control system allowing for the
+<p>* Complete access control system allowing for the
   creation of multiple administrator users, public or private access to creating surveys,
   multiple users with individual permissions to take surveys, view results, and edit surveys.
   Access to surveys and results can be unrestricted (public), or restricted by IP address,
   cookies, username and password or invitation only (invitation sent by email).</p>
-<p>* <strong>New with v1.8.0:</strong> Access to taking surveys can be restricted
+<p>* Access to taking surveys can be restricted
   to a certain number of times over a given period, i.e. <em>&quot;Allow users to
   take 1 survey every 7 days.&quot;</em>.</p>
-<p>* <strong>New with v1.8.0:</strong> Surveys can be completely hidden and not show up
+<p>* Surveys can be completely hidden and not show up
   on the main page at all. Access to the surveys is possible by using a unique
   URL, though, that can be delivered through email, for example. This could allow you
   to run multiple surveys with multiple users and not advertise what each of them are. </p>
-<p>* <strong>New with v1.8.0:</strong> Individual surveys have username and password protected administration area for activating
+<p>* Individual surveys have username and password protected administration area for activating
   or deactivating surveys, setting all properties, and editing questions and messages. Multiple
   users can be created with access to edit surveys.</p>
 <p>* Administrative and per-survey level setting allow question, answer values, and
@@ -224,6 +226,8 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   The modified version is released under the <a href="http://www.affero.org/oagpl.html">Affero General Public License</a>
   and is copyrighted by the author. Version 1.0 and any prior versions are public domain. </p>
   <!-- End Introduction -->
+
+
   <!-- Installation -->
 <hr>
 <h3><a name="installation" href="#toc">2. Installation</a></h3>
@@ -343,7 +347,22 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   the access controls for each of existing surveys. <strong>No survey data will be lost</strong> during
   the upgrade except for the previous access control settings.
 </p>
+<h4><a href="#toc" name="installation_upgrade180_181">2.7 Upgrade from v1.8.0 to v1.8.0</a></h4>
+<p>Version 1.8.1 is a minor upgrade that includes support for multiple character sets for foreign languages
+  and also fixes an annoying bug regarding quotes when adding answer values. Before upgrading from a previous
+  version, take notes regarding your settings in the <strong>survey.ini.php</strong> file because v1.8.1 includes
+  a new version of that file. To upgrade, delete all of the old UCCASS files (except any custom templates you may
+  have created) and copy the new files to your directory. Run the <strong>install.php</strong> file and re-enter
+  all of your settings that you copied from the old <strong>survey.ini.php</strong> file. The will see the new
+  option to choose a character set for your installation and the available options. In the drop down at the top of
+  the page, choose whether you are upgrading from a previous version or performing a new installation. Upgrading from
+  any previous version will not remove any existing surveys or results. If you are upgrading from a version prior
+  to v1.8.0, read the notices above for each new version to see what changes will be made. After running the installation
+  program, delete the install.php file and UCCASS will be ready to use.
+</p>
 <!-- End Installation -->
+
+
 <!-- Using UCCASS  -->
 <hr>
 <h3><a name="using_ucass" href="#toc">3. Using UCCASS</a></h3>
@@ -413,7 +432,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   values if appropriate. Then, when adding or editing questions, you'll choose
   from the defined answer values for each question. Normally an answer type is
   used for multiple questions, so it's easier to create these separately. </p>
-<p>New with v1.8.0, the fourth section of editing surveys controls who has access
+<p>The fourth section of editing surveys, access control, will control who has access
   to the surveys and how they get access. </p>
 <p>The links along the top of the page control access to each of the different
   sections of editing a survey. </p>
@@ -433,8 +452,8 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <h4><a href="#toc" name="ep_active">3.3.1.2 Active and Inactive Status</a></h4>
 <p>You can use these properties to manually turn your survey on or off. Making
   the survey active will cause it to appear in the public or private available
-  survey list. The survey must have at least one question in order to be activated
-  (new with v1.8.0). If the survey has been given a start date then the survey will
+  survey list. The survey must have at least one question in order to be activated.
+  If the survey has been given a start date then the survey will
   not actually become active until that date arrives. If you have specified a
   start date yet want the survey to be active immediately, you must remove the
   start date from the previous property. Making a survey inactive will disable
@@ -1410,7 +1429,30 @@ ability to use them. </p>
   a table prefix, you will need to create the prefixes on your tables manually. This setting allows the survey
   system to be installed into an existing database and be given a unique prefix so that it does not interfere with any
   already existing tables. </p>
-<h4><a href="#toc" name="smarty_adodb">4.2.16 Smarty and ADOdb Paths</a></h4>
+<h4><a href="#toc" name="character_set">4.2.16 Character Set</a></h4>
+<p>New with v1.8.1 is the option to choose a character set during installation or upgrade. This will allow the use
+  of alternate character sets including UTF-8 and BIG5, for example. These character sets allow the use of
+  foreign language characters such as Chinese, Japanese and Arabic.
+</p>
+<p>The available character sets are limited to those supported by MySQL <strong>and</strong> the PHP function
+  <a href="http://www.php.net/htmlentities">htmlentities()</a>. Only character sets common amongst the two
+  can be used with UCCASS. The available options are shown below.
+</p>
+<ul>
+  <li>ISO-8859-1 - Western European (default)</li>
+  <li>UTF-8 - ASCII compatible multi-byte 8-bit Unicode</li>
+  <li>cp1251 - Windows specific Cyrillic charset</li>
+  <li>KOI8-R - Russian</li>
+  <li>BIG5 - Traditional Chinese, mainly used in Taiwan</li>
+  <li>gb2312 - Simplified Chinese, national standard character set</li>
+  <li>Shift_JIS - Japanese</li>
+</ul>
+<p>ISO-8859-1 (or Latin1 in MySQL) is the default and recommended for English sites. This character set is what
+  most web sites use and include the common English letters, numbers, symbols, etc. If your site caters to an
+  international crowd, UTF-8 is recommended as it will allow a greater number of characters to be used both when
+  creating surveys and when users provide answers.
+</p>
+<h4><a href="#toc" name="smarty_adodb">4.2.17 Smarty and ADOdb Paths</a></h4>
 <p>These settings are blank by default and will cause the survey system to use the versions of Smarty and ADOdb
   included with all of the other files. If you already have an installation of Smarty or ADOdb, though, you can
   give the complete path to the Smarty or ADOdb directories and the survey system will look there for the include
@@ -1429,6 +1471,8 @@ ability to use them. </p>
   an images/ directory, also. If an images/ directory is not found, though, the survey system will look in the template
   directory for any images (to be used in bar graphs, for example). </p>
   <!-- End Administration  -->
+
+
   <!-- Technical Support -->
 <hr>
 <h3><a name="technical_support" href="#toc">5. Technical Support</a> </h3>
@@ -1438,6 +1482,8 @@ ability to use them. </p>
   <a href="http://bigredspark.com/mailman/listinfo/uccass-general_bigredspark.com">UCCASS-General mailing list</a>. Any of
   the methods listed can also be used for general discussion of the system and feature requests.</p>
   <!-- End Technical Support -->
+
+
   <!-- Tutorial  -->
 <hr>
 <h3><a name="tutorial" href="#toc">6. Tutorial</a></h3>

@@ -16,7 +16,8 @@ CREATE TABLE answer_types (
   label varchar(255) NOT NULL default '',
   sid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (aid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `answer_types`
@@ -122,7 +123,8 @@ CREATE TABLE answer_values (
   image varchar(255) NOT NULL default '',
   PRIMARY KEY  (avid),
   KEY aid (aid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `answer_values`
@@ -459,7 +461,8 @@ CREATE TABLE dependencies (
   dep_option varchar(10) NOT NULL default '',
   PRIMARY KEY  (dep_id),
   UNIQUE KEY sid (sid,qid,dep_qid,dep_aid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `dependencies`
@@ -503,7 +506,8 @@ CREATE TABLE ip_track (
   sid int(10) unsigned default NULL,
   completed int(11) NOT NULL default '0',
   KEY sid (sid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `ip_track`
@@ -528,7 +532,8 @@ CREATE TABLE questions (
   PRIMARY KEY  (qid),
   KEY aid (aid),
   KEY sid (sid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `questions`
@@ -1213,7 +1218,8 @@ CREATE TABLE results_text (
   KEY qid (qid),
   KEY sequence (sequence),
   FULLTEXT KEY answer (answer)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `results_text`
@@ -1347,7 +1353,8 @@ CREATE TABLE surveys (
   survey_limit_unit int(11) NOT NULL default '0',
   survey_limit_seconds int(11) NOT NULL default '0',
   PRIMARY KEY  (sid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
 
 --
 -- Dumping data for table `surveys`
@@ -1479,7 +1486,9 @@ CREATE TABLE users (
   status_date int(11) NOT NULL default '0',
   invite_code varchar(32) default NULL,
   PRIMARY KEY  (uid,sid)
-) TYPE=MyISAM;
+) CHARACTER SET latin1
+TYPE=MyISAM;
+
 
 --
 -- Dumping data for table `users`

@@ -72,7 +72,7 @@ class UCCASS_Config
                                    <option value=\"upgrade_104\">Upgrade From v1.04</option>
                                    <option value=\"upgrade_105\">Upgrade From v1.05</option>
                                    <option value=\"upgrade_106\">Upgrade From v1.06</option>
-                                   <option value=\"upgrade_180b\">Upgrade From v1.8.0b</option>
+                                   <option value=\"upgrade_180\">Upgrade From v1.8.0</option>
                                  </select>
                                </td></tr><tr><td>
                                <pre>{$ini_file}</pre></td></tr>
@@ -144,6 +144,16 @@ class UCCASS_Config
         $error = FALSE;
         $query = '';
 
+        $valid_charset = array('iso-8859-1'=>'latin1',
+                               'utf-8'=>'utf8',
+                               'cp1251'=>'cp1251',
+                               'koi8-R'=>'koi8_ru',
+                               'big5'=>'big5',
+                               'gb2312'=>'gb2312',
+                               'shift_jis'=>'sjis');
+        $char = strtolower($survey->CONF['charset']);
+        $charset = (isset($valid_charset[$char])) ? $valid_charset[$char] : $valid_charset['iso-8859-1'];
+
         if(!empty($sql_file) && file_exists($sql_file))
         {
             $file = file($sql_file);
@@ -158,6 +168,7 @@ class UCCASS_Config
                         $query = preg_replace('/^INSERT INTO (`?)/','\\0' . $survey->CONF['db_tbl_prefix'],$query);
                         $query = preg_replace('/^DROP TABLE IF EXISTS (`?)/','\\0' . $survey->CONF['db_tbl_prefix'],$query);
                         $query = preg_replace('/FROM (`?)([a-z_]+)(`?);$/',"FROM \\1{$survey->CONF['db_tbl_prefix']}\\2\\3;",$query);
+                        $query = str_replace('CHARACTER SET latin1',"CHARACTER SET {$charset}",$query);
                         $query = substr($query,0,-1);
 
                         if($parse_sequence)
@@ -171,6 +182,8 @@ class UCCASS_Config
                         }
                         $query = '';
                     }
+                    if(!empty($query))
+                    { $query .= "\n"; }
                 }
             }
         }

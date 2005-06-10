@@ -97,11 +97,13 @@ class SafeString
     var $html;
     var $images_html;
     var $dbtype;
+    var $charset;
 
-    function SafeString($dbtype='mysql')
+    function SafeString($dbtype='mysql',$charset='ISO-8859-1')
     {
         $this->html = '';
         $this->images_html = '';
+        $this->charset = $charset;
         $this->db = NewADOConnection($dbtype);
 
         return TRUE;
@@ -137,7 +139,7 @@ class SafeString
 
                 case SAFE_STRING_LIMHTML:
                     $str = str_replace(array('{$images_html}','{$html}'),array($this->images_html,$this->html),$str);
-                    $str = htmlentities($str,ENT_QUOTES);
+                    $str = htmlentities($str,ENT_QUOTES,$this->charset);
                     $str = preg_replace('#&lt;b&gt;(.*?)&lt;/b&gt;#i','<b>\1</b>',$str);
                     $str = preg_replace('#&lt;i&gt;(.*?)&lt;/i&gt;#i','<i>\1</i>',$str);
                     $str = preg_replace('#&lt;u&gt;(.*?)&lt;/u&gt;#i','<u>\1</u>',$str);
@@ -153,7 +155,7 @@ class SafeString
 
                 case SAFE_STRING_TEXT:
                 default:
-                    $str = htmlentities($str,ENT_QUOTES);
+                    $str = htmlentities($str,ENT_QUOTES,$this->charset);
                 break;
             }
         }

@@ -151,7 +151,7 @@ text_filter = "none, na, n/a, no, nothing, nope, asdf"
 ;     the user-supplied text and only use it for survey
 ;     text under very controlled situations.
 ;
-; Survey Text Mode (default is 0)
+; Survey Text Mode (default is 1)
 survey_text_mode = 1
 ;
 ; User Text Mode (default is 0)
@@ -212,6 +212,25 @@ db_database =
 ; blank for no prefix and to use the
 ; default table names.
 db_tbl_prefix =
+
+; Database / HTML Character Set
+;
+; Sets character set for database tables
+; and HTML pages. Supported character sets:
+; ----
+; ISO-8859-1 - Western European (default)
+; UTF-8 - ASCII compatible multi-byte 8-bit Unicode
+; cp1251 - Windows specific Cyrillic charset
+; KOI8-R - Russian
+; BIG5 - Traditional Chinese, mainly used in Taiwan
+; gb2312 - Simplified Chinese, national standard character set
+; Shift_JIS - Japanese
+; ----
+; Supported character sets depends upon database support
+; and PHP support for the htmlentities() function. Consult
+; your MySQL and PHP documentation to see if other
+; character sets are supported.
+charset = "ISO-8859-1"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; SMARTY CONFIGURATION ;

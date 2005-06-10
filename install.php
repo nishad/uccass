@@ -51,14 +51,13 @@ if(count($_POST) > 0)
                     }
                     else
                     { echo '<p><strong>There were errors while upgrading from 1.06 to 1.8</strong></p>'; }
-                break;
 
-                case 'upgrade_180b': //upgrade from 1.8.0b to 1.8.0
-                    $sql_error = $c->load_sql_file('upgrades/upgrade_180b_180.sql',TRUE);
+                case 'upgrade_180': //upgrade from 1.8.0 to 1.8.1
+                    $sql_error = $c->load_sql_file('upgrades/upgrade_180_181.sql',TRUE);
                     $error = $error | $sql_error;
                     if(!$error)
                     {
-                        echo '<p><strong>Upgrade from v1.8.0b to v1.8.0 successful.</strong></p>';
+                        echo '<p><strong>Upgrade from v1.8.0 to v1.8.1 successful.</strong></p>';
                     }
                 break;
 
@@ -66,9 +65,9 @@ if(count($_POST) > 0)
                     $sql_file = 'survey.sql';
                     $error = $c->load_sql_file($sql_file) | $error;
                     if(!$error)
-                    { echo '<p><strong>New installation of v1.8 completed successfully.</strong></p>'; }
+                    { echo '<p><strong>New installation of v1.8.1 completed successfully.</strong></p>'; }
                     else
-                    { echo '<p><strong>There were errors while performing a new installation of v1.8.</strong></p>'; }
+                    { echo '<p><strong>There were errors while performing a new installation of v1.8.1</strong></p>'; }
                 break;
 
                 case 'updateconfigonly':
@@ -87,6 +86,13 @@ if(count($_POST) > 0)
                 echo "<p>Installation sucessful. To complete the installation, the <strong>install.php</strong> file must
                       be deleted or removed from the web root. Doing so will prevent anyone from re-running
                       your installation and aquiring your database information or changing your site's information.</p>
+
+                      <p>A default administrative user has been created with the following username and password. It's recommended
+                      that you change this at once.</p>
+                      <blockquote>
+                        <p>Username: <strong>admin</strong></p>
+                        <p>Password: <strong>password</strong></p>
+                      </blockquote>
 
                       <p>Once complete, you may click <a href=\"{$survey->CONF['html']}/index.php\">here</a> to
                       begin using your Survey System.</p>";

@@ -154,7 +154,7 @@ class UCCASS_Special_Results extends UCCASS_Main
             }
         }
 
-        header("Content-Type: text/plain");
+        header("Content-Type: text/plain; charset={$this->CONF['charset']}");
         header("Content-Disposition: attachment; filename=Export.csv");
 
         $query = "SELECT q.qid, q.question, s.date_format

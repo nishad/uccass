@@ -37,7 +37,7 @@ OSSIBILITY OF SUCH DAMAGE.
  *
  * Last Editor: $Author: jholmes763 $
  * @author Richard Tango-Lowy & Dan Cech
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  *
  * @package axmls
  * @tutorial getting_started.pkg
@@ -1004,7 +1004,7 @@ class dbQuerySet extends dbObject {
 * @tutorial getting_started.pkg
 *
 * @author Richard Tango-Lowy & Dan Cech
-* @version $Revision: 1.5 $
+* @version $Revision: 1.6 $
 *
 * @package axmls
 */

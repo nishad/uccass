@@ -49,26 +49,31 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
-            if(strlen($_REQUEST['name']) > 0)
-            { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],SAFE_STRING_DB); }
+            if(isset($_REQUEST['add_answers_submit']))
+            { $ss_type = SAFE_STRING_TEXT; }
             else
-            { $error .= "Please enter a name. "; }
+            { $ss_type = SAFE_STRING_DB; }
 
-            $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],SAFE_STRING_DB);
+            if(strlen($_REQUEST['name']) > 0)
+            { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
+            else
+            { $error .= 'Please enter a name. '; }
+
+            $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
 
             switch($_REQUEST['type'])
             {
                 case 'T':
                 case 'S':
                 case 'N':
-                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],SAFE_STRING_DB);
+                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     if(isset($_REQUEST['add_answers_submit']))
                     { $error .= ' Cannot add answers to types T, S, or N.'; }
                 break;
                 case 'MM':
                 case 'MS':
                 case 'S':
-                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],SAFE_STRING_DB);
+                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
 
                     if(isset($_REQUEST['value']) && is_array($_REQUEST['value']) &&
                        isset($_REQUEST['numeric_value']) && is_array($_REQUEST['numeric_value']) &&
@@ -80,14 +85,14 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         {
                             if(strlen($value) > 0)
                             {
-                                $input['value'][] = $this->SfStr->getSafeString($value,SAFE_STRING_DB);
+                                $input['value'][] = $this->SfStr->getSafeString($value,$ss_type);
 
                                 $image_key = array_search($_REQUEST['image'][$key],$input['allowable_images']);
                                 if($image_key === FALSE)
                                 { $error .= 'Invalid image name. '; }
                                 else
                                 {
-                                    $input['image'][] = $this->SfStr->getSafeString($_REQUEST['image'][$key],SAFE_STRING_DB);
+                                    $input['image'][] = $this->SfStr->getSafeString($_REQUEST['image'][$key],$ss_type);
                                     $selected['image'][] = array($image_key => ' selected');
                                 }
 
@@ -102,7 +107,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         { $error .= ' Answer values must be provided.'; }
                     }
                     else
-                    { $error .= " Bad display answer value or numeric value was entered."; }
+                    { $error .= ' Bad display answer value or numeric value was entered.'; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -121,7 +126,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= "Incorrect Answer Type";
+                    $error .= 'Incorrect Answer Type';
                 break;
             }
 
@@ -172,6 +177,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             }
         }
 
+        $selected[$_REQUEST['type']] = ' selected';
+        $this->smarty->assign('selected',$selected);
+
         if(strlen($error)>0)
         {
             //Encode $input values so they are safe to "reshow"
@@ -184,9 +192,6 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $input['numeric_value'][$key] = $this->SfStr->getSafeString($_REQUEST['numeric_value'][$key],SAFE_STRING_TEXT);
                 $input['image'][$key][$_REQUEST['image'][$key]] = ' selected';
             }
-
-            $selected[$_REQUEST['type']] = ' selected';
-            $this->smarty->assign('selected',$selected);
             $show['error'] = $error;
         }
         $data['sid'] = $input['sid'];
@@ -312,12 +317,17 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             $error = '';
             $load_answer = FALSE;
 
+            if(isset($_REQUEST['add_answers_submit']))
+            { $ss_type = SAFE_STRING_TEXT; }
+            else
+            { $ss_type = SAFE_STRING_DB; }
+
             if(strlen($_REQUEST['name']) > 0)
-            { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],SAFE_STRING_DB); }
+            { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
             else
             { $error .= "Please enter a name. "; }
 
-            $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],SAFE_STRING_DB);
+            $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
 
             $input['aid'] = (int)$_REQUEST['aid'];
 
@@ -329,7 +339,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 case 'S':
                 case 'N':
                     $input['value'] = '';
-                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],SAFE_STRING_DB);
+                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
                     if(isset($_REQUEST['add_answers_submit']))
@@ -343,7 +353,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 case 'MM':
                 case 'MS':
                 case 'S':
-                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],SAFE_STRING_DB);
+                    $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
                     if(isset($_REQUEST['value']) && is_array($_REQUEST['value']) &&
@@ -365,7 +375,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                 else
                                 { $input['avid'][] = $avid; }
 
-                                $input['value'][] = $this->SfStr->getSafeString($value,SAFE_STRING_DB);
+                                $input['value'][] = $this->SfStr->getSafeString($value,$ss_type);
 
                                 $user_image = $_REQUEST['image'][$avid];
                                 $image_key = array_search($user_image,$input['allowable_images']);
@@ -373,7 +383,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                 { $error .= 'Invalid image selection. '; }
                                 else
                                 {
-                                    $input['image'][] = $this->SfStr->getSafeString($user_image,SAFE_STRING_DB);
+                                    $input['image'][] = $this->SfStr->getSafeString($user_image,$ss_type);
                                     $input['image_selected'][] = array($image_key => ' selected');
                                 }
 

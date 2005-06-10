@@ -108,7 +108,7 @@ class UCCASS_Main
         { $this->error("Cannot find {$ini_file}"); return; }
 
         //Version of Survey System
-        $this->CONF['version'] = 'v1.8.0';
+        $this->CONF['version'] = 'v1.8.1';
 
         //Default path to Smarty
         if(!isset($this->CONF['smarty_path']) || $this->CONF['smarty_path'] == '')
@@ -181,7 +181,7 @@ class UCCASS_Main
 
         //Create SafeString object for escaping user text
         require($this->CONF['path'] . '/classes/safestring.class.php');
-        $this->SfStr = new SafeString($this->CONF['db_type']);
+        $this->SfStr = new SafeString($this->CONF['db_type'],$this->CONF['charset']);
         $this->SfStr->setHTML($this->CONF['html']);
         $this->SfStr->setImagesHTML($this->CONF['images_html']);
 

@@ -1,3 +1,13 @@
+Version 1.8.1
+
+  2005-05-31
+
+    Added option to choose different character sets during
+    installation to cater to international sites
+
+    Fixed bug that added quotes and slashes around
+    answer values when adding more text boxes
+
 Version 1.8.0
 
   2004-11-06
