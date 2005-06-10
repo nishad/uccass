@@ -75,18 +75,6 @@ class UCCASS_Results extends UCCASS_Main
         elseif(isset($_SESSION['results']['page']))
         { unset($_SESSION['results']['page']); }
 
-        //Set default for group/ungroup
-        if(isset($_SESSION['group_answers'][$sid]))
-        {
-            $survey['show_ungroup_answers'] = TRUE;
-            $survey['show_group_answers'] = FALSE;
-        }
-        else
-        {
-            $survey['show_group_answers'] = TRUE;
-            $survey['show_ungroup_answers'] = FALSE;
-        }
-
         //Set defaults for show/hide questions
         $hide_show_where = '';
         $survey['hide_show_questions'] = TRUE;
@@ -230,40 +218,6 @@ class UCCASS_Results extends UCCASS_Main
             $this->smarty->assign('show',$show);
         }
 
-        if(isset($_SESSION['group_answers'][$sid]))
-        {
-            //loop through each answer
-            //answer values within $answer are
-            //already encoded with safe_string()
-            foreach($answer as $num=>$answer_array)
-            {
-                //determine if answer has groups or not
-                if(isset($answer_array['has_groups']))
-                {
-                    //determine what groups there are and
-                    //loop through each one
-                    $unique_groups = array_unique($answer_array['group_id']);
-                    foreach($unique_groups as $key=>$group)
-                    {
-                        //grab all keys that match current group
-                        //and loop through them
-                        $group_keys = array_keys($answer_array['group_id'],$group);
-                        foreach($group_keys as $group_key)
-                        {
-                            //add each value and count matching current group
-                            //key to temporary array
-                            $delim = (empty($temp_value[$group])) ? '' : ', ';
-                            @$temp_value[$group] .= $delim . $answer_array['value'][$group_key];
-                            @$temp_count[$group] += $count[$num][$group_key];
-                        }
-                    }
-
-                    $answer[$num]['value'] = array_values($temp_value);
-                    $count[$num] = array_values($temp_count);
-                }
-            }
-        }
-
         if(isset($count) && count($count) > 0)
         {
             foreach($count as $key=>$value)
@@ -315,6 +269,9 @@ class UCCASS_Results extends UCCASS_Main
             }
         }
 
+        $survey['export_csv_text'] = EXPORT_CSV_TEXT;
+        $survey['export_csv_numeric'] = EXPORT_CSV_NUMERIC;
+
         $this->smarty->assign_by_ref('survey',$survey);
         $this->smarty->assign_by_ref('question',$question);
         $this->smarty->assign_by_ref('qid',$qid);
@@ -357,7 +314,9 @@ class UCCASS_Results extends UCCASS_Main
         $sid = (int)$sid;
         $qid = (int)$qid;
 
-        if(!empty($_REQUEST['delete_rid']) && $this->_hasPriv(EDIT_PRIV,$sid))
+        $answer['delete_access'] = $this->_hasPriv(EDIT_PRIV,$sid) | $this->_hasPriv(ADMIN_PRIV);
+
+        if(!empty($_REQUEST['delete_rid']) && $answer['delete_access'])
         {
             $rid_list = '';
             foreach($_REQUEST['delete_rid'] as $rid)
@@ -439,8 +398,9 @@ class UCCASS_Results extends UCCASS_Main
         $answer['text'] = array();
         $answer['rid'] = array();
         $answer['num'] = array();
-        $answer['delete_access'] = $answer['num_answers'] & $delete_access;
+        $answer['delete_access'] = $answer['num_answers'] && $answer['delete_access'];
         $cnt = 0;
+
         while($r = $rs->FetchRow($rs))
         {
             $answer['num'][] = $answer['num_answers'] - $start - $cnt++;
@@ -655,14 +615,6 @@ class UCCASS_Results extends UCCASS_Main
 
         switch($_REQUEST['action'])
         {
-            case "group_answers":
-                $_SESSION['group_answers'][$sid] = TRUE;
-            break;
-
-            case "ungroup_answers":
-                unset($_SESSION['group_answers'][$sid]);
-            break;
-
             case "hide_questions":
             case "show_questions":
                 if(isset($_REQUEST['select_qid']) && !empty($_REQUEST['select_qid']))

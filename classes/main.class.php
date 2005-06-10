@@ -24,8 +24,8 @@ session_start();
 
 //Set Error Reporting Level to not
 //show notices or warnings
-//error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-error_reporting(E_ALL);
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+//error_reporting(E_ALL);
 
 //Turn off runtime escaping of quotes
 set_magic_quotes_runtime(0);
@@ -55,6 +55,33 @@ define('AC_INVITATION',4);
 //Message for already completed survey
 define('ALREADY_COMPLETED',1);
 
+//Answer types
+define('ANSWER_TYPE_T','T');    //Textarea
+define('ANSWER_TYPE_S','S');    //Textbox (sentence)
+define('ANSWER_TYPE_N','N');    //None
+define('ANSWER_TYPE_MS','MS');  //Multiple choice, single answer
+define('ANSWER_TYPE_MM','MM');  //Multiple choice, multiple answer
+
+//Orientation Types
+define('ANSWER_ORIENTATION_H','H'); //Horizontal
+define('ANSWER_ORIENTATION_V','V'); //Vertical
+define('ANSWER_ORIENTATION_D','D'); //Dropdown
+define('ANSWER_ORIENTATION_M','M'); //Matrix
+
+//Form Elements
+define('FORM_CHECKED',' checked');
+define('FORM_SELECTED',' selected');
+
+//Lookback Settings
+define('LOOKBACK_TEXT','$lookback');
+define('LOOKBACK_START_DELIMITER','{');
+define('LOOKBACK_END_DELIMITER','}');
+
+//Export CSV Settings
+define('EXPORT_CSV_TEXT',1);
+define('EXPORT_CSV_NUMERIC',2);
+define('MULTI_ANSWER_SEPERATOR',', ');
+
 class UCCASS_Main
 {
     function UCCASS_Main()
@@ -81,7 +108,7 @@ class UCCASS_Main
         { $this->error("Cannot find {$ini_file}"); return; }
 
         //Version of Survey System
-        $this->CONF['version'] = 'v1.8.0b1';
+        $this->CONF['version'] = 'v1.8.0';
 
         //Default path to Smarty
         if(!isset($this->CONF['smarty_path']) || $this->CONF['smarty_path'] == '')
@@ -337,13 +364,13 @@ class UCCASS_Main
         {
             if($by==BY_QID)
             {
-                $query = "SELECT av.avid, av.value, av.group_id, av.image FROM {$this->CONF['db_tbl_prefix']}answer_values av,
+                $query = "SELECT av.avid, av.value, av.numeric_value, av.image FROM {$this->CONF['db_tbl_prefix']}answer_values av,
                           {$this->CONF['db_tbl_prefix']}questions q WHERE q.aid = av.aid AND q.qid = $id AND q.sid = $sid
                           ORDER BY av.avid ASC";
             }
             else
             {
-                $query = "SELECT avid, value, group_id, image FROM {$this->CONF['db_tbl_prefix']}answer_values
+                $query = "SELECT av.avid, av.value, av.numeric_value, av.image FROM {$this->CONF['db_tbl_prefix']}answer_values av
                           WHERE aid = $id ORDER BY avid ASC";
             }
 
@@ -355,13 +382,10 @@ class UCCASS_Main
             {
                 $retval['avid'][] = $r['avid'];
                 $retval['value'][] = $this->SfStr->getSafeString($r['value'],$mode);
-                $retval['group_id'][] = $r['group_id'];
+                $retval['numeric_value'][] = $r['numeric_value'];
                 $retval['image'][] = $r['image'];
                 $retval[$r['avid']] = $r['value'];
             }
-
-            if(count($retval['group_id']) != count(array_unique($retval['group_id'])))
-            { $retval['has_groups'] = TRUE; }
 
             $answer_values[$id] = $retval;
         }
@@ -415,14 +439,6 @@ class UCCASS_Main
 
         return $retval;
     }
-
-    /* function check_access($sid)
-    {
-        if(isset($_SESSION['admin_logged_in']) || isset($_SESSION['edit_survey'][$sid]))
-        { return TRUE; }
-        else
-        { return FALSE; }
-    } */
 
     /*****************
     * VALIDATE LOGIN *
@@ -597,7 +613,7 @@ class UCCASS_Main
                         $_SESSION['priv'][$sid] = array(TAKE_PRIV => $r['take_priv'], EDIT_PRIV => $r['edit_priv'],
                                                         RESULTS_PRIV => $r['results_priv'], CREATE_PRIV => $r['create_priv']);
 
-                        if($_SESSION['priv'][$sid][$priv] == 1)
+                        if(isset($_SESSION['priv'][$sid][$priv]) && $_SESSION['priv'][$sid][$priv] == 1)
                         { $retval = TRUE; }
                     }
 

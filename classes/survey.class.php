@@ -64,26 +64,10 @@ class UCCASS_Survey extends UCCASS_Main
 
             if($r['active'] == 1)
             {
-                //if($r['survey_access'] == 'public')
-                //{
-                    $survey['public'][$x]['display'] = $survey_name;
-                    $survey['public'][$x]['sid'] = $r['sid'];
-                    //if($r['results_access'] == 'public')
-                    $survey['results'][$x] = TRUE;
-                    //else
-                    //{
-                     //   $survey['priv_results']['display'][] = $survey_name;
-                     //   $survey['priv_results']['sid'][] = $r['sid'];
-                    //}
-                    $x++;
-                //}
-                //else
-                //{
-                  //  $survey['priv_survey']['display'][] = $survey_name;
-                  //  $survey['priv_survey']['sid'][] = $r['sid'];
-                  //  $survey['priv_results']['display'][] = $survey_name;
-                  //  $survey['priv_results']['sid'][] = $r['sid'];
-                //}
+                $survey['public'][$x]['display'] = $survey_name;
+                $survey['public'][$x]['sid'] = $r['sid'];
+                $survey['results'][$x] = TRUE;
+                $x++;
             }
         }
 
@@ -161,29 +145,19 @@ class UCCASS_Survey extends UCCASS_Main
         if(!isset($_SESSION['take_survey']['start_time']))
         { $_SESSION['take_survey']['start_time'] = time(); }
 
+        if(isset($_REQUEST['preview_survey']))
+        { $_SESSION['take_survey']['preview_survey'] = TRUE; }
+
         //Retrieve survey information
         $rs = $this->db->Execute("SELECT s.name, s.start_date, s.end_date, s.redirect_page,
-            s.active, MAX(q.page) AS max_page, s.template, s.survey_text_mode, s.time_limit
+            s.active, MAX(q.page) AS max_page, s.template, s.survey_text_mode, s.user_text_mode, s.time_limit
             FROM {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
             WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid");
 
         if($rs === FALSE) { $this->error("Error retrieving Survey:" . $this->db->ErrorMsg());return; }
         if($r = $rs->FetchRow($rs))
         {
-            /*if($r['survey_access'] == 'private' && !isset($_SESSION['admin_logged_in']))
-            {
-                if(isset($_REQUEST['password']))
-                {
-                    if($_REQUEST['password'] == $r['survey_password'])
-                    { $_SESSION['survey_access'][$sid] = 1; }
-                    else
-                    { $this->error("Incorrect Password"); return; }
-                }
-                elseif(!isset($_SESSION['survey_access'][$sid]))
-                { $this->error("This survey requires a password"); return; }
-            }*/
-
-            if($r['active'] == 0 || $now < $r['start_date'] || ($now > $r['end_date'] && $r['end_date'] != 0))
+            if(($r['active'] == 0 || $now < $r['start_date'] || ($now > $r['end_date'] && $r['end_date'] != 0)) && !isset($_SESSION['take_survey']['preview_survey']))
             { $this->error("Survey #$sid. <em>{$r['name']}</em> in not active at this time");return; }
         }
         else
@@ -217,7 +191,7 @@ class UCCASS_Survey extends UCCASS_Main
         //Verify answers to required questions have been provided
         $page = $_SESSION['take_survey']['page'];
 
-        if(isset($_SESSION['take_survey']['req'][$page]) && !isset($_REQUEST['previous']))
+        if(isset($_SESSION['take_survey']['req'][$page]) && !isset($_REQUEST['previous']) && !isset($_SESSION['take_survey']['preview_survey']))
         {
             foreach($_SESSION['take_survey']['req'][$page] as $qid=>$num_required)
             {
@@ -269,20 +243,27 @@ class UCCASS_Survey extends UCCASS_Main
                 { unset($_SESSION['take_survey']['answer'][$qid]); }
                 if(!empty($value))
                 {
-                    foreach($value as $key2=>$value2)
+                    foreach($value as $answernum=>$avid)
                     {
-                        if(is_array($value2))
+                        $cnt = 0;
+                        if(is_array($avid))
                         {
-                            foreach($value2 as $key3=>$value3)
+                            foreach($avid as $answernum2=>$avid2)
                             {
-                                if(strlen($value3) > 0)
-                                {$_SESSION['take_survey']['answer'][$qid][$key2][$key3] = $value3; }
+                                if(strlen($avid2) > 0)
+                                {
+                                    $_SESSION['take_survey']['answer'][$qid][$answernum][$answernum2] = $avid2;
+                                    $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid2;
+                                }
                             }
                         }
                         else
                         {
-                            if(strlen($value2) > 0)
-                            { $_SESSION['take_survey']['answer'][$qid][$key2] = $value2; }
+                            if(strlen($avid) > 0)
+                            {
+                                $_SESSION['take_survey']['answer'][$qid][$answernum] = $avid;
+                                $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid;
+                            }
                         }
                     }
                 }
@@ -310,7 +291,8 @@ class UCCASS_Survey extends UCCASS_Main
         {
             //Process answers to survey
             case $survey['total_pages']+1:
-                $this->process_answers($_SESSION['take_survey']);
+                if(!isset($_SESSION['take_survey']['preview_survey']))
+                { $this->process_answers($_SESSION['take_survey']); }
 
                 switch($_SESSION['take_survey']['redirect_page'])
                 {
@@ -479,13 +461,19 @@ class UCCASS_Survey extends UCCASS_Main
                     else
                     {
                         $q['qid'] = $r['qid'];
-                        $q['question'] = nl2br($this->SfStr->getSafeString($r['question'],$survey['survey_text_mode']));
+
+                        //Look for lookback text within the question
+                        if(strpos($r['question'],LOOKBACK_START_DELIMITER.LOOKBACK_TEXT)!== FALSE)
+                        { $q['question'] = $this->_process_Lookback($r['question'],$survey['survey_text_mode'],$survey['user_text_mode']); }
+                        else
+                        { $q['question'] = nl2br($this->SfStr->getSafeString($r['question'],$survey['survey_text_mode'])); }
+
                         $q['num_answers'] = $r['num_answers'];
 
                         if($require_question)
                         { $r['num_required'] = $r['num_answers']; }
 
-                        if($r['num_required'] > 0)
+                        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
                         {
                             $_SESSION['take_survey']['req'][$page][$r['qid']] = $r['num_required'];
                             $q['num_required'] = $r['num_required'];
@@ -498,7 +486,7 @@ class UCCASS_Survey extends UCCASS_Main
 
                         $q['label'] = $this->SfStr->getSafeString($r['label'],$survey['survey_text_mode']);
 
-                        if($r['type'] == 'T' || $r['type'] == 'S' || $r['type'] == 'N')
+                        if($r['type'] == ANSWER_TYPE_T || $r['type'] == ANSWER_TYPE_S || $r['type'] == ANSWER_TYPE_N)
                         {
                             $q[$r['type']][$x] = TRUE;
                             $q['value'][$x] = '';
@@ -532,10 +520,10 @@ class UCCASS_Survey extends UCCASS_Main
                             switch($r['orientation'])
                             {
                                 //Vertical & Horizontal
-                                case 'V':
-                                case 'H':
+                                case ANSWER_ORIENTATION_V:
+                                case ANSWER_ORIENTATION_H:
                                     $template = "take_survey_question_{$r['type']}_{$r['orientation']}.tpl";
-                                    $selected_text = ' checked';
+                                    $selected_text = FORM_CHECKED;
                                     if($matrix_aid)
                                     {
                                         $matrix_aid = FALSE;
@@ -544,9 +532,9 @@ class UCCASS_Survey extends UCCASS_Main
                                 break;
 
                                 //Dropdown
-                                case 'D':
+                                case ANSWER_ORIENTATION_D:
                                     $template = "take_survey_question_{$r['type']}_{$r['orientation']}.tpl";
-                                    $selected_text = ' selected';
+                                    $selected_text = FORM_SELECTED;
                                     if($matrix_aid)
                                     {
                                         $matrix_aid = FALSE;
@@ -555,8 +543,8 @@ class UCCASS_Survey extends UCCASS_Main
                                 break;
 
                                 //Matrix
-                                case 'M':
-                                    $selected_text = ' checked';
+                                case ANSWER_ORIENTATION_M:
+                                    $selected_text = FORM_CHECKED;
                                     if($matrix_aid != $r['aid'])
                                     {
                                         if($matrix_aid !== FALSE)
@@ -573,7 +561,7 @@ class UCCASS_Survey extends UCCASS_Main
                             {
                                 switch($r['type'])
                                 {
-                                    case "MM":
+                                    case ANSWER_TYPE_MM:
                                         foreach($_SESSION['take_survey']['answer'][$r['qid']] as $value)
                                         {
                                             if(is_array($value))
@@ -588,7 +576,7 @@ class UCCASS_Survey extends UCCASS_Main
                                         }
                                     break;
 
-                                    case "MS":
+                                    case ANSWER_TYPE_MS:
                                         foreach($_SESSION['take_survey']['answer'][$r['qid']] as $value)
                                         {
                                             $key = array_search($value,$q['avid']);
@@ -599,7 +587,7 @@ class UCCASS_Survey extends UCCASS_Main
                             }
                         }
 
-                        if($r['type'] != "N")
+                        if($r['type'] != ANSWER_TYPE_N)
                         { $q['question_num'] = $qstart + $x - $no_counts; }
                         else
                         { $no_counts++; }
@@ -660,6 +648,52 @@ class UCCASS_Survey extends UCCASS_Main
         { $this->smarty->assign('message',$message); }
 
         return $this->smarty->fetch($this->template.'/take_survey.tpl');
+    }
+
+    /*****************************************
+    * PROCESS LOOKBACKS WITHIN QUESTION TEXT *
+    *****************************************/
+    function _process_Lookback($question, $survey_text_mode, $user_text_mode)
+    {
+        $_SESSION['take_survey']['lookback_user_text_mode'] = $user_text_mode;
+        $_SESSION['take_survey']['lookback_survey_text_mode'] = $survey_text_mode;
+
+        $pattern = '/(^|.*)' . preg_quote(LOOKBACK_START_DELIMITER . LOOKBACK_TEXT) . '\.([0-9]+)' . preg_quote(LOOKBACK_END_DELIMITER) . '(.*|$)/sU';
+        return preg_replace_callback($pattern,array($this,'_lookback_callback'),$question);
+    }
+
+    //Function to conduct lookback replacements
+    function _lookback_callback($matches)
+    {
+        $retval = '';
+        if(isset($matches[2]) && isset($_SESSION['take_survey']['lookback'][$matches[2]]));
+        {
+            $qid = $matches[2];
+            $answers = $this->get_answer_values($qid,BY_QID,$_SESSION['take_survey']['lookback_survey_text_mode']);
+
+            $ans = array();
+            foreach($_SESSION['take_survey']['lookback'][$qid] as $avid)
+            {
+                if(empty($answers['avid']))
+                { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode']));}
+                else
+                {
+                    $avid_key = array_search($avid,$answers['avid']);
+                    if($avid_key !== FALSE)
+                    { $ans[] = $answers['value'][$avid_key]; }
+                    else
+                    { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode'])); }
+                }
+            }
+            $retval = implode(', ',$ans);
+        }
+
+        if(empty($retval))
+        { $retval = $matches[0]; }
+        else
+        { $retval = nl2br($this->SfStr->getSafeString($matches[1],$_SESSION['take_survey']['lookback_survey_text_mode'])) . $retval . nl2br($this->SfStr->getSafeString($matches[3],$_SESSION['take_survey']['lookback_survey_text_mode'])); }
+
+        return $retval;
     }
 
     /****************************

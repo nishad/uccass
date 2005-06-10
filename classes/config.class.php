@@ -52,7 +52,7 @@ class UCCASS_Config
                 // form elements
                 $ini_file = fread($fp,filesize($file));
                 $ini_file = str_replace("\\","\\\\",$ini_file);
-                $ini_file = preg_replace('/^([a-z0-9_.-]+)\s?=\s?"?(.*)?"?$/im',
+                $ini_file = preg_replace('/^([a-z0-9_.-]+)\s?=\s?"?([^\r\n]+)?"?$/im',
                                          "</pre>$1: <input type=\"text\" name=\"$1\" value=\"$2\" size=\"40\"></td></tr><tr><td><pre>\n",
                                          $ini_file);
 
@@ -72,6 +72,7 @@ class UCCASS_Config
                                    <option value=\"upgrade_104\">Upgrade From v1.04</option>
                                    <option value=\"upgrade_105\">Upgrade From v1.05</option>
                                    <option value=\"upgrade_106\">Upgrade From v1.06</option>
+                                   <option value=\"upgrade_180b\">Upgrade From v1.8.0b</option>
                                  </select>
                                </td></tr><tr><td>
                                <pre>{$ini_file}</pre></td></tr>

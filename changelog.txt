@@ -1,4 +1,48 @@
-Version 1.8
+Version 1.8.0
+
+  2004-11-06
+
+    Removed "group" feature from answer values
+    DB: Renamed "group_id" column in answer_values table
+    to "numeric_value"
+
+    Added numeric value to each answer value for
+    MM and MS answer types to optionally be used in CSV
+    exports
+
+  2004-11-02
+
+    Added lookbacks
+
+  2004-09-15
+
+    Added preview option while editing surveys
+
+    Fixed v1.06->v1.8 upgrade that did not correctly
+    set the users_sequence value
+
+  2004-09-13
+
+    Fixed bug that send duplicate emails to users and invitees
+
+    Fixed bug for setting template when creating surveys
+
+    Fixed configuration bug for detecting empty config
+    options upon installation
+
+    Moved "save" option for users and invitees to action dropdown
+    to clear up UI confusion
+
+    Fixed bug that cleared "sent invite code" flag when re-saving
+    invitee data
+
+  2004-08-25
+
+    Fixed bug that prevented checkboxes from showing up
+    for deleting individual text results
+
+    Fixed bug to correctly hide create survey privileges
+    when survey creation is set to public
 
   2004-08-22
 

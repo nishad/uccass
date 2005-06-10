@@ -41,7 +41,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $input['name'] = '';
         $input['label'] = '';
         $input['value'] = array();
-        $input['group'] = array();
+        $input['numeric_value'] = array();
         $input['num_answers'] = 6;
         $input['show_add_answers'] = TRUE;
         $input['sid'] = (int)$sid;
@@ -71,17 +71,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],SAFE_STRING_DB);
 
                     if(isset($_REQUEST['value']) && is_array($_REQUEST['value']) &&
-                       isset($_REQUEST['group']) && is_array($_REQUEST['group']) &&
+                       isset($_REQUEST['numeric_value']) && is_array($_REQUEST['numeric_value']) &&
                        count($_REQUEST['value']) <= 99)
                     {
                         $input['num_answers'] = min(99,count($_REQUEST['value']));
-
-                        //Determine what group numbers
-                        //the user did not use
-                        for($x=1;$x<=100;$x++)
-                        { $group[] = $x; }
-                        $group = array_diff($group,$_REQUEST['group']);
-                        reset($group);
 
                         foreach($_REQUEST['value'] as $key=>$value)
                         {
@@ -98,22 +91,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                     $selected['image'][] = array($image_key => ' selected');
                                 }
 
-                                if(!empty($_REQUEST['group'][$key]))
-                                {
-                                    $g = (int)$_REQUEST['group'][$key];
-                                    if($g > 0 && $g < 100)
-                                    { $input['group'][] = $g; }
-                                    else
-                                    {
-                                        $g = each($group);
-                                        $input['group'][] = $g['value'];
-                                    }
-                                }
+                                if(empty($_REQUEST['numeric_value'][$key]))
+                                { $input['numeric_value'][] = 0; }
                                 else
-                                {
-                                    $g = each($group);
-                                    $input['group'][] = $g['value'];
-                                }
+                                { $input['numeric_value'][] = (int)$_REQUEST['numeric_value'][$key];  }
                             }
                         }
 
@@ -121,7 +102,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         { $error .= ' Answer values must be provided.'; }
                     }
                     else
-                    { $error .= " Bad value or group entries."; }
+                    { $error .= " Bad display answer value or numeric value was entered."; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -160,9 +141,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         for($x=0;$x<$c;$x++)
                         {
                             $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
-                            $sql .= "($avid,$aid,{$input['value'][$x]},{$input['group'][$x]},{$input['image'][$x]}),";
+                            $sql .= "($avid,$aid,{$input['value'][$x]},{$input['numeric_value'][$x]},{$input['image'][$x]}),";
                         }
-                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, group_id, image) VALUES " . substr($sql,0,-1);
+                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, numeric_value, image) VALUES " . substr($sql,0,-1);
                         $rs = $this->db->Execute($query);
 
 
@@ -182,7 +163,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     $input['name'] = '';
                     $input['label'] = '';
                     $input['value'] = array();
-                    $input['group'] = array();
+                    $input['numeric_value'] = array();
                     $input['num_answers'] = 6;
                     $input['show_add_answers'] = TRUE;
                     $input['sid'] = (int)$_REQUEST['sid'];
@@ -200,7 +181,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             foreach($_REQUEST['value'] as $key => $value)
             {
                 $input['value'][$key] = $this->SfStr->getSafeString($value,SAFE_STRING_TEXT);
-                $input['group'][$key] = $this->SfStr->getSafeString($_REQUEST['group'][$key],SAFE_STRING_TEXT);
+                $input['numeric_value'][$key] = $this->SfStr->getSafeString($_REQUEST['numeric_value'][$key],SAFE_STRING_TEXT);
                 $input['image'][$key][$_REQUEST['image'][$key]] = ' selected';
             }
 
@@ -270,7 +251,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         //upon a successful submission to "reset"
         //the form...
         $input['value'] = array();
-        $input['group_id'] = array();
+        $input['numeric_value'] = array();
         $input['num_answers'] = 6;
         $input['show_add_answers'] = TRUE;
         $input['delete_avid'] = array();
@@ -366,17 +347,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
                     if(isset($_REQUEST['value']) && is_array($_REQUEST['value']) &&
-                       isset($_REQUEST['group_id']) && is_array($_REQUEST['group_id']) &&
+                       isset($_REQUEST['numeric_value']) && is_array($_REQUEST['numeric_value']) &&
                        count($_REQUEST['value']) <= 99)
                     {
                         $input['num_answers'] = min(99,count($_REQUEST['value']));
-
-                        //Determine what group numbers
-                        //the user did not use
-                        for($x=1;$x<=100;$x++)
-                        { $group[] = $x; }
-                        $group = array_diff($group,$_REQUEST['group_id']);
-                        reset($group);
 
                         foreach($_REQUEST['value'] as $avid=>$value)
                         {
@@ -403,22 +377,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                     $input['image_selected'][] = array($image_key => ' selected');
                                 }
 
-                                if(!empty($_REQUEST['group_id'][$avid]))
-                                {
-                                    $g = (int)$_REQUEST['group_id'][$avid];
-                                    if($g > 0 && $g < 100)
-                                    { $input['group_id'][] = $g; }
-                                    else
-                                    {
-                                        $g = each($group);
-                                        $input['group_id'][] = $g['value'];
-                                    }
-                                }
+                                if(empty($_REQUEST['numeric_value'][$avid]))
+                                { $input['numeric_value'][] = 0; }
                                 else
-                                {
-                                    $g = each($group);
-                                    $input['group_id'][] = $g['value'];
-                                }
+                                { $input['numeric_value'][] = (int)$_REQUEST['numeric_value'][$avid]; }
                             }
                             else
                             {
@@ -434,7 +396,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         { $error .= ' Answer values must be provided.'; }
                     }
                     else
-                    { $error .= ' Bad value or group entries.'; }
+                    { $error .= ' Bad display value or numeric value entered.'; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -497,7 +459,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         case 'MM':
 
                             $sql_value = '';
-                            $sql_group_id = '';
+                            $sql_numeric_value = '';
                             $sql_image = '';
                             $sql_avid = '';
                             $insert = array();
@@ -509,12 +471,12 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                     if(substr($input['avid'][$x],0,1) == 'x')
                                     {
                                         $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
-                                        $insert[] = "($avid, $aid,{$input['value'][$x]},{$input['group_id'][$x]},{$input['image'][$x]})";
+                                        $insert[] = "($avid, $aid,{$input['value'][$x]},{$input['numeric_value'][$x]},{$input['image'][$x]})";
                                     }
                                     else
                                     {
                                         $sql_value .= "WHEN avid = {$input['avid'][$x]} THEN {$input['value'][$x]} ";
-                                        $sql_group_id .= "WHEN avid = {$input['avid'][$x]} THEN {$input['group_id'][$x]} ";
+                                        $sql_numeric_value .= "WHEN avid = {$input['avid'][$x]} THEN {$input['numeric_value'][$x]} ";
                                         $sql_image .= "WHEN avid = {$input['avid'][$x]} THEN {$input['image'][$x]} ";
                                         $sql_avid .= $input['avid'][$x] . ',';
                                     }
@@ -524,11 +486,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                             if(!empty($sql_avid))
                             {
                                 $sql_avid = substr($sql_avid,0,-1);
-                                $query[] = "UPDATE {$this->CONF['db_tbl_prefix']}answer_values SET value = CASE $sql_value END, group_id = CASE $sql_group_id END, image = CASE $sql_image END WHERE avid IN ($sql_avid)";
+                                $query[] = "UPDATE {$this->CONF['db_tbl_prefix']}answer_values SET value = CASE $sql_value END, numeric_value = CASE $sql_numeric_value END, image = CASE $sql_image END WHERE avid IN ($sql_avid)";
                             }
 
                             if(count($insert))
-                            { $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,group_id,image) VALUES " . implode(',',$insert); }
+                            { $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,numeric_value,image) VALUES " . implode(',',$insert); }
 
 
                             if(count($input['delete_avid']))
@@ -566,7 +528,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $answer['selected'][$r['type']] = ' selected';
                 $answer['allowable_images'] = $input['allowable_images'];
 
-                $query = "SELECT avid, value, group_id, image FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid ORDER BY avid ASC";
+                $query = "SELECT avid, value, numeric_value, image FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid ORDER BY avid ASC";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->error('Error getting answer values: ' . $this->db->ErrorMsg()); return;}
@@ -575,7 +537,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     do{
                         $answer['avid'][] = $r['avid'];
                         $answer['value'][] = $this->SfStr->getSafeString($r['value'],SAFE_STRING_TEXT);
-                        $answer['group_id'][] = $r['group_id'];
+                        $answer['numeric_value'][] = $r['numeric_value'];
                         $key = array_search($r['image'],$answer['allowable_images']);
                         $answer['image_selected'][] = array($key => ' selected');
                     }while($r = $rs->FetchRow($rs));
@@ -607,7 +569,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             foreach($_REQUEST['value'] as $key=>$value)
             {
                 $input['value'][$count] = $this->SfStr->getSafeString($value,SAFE_STRING_TEXT);
-                $input['group_id'][$count] = $this->SfStr->getSafeString($_REQUEST['group_id'][$key],SAFE_STRING_TEXT);
+                $input['numeric_value'][$count] = $this->SfStr->getSafeString($_REQUEST['numeric_value'][$key],SAFE_STRING_TEXT);
                 $input['image_selected'][$count][$_REQUEST['image'][$key]] = ' selected';
                 $count++;
             }

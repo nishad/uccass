@@ -141,12 +141,12 @@ class UCCASS_EditSurvey extends UCCASS_Main
             case MODE_ACCESSCONTROL:
                 if(isset($_REQUEST['update_access_control']))
                 { $this->_processUpdateAccessControl($sid); }
-                elseif(isset($_REQUEST['update_users']))
-                { $this->_processUpdateUsers($sid); }
+                //elseif(isset($_REQUEST['update_users']))
+                //{ $this->_processUpdateUsers($sid); }
                 elseif(isset($_REQUEST['users_go']))
                 { $this->_processUsersAction($sid); }
-                elseif(isset($_REQUEST['invite_update']))
-                { $this->_processUpdateInvite($sid); }
+                //elseif(isset($_REQUEST['invite_update']))
+                //{ $this->_processUpdateInvite($sid); }
                 elseif(isset($_REQUEST['invite_go']))
                 { $this->_processInviteAction($sid); }
                 else
@@ -1380,9 +1380,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
         {
             do
             {
-                if($r['type'] != 'N')
+                if($r['type'] != ANSWER_TYPE_N)
                 {
-                    if($r['type'] == 'S' || $r['type'] == 'T')
+                    if($r['type'] == ANSWER_TYPE_S || $r['type'] == ANSWER_TYPE_T)
                     { $x++; }
                     else
                     {
@@ -1408,8 +1408,11 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
             $this->data['js'] .= "Num_Answers['{$old_qid}'] = '{$av_count}';\n";
 
-            $this->data['dep_qid'] = array_keys($this->data['qnum']);
-            $this->data['dep_qnum'] = array_values($this->data['qnum']);
+            if(!empty($this->data['qnum']))
+            {
+                $this->data['dep_qid'] = array_keys($this->data['qnum']);
+                $this->data['dep_qnum'] = array_values($this->data['qnum']);
+            }
         }
 
         //Retrieve existing dependencies for question
@@ -1547,11 +1550,16 @@ class UCCASS_EditSurvey extends UCCASS_Main
                     $key = 'invite';
                     $num = &$y;
 
-                    $this->data[$key][$num]['invite_code'] = $this->SfStr->getSafeString($r['invite_code'],SAFE_STRING_TEXT);
+                    if(!empty($r['invite_code']))
+                    { $this->data[$key][$num]['invite_code'] = $this->SfStr->getSafeString($r['invite_code'],SAFE_STRING_TEXT); }
+                    else
+                    { $this->data[$key][$num]['invite_code'] = '&nbsp;'; }
+
                     if($r['status'] == USERSTATUS_INVITEE)
                     { $this->data[$key][$num]['status_date'] = 'N'; }
                     elseif($r['status'] == USERSTATUS_INVITED)
                     { $this->data[$key][$num]['status_date'] = date($date_format,$r['status_date']); }
+
                     if($r['results_priv'])
                     { $this->data[$key][$num]['results_priv'] = ' checked'; }
                 }
@@ -1855,10 +1863,12 @@ class UCCASS_EditSurvey extends UCCASS_Main
             case 'movetoinvite':
                 $this->_processMoveToList($sid,$_REQUEST['users_checkbox'],USERSTATUS_INVITEE);
             break;
-            //No action was chosen, so redirect back to access control page
+            //Save All Users
+            case 'saveall':
             default:
-                $this->setMessageRedirect("edit_survey.php?sid=$sid&mode=access_control");
-                $this->setMessage('Notice','Please choose an action from the dropdown to perform.',MSGTYPE_NOTICE);
+                $this->_processUpdateUsers($sid);
+                //$this->setMessageRedirect("edit_survey.php?sid=$sid&mode=access_control");
+                //$this->setMessage('Notice','Please choose an action from the dropdown to perform.',MSGTYPE_NOTICE);
             break;
         }
     }
@@ -1998,15 +2008,16 @@ class UCCASS_EditSurvey extends UCCASS_Main
     }
 
     // PARSE EMAIL TEMPLATE //
-    function _parseEmailTemplate(&$survey, &$user, &$template)
+    function _parseEmailTemplate(&$survey, &$user, $template)
     {
         $retval = array();
 
+        //Fetch selected email template
         if($template{0} != '/')
         { $template = '/' . $template; }
+        $template = $survey['template'] . $template;
 
-        //Fetch selected email template
-        $emailtext = $this->smarty->Fetch($this->template.$template);
+        $emailtext = $this->smarty->Fetch($template);
 
         //Split email on HEADER_SEPERATOR. Lines before seperator are used as
         //headers for the email and text after the seperator is the body of the email.
@@ -2022,7 +2033,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
             if(preg_match('/^To:(.*)$/im',$retval['headers'],$to))
             {
                 $retval['to'] = trim($to[1]);
-                $headers = preg_replace('/^To:.*$/i','',$retval['headers']);
+                $retval['headers'] = preg_replace("/^To:.*\r?\n/im",'',$retval['headers']);
             }
             else
             { $retval['to'] = $user['email']; }
@@ -2030,7 +2041,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
             if(preg_match('/^Subject:(.*)$/im',$retval['headers'],$subject))
             {
                 $retval['subject'] = trim($subject[1]);
-                $headers = preg_replace('/^Subject:.*$/i','',$retval['headers']);
+                $retval['headers'] = preg_replace("/^Subject:.*\r?\n/im",'',$retval['headers']);
             }
             else
             { $retval['subject'] = 'Survey Information'; }
@@ -2134,7 +2145,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         {
                             $uid = (int)$uid;
                             $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET name = {$input['name']},
-                                      email = {$input['email']}, status = {$input['status']}, results_priv = {$input['results_priv']}
+                                      email = {$input['email']}, results_priv = {$input['results_priv']}
                                       WHERE uid=$uid AND sid=$sid";
                         }
 
@@ -2180,10 +2191,12 @@ class UCCASS_EditSurvey extends UCCASS_Main
             case 'movetousers':
                 $this->_processMoveToList($sid,@$_REQUEST['invite_checkbox'],USERSTATUS_NONE);
             break;
-            //No action was chosen, so redirect back to access_control page
+            //Save all invitees
+            case 'saveall':
             default:
-                $this->setMessageRedirect("edit_survey.php?sid=$sid&mode=access_control");
-                $this->setMessage('Notice','Please choose an invite action from the dropdown.',MSGTYPE_NOTICE);
+                $this->_processUpdateInvite($sid);
+                //$this->setMessageRedirect("edit_survey.php?sid=$sid&mode=access_control");
+                //$this->setMessage('Notice','Please choose an invite action from the dropdown.',MSGTYPE_NOTICE);
             break;
         }
     }
@@ -2191,7 +2204,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
     // SEND EMAIL INVITATION CODE TO INVITEES //
     function _processSendInvitation($sid,$users,$template)
     {
-        set_time_limit(120);
+        @set_time_limit(120);
 
         $sid = (int)$sid;
         $error = array();
@@ -2398,6 +2411,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
         return implode(WORDCODE_SEPERATOR,$chosenwords);
     }
+
 }
 
 ?>

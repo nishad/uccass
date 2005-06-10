@@ -2,7 +2,7 @@
       <input type="hidden" name="mode" value="{$data.mode}">
       <input type="hidden" name="sid" value="{$data.sid}">
 
-      <div class="whitebox">Survey Access Control</div>
+      <div class="whitebox">Survey Access Control <a href="{$conf.html}/docs/index.html#ac_type">[?]</a></div>
 
       <div class="indented_cell">
         <select name="access_control" size="1">
@@ -14,7 +14,7 @@
         </select>
       </div>
 
-      <div class="whitebox">Hide Survey</div>
+      <div class="whitebox">Hide Survey <a href="{$conf.html}/docs/index.html#ac_hidden">[?]</a></div>
 
       <div class="indented_cell">
         <input type="checkbox" name="hidden" value="1"{$data.hidden_checked}>
@@ -27,7 +27,7 @@
           <a href="{$conf.html}/edit_survey.php?sid={$data.sid}">Edit Survey</a> ]
       </div>
 
-      <div class="whitebox">Public Survey Results</div>
+      <div class="whitebox">Public Survey Results <a href="{$conf.html}/docs/index.html#ac_public_results">[?]</a></div>
 
       <div class="indented_cell">
         <input type="checkbox" name="public_results" value="1"{$data.public_results_checked}> Check this box to make the results of the survey
@@ -36,7 +36,7 @@
       </div>
 
       {section name="survey_limit" loop=1 show=$data.show.survey_limit}
-        <div class="whitebox">Survey Limit</div>
+        <div class="whitebox">Survey Limit <a href="{$conf.html}/docs/index.html#ac_survey_limit">[?]</a></div>
 
         <div class="indented_cell">
           Allow users to take survey <input type="text" name="survey_limit_times" size="3" value="{$data.survey_limit_times}">
@@ -55,7 +55,7 @@
       {/section}
 
       {section name="clear_completed" loop=1 show=$data.show.clear_completed}
-        <div class="whitebox">Reset Completed Surveys</div>
+        <div class="whitebox">Reset Completed Surveys <a href="{$conf.html}/docs/index.html#ac_clear_completed">[?]</a></div>
 
         <div class="indented_cell">
           <input type="checkbox" name="clear_completed" value="1">Check this box to reset the completed surveys number for all users. This will not
@@ -69,7 +69,7 @@
 
       <hr>
 
-      <div class="whitebox">Users</div>
+      <div class="whitebox">Users <a href="{$conf.html}/docs/index.html#ac_user_list">[?]</a></div>
 
       <div class="indented_cell">
         <strong>Be sure to click the &quot;Update Access Control&quot; button if any changes were made above before you
@@ -110,15 +110,15 @@
             </tr>
           {/section}
           <tr>
-            <td colspan="2"><input type="submit" name="update_users" value="Save User Info"></td>
+            <td colspan="2">(Be sure to save users before sending login information)</td>
             <td colspan="{$data.actioncolspan}" align="right" bgcolor="#DDDDDD">
               Action:
               <select name="users_selection" size="1">
-                <option value="none">None</option>
+                <option value="saveall">Save All Users</option>
                 <option value="delete">Delete Selected</option>
-                <option value="remind">Send Login Info to Email Address</option>
+                <option value="remind">Send Login Info to Selected</option>
                 {section name="invite" loop=1 show=$data.show.invite}
-                  <option value="movetoinvite">Move to Invitee List</option>
+                  <option value="movetoinvite">Move Selected to Invitee List</option>
                 {/section}
               </select>
               <input type="submit" name="users_go" value="Go">
@@ -128,7 +128,7 @@
       </div>
 
       {section name="invite" loop=1 show=$data.show.invite}
-        <div class="whitebox" style="margin-top:10px">Invitation Code Type</div>
+        <div class="whitebox" style="margin-top:10px">Invitation Code Type <a href="{$conf.html}/docs/index.html#ac_invite_code">[?]</a></div>
         <div class="indented_cell">
           <p style="margin-top:1px; margin-bottom:1px">
             <input type="radio" id="alphanumeric" name="invite_code_type" value="alphanumeric"{$data.invite_code_type.alphanumeric}>
@@ -141,7 +141,7 @@
             <label for="words">Words</label> <em>(i.e &quot;buffalo-candy&quot; or &quot;interesting-something&quot;)</em>
           </p>
         </div>
-        <div class="whitebox">Invitees</div>
+        <div class="whitebox">Invitees <a href="{$conf.html}/docs/index.html#ac_invitee_list">[?]</a></div>
         <div class="indented_cell">
           <table border="1" cellspacing="0" cellpadding="3">
             <tr>
@@ -169,14 +169,14 @@
               </tr>
             {/section}
             <tr>
-              <td colspan="2"><input type="submit" name="invite_update" value="Save Invitee Info"></td>
+              <td colspan="2">(Be sure to save invitees before sending invite codes.)</td>
               <td colspan="{$data.inviteactioncolspan}" align="right" bgcolor="#DDDDDD">
                 Action:
                 <select name="invite_selection" size="1">
-                  <option value="none">None</option>
-                  <option value="delete">Delete Invitees</option>
-                  <option value="invite">Send Invitation Code</option>
-                  <option value="movetousers">Move to Users List</option>
+                  <option value="saveall">Save All Invitees</option>
+                  <option value="delete">Delete Selected Invitees</option>
+                  <option value="invite">Send Invitation Code to Selected</option>
+                  <option value="movetousers">Move Selected to Users List</option>
                 </select>
                 <input type="submit" name="invite_go" value="Go">
               </td>

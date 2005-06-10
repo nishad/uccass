@@ -13,10 +13,12 @@
         [ <a href="{$conf.html}/index.php">Main</a> ]
         &nbsp;&nbsp;
         [ <a href="{$conf.html}/results_table.php?sid={$survey.sid}">Results as Table</a>
-           <a href="{$conf.html}/docs/index.html#table_results">[?]</a> ]
+          <a href="{$conf.html}/docs/index.html#table_results">[?]</a> ]
         &nbsp;&nbsp;
-        [ <a href="{$conf.html}/results_csv.php?sid={$survey.sid}">Export Results to CSV</a>
-           <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
+        [ Export Results to CSV as
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_text}">Text</a> or
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_numeric}">Numeric</a> Values
+          <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
       </div>
 
       <div class="whitebox">
@@ -53,14 +55,6 @@
 
             {section name="show_all_questions" loop=1 show=$survey.show_all_questions}
               <option value="show_all_questions">Show All Questions</option>
-            {/section}
-
-            {section name="show_group_answers" loop=1 show=$survey.show_group_answers}
-              <option value="group_answers">Group Answers</option>
-            {/section}
-
-            {section name="show_ungroup_answers" loop=1 show=$survey.show_ungroup_answers}
-              <option value="ungroup_answers">Ungroup Answers</option>
             {/section}
           </select>
           <input type="submit" name="results_action" value="Go">

@@ -206,7 +206,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                 else
                 {
                     $input['create_col'] = '';
-                    $input['create_priv'] = '';
+                    $input['create_update'] = '';
                 }
 
                 if(!isset($erruid[$uid]))

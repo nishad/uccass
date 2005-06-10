@@ -1,6 +1,7 @@
         <table border="1" width="95%" cellspacing="0" cellpadding="0" align="center">
           <tr class="whitebox" style="text-align:center">
-            <td width="10%" rowspan="2">Question Number</td>
+            <td width="5%" rowspan="2">Question Number</td>
+            <td width="5%" rowspan="2">QID</td>
             <td width="50%" rowspan="2">Question Text</td>
             <td colspan="3">
               Options
@@ -23,6 +24,7 @@
                 {$data.qnum[p]}
                 <input type="hidden" name="qid" value="{$data.qid[p]}">
               </td>
+              <td style="text-align:center">{$data.qid[p]}</td>
               <td>
                 <div class="indented_cell">
                   {$data.question[p]}

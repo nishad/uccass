@@ -36,8 +36,8 @@ if(count($_POST) > 0)
                 case 'upgrade_105': // upgrade from 1.05 to 1.06
                     echo '<p><strong>Upgrade from v1.05 to v1.06 successful.</strong></p>';
 
-                case 'upgrade_106': //upgrade from 1.06 to 1.8
-                    $sql_error = $c->load_sql_file('upgrades/upgrade_106_18.sql',TRUE);
+                case 'upgrade_106': //upgrade from 1.06 to 1.8.0
+                    $sql_error = $c->load_sql_file('upgrades/upgrade_106_180.sql',TRUE);
                     $error = $error | $sql_error;
                     if(!$error)
                     {
@@ -50,7 +50,16 @@ if(count($_POST) > 0)
                               those access controls with the new system.<br /><br />';
                     }
                     else
-                    { echo '<p><strong>There were erros while upgrading from 1.06 to 1.8</strong></p>'; }
+                    { echo '<p><strong>There were errors while upgrading from 1.06 to 1.8</strong></p>'; }
+                break;
+
+                case 'upgrade_180b': //upgrade from 1.8.0b to 1.8.0
+                    $sql_error = $c->load_sql_file('upgrades/upgrade_180b_180.sql',TRUE);
+                    $error = $error | $sql_error;
+                    if(!$error)
+                    {
+                        echo '<p><strong>Upgrade from v1.8.0b to v1.8.0 successful.</strong></p>';
+                    }
                 break;
 
                 case 'newinstallation':

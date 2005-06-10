@@ -106,7 +106,7 @@ class UCCASS_Special_Results extends UCCASS_Main
                     $answers[$x]['date'] = date($date_format,$r['entered']);
                 }
                 if(isset($answers[$x][$r['qid']]))
-                { $answers[$x][$r['qid']] .= ' -- ' . $this->SfStr->getSafeString($r['value'] . $r['answer'],$user_text_mode); }
+                { $answers[$x][$r['qid']] .= MULTI_ANSWER_SEPERATOR . $this->SfStr->getSafeString($r['value'] . $r['answer'],$user_text_mode); }
                 else
                 { $answers[$x][$r['qid']] = $this->SfStr->getSafeString($r['value'] . $r['answer'],$user_text_mode); }
             }
@@ -133,9 +133,11 @@ class UCCASS_Special_Results extends UCCASS_Main
         return $this->smarty->fetch($this->template.'/results_table.tpl');
     }
 
-    function results_csv($sid)
+    function results_csv($sid, $export_type=EXPORT_CSV_TEXT)
     {
         $sid = (int)$sid;
+
+
         $retval = '';
 
         if(!$this->_CheckAccess($sid,RESULTS_PRIV,"results_csv.php?sid=$sid"))
@@ -181,7 +183,7 @@ class UCCASS_Special_Results extends UCCASS_Main
 
         $query = "SELECT GREATEST(rt.qid, r.qid) AS qid, GREATEST(rt.sequence, r.sequence) AS seq,
                   GREATEST(rt.entered, r.entered) AS entered,
-                  q.question, av.value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
+                  q.question, av.value, av.numeric_value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
                   r ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid LEFT JOIN
                   {$this->CONF['db_tbl_prefix']}answer_values av ON r.avid = av.avid WHERE q.sid = $sid {$_SESSION['filter'][$sid]}
                   ORDER BY seq, q.page, q.oid";
@@ -202,10 +204,29 @@ class UCCASS_Special_Results extends UCCASS_Main
                     $seq = $r['seq'];
                     $answers[$x]['date'] = date($date_format,$r['entered']);
                 }
+
+                switch($export_type)
+                {
+                    case EXPORT_CSV_NUMERIC:
+                        if(empty($r['answer']))
+                        { $value = $r['numeric_value']; }
+                        else
+                        { $value = $r['answer']; }
+                    break;
+
+                    case EXPORT_CSV_TEXT:
+                    default:
+                        if(empty($r['answer']))
+                        { $value = $r['value']; }
+                        else
+                        { $value = $r['answer']; }
+                    break;
+                }
+
                 if(isset($answers[$x][$r['qid']]))
-                { $answers[$x][$r['qid']] .= ' -- ' . $r['value'] . $r['answer']; }
+                { $answers[$x][$r['qid']] .= MULTI_ANSWER_SEPERATOR . $value; }
                 else
-                { $answers[$x][$r['qid']] = $r['value'] . $r['answer']; }
+                { $answers[$x][$r['qid']] = $value; }
             }
             $last_date = date($date_format,$r['entered']);
         }

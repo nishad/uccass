@@ -152,7 +152,7 @@ text_filter = "none, na, n/a, no, nothing, nope, asdf"
 ;     text under very controlled situations.
 ;
 ; Survey Text Mode (default is 0)
-survey_text_mode = 0
+survey_text_mode = 1
 ;
 ; User Text Mode (default is 0)
 user_text_mode = 0

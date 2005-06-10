@@ -13,6 +13,14 @@ li {
 .toc {
     line-height: 25%;
 }
+
+.depr {
+    text-decoration: line-through;
+}
+
+.faded {
+    color: #BBBBBB;
+}
 -->
 </style>
 </head>
@@ -23,23 +31,32 @@ li {
 details, documentation, demo and download can be found at <a href="http://www.bigredspark.com/survey.html">http://www.bigredspark.com/survey.html</a>.</h3>
 <p><a name="toc" href="#toc">Table of Contents:</a> </p>
 <span class="toc">
+
+
 <h3><a href="#introduction">1. Introduction</a></h3>
 <blockquote>
   <h4><a href="#features">1.1 Features</a></h4>
 </blockquote>
+
+
 <h3><a href="#installation">2. Installation</a></h3>
 <blockquote>
   <h4><a href="#installation_requirements">2.1 Requirements</a> </h4>
   <h4><a href="#installation_webbased">2.2 Web-based Installation</a> </h4>
   <h4><a href="#installation_manual">2.3 Manual Installation</a></h4>
   <h4><a href="#installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
+  <h4><a href="#installation_upgrade105_106">2.5 Upgrade from v1.05 to v1.06</a></h4>
+  <h4><a href="#installation_upgrade106_180">2.6 Upgrade from v1.06 to v1.8.0</a></h4>
 </blockquote>
+
+
 <h3><a href="#using_uccass">3. Using UCCASS</a></h3>
 <blockquote>
   <h4><a href="#available_surveys">3.1 Available Surveys</a></h4>
   <h4><a href="#create_new_survey">3.2 Creating A New Survey</a></h4>
   <h4><a href="#edit_surveys">3.3 Editing Surveys</a></h4>
   <blockquote>
+
     <h4><a href="#survey_properties">3.3.1 Survey Properties</a></h4>
     <blockquote>
       <h4><a href="#ep_name">3.3.1.1 Survey Name</a></h4>
@@ -48,25 +65,41 @@ details, documentation, demo and download can be found at <a href="http://www.bi
       <h4><a href="#ep_template">3.3.1.4 Survey Template</a></h4>
       <h4><a href="#ep_text_mode">3.3.1.5 Survey and User Text Modes</a></h4>
       <h4><a href="#ep_redirect">3.3.1.6 Completion Redirect Page</a></h4>
-      <h4><a href="#ep_access">3.3.1.7 Survey and Results Access</a></h4>
-      <h4><a href="#ep_password">3.3.1.8 Edit Password</a></h4>
+      <h4><a href="#ep_access" class="depr">3.3.1.7 Survey and Results Access</a></h4>
+      <h4><a href="#ep_password" class="depr">3.3.1.8 Edit Password</a></h4>
       <h4><a href="#ep_results_date_format">3.3.1.9 Results Date Format</a></h4>
       <h4><a href="#ep_time_limit">3.3.1.10 Time Limit</a></h4>
       <h4><a href="#ep_clear">3.3.1.11 Clear Survey</a></h4>
       <h4><a href="#ep_delete">3.3.1.12 Delete Survey</a></h4>
     </blockquote>
+
     <h4><a href="#survey_questions">3.3.2 Survey Questions</a></h4>
     <blockquote>
       <h4><a href="#question_list">3.3.2.1 The Question List</a></h4>
       <h4><a href="#new_question">3.3.2.2 Adding A New Question</a></h4>
-      <h4><a href="#dependencies">3.3.2.3 Dependencies</a></h4>
-      <h4><a href="#page_break">3.3.2.4 Adding A Page Break</a></h4>
-      <h4><a href="#edit_question">3.3.2.5 Editing A Question</a></h4>
+      <h4><a href="#lookbacks">3.3.2.3 Lookbacks</a> <strong>** New with v1.8.0! **</strong></h4>
+      <h4><a href="#dependencies">3.3.2.4 Dependencies</a></h4>
+      <h4><a href="#page_break">3.3.2.5 Adding A Page Break</a></h4>
+      <h4><a href="#edit_question">3.3.2.6 Editing A Question</a></h4>
     </blockquote>
+
     <h4><a href="#answer_types">3.3.3 Answer Types and Values</a></h4>
     <blockquote>
       <h4><a href="#new_answer_type">3.3.3.1 Adding A New Answer Type</a></h4>
       <h4><a href="#edit_answer_type">3.3.3.2 Editing An Answer Type or Value</a></h4>
+    </blockquote>
+
+    <h4><a href="#access_control">3.3.4 Access Control</a> <strong>** New with v1.8.0! **</strong></h4>
+    <blockquote>
+      <h4><a href="#ac_type">3.3.4.1 Access Control Types</a></h4>
+      <h4><a href="#ac_hidden">3.3.4.2 Hidden Survey Control</a></h4>
+      <h4><a href="#ac_public_results">3.3.4.3 Public Results</a></h4>
+      <h4><a href="#ac_survey_limit">3.3.4.4 Setting Limits on Taking Surveys</a></h4>
+      <h4><a href="#ac_clear_completed">3.3.4.5 Clearing Completed Survey Tracking</a></h4>
+      <h4><a href="#ac_user_list">3.3.4.6 User List</a></h4>
+      <h4><a href="#ac_invitee_list">3.3.4.7 Invitee List</a></h4>
+      <h4><a href="#ac_invite_code">3.3.4.8 Invitation Code Types</a></h4>
+      <h4><a href="#ac_email_templates">3.3.4.9 Email Templates</a></h4>
     </blockquote>
   </blockquote>
   <h4><a href="#take_survey">3.4 Taking A Survey</a></h4>
@@ -80,7 +113,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
     <h4><a href="#choose_survey2">3.5.1 Choosing A Survey</a></h4>
     <h4><a href="#view_results2">3.5.2 Viewing Results</a></h4>
     <h4><a href="#filter_results">3.5.3 Filtering Results</a></h4>
-    <h4><a href="#group_results">3.5.4 Grouping Results</a></h4>
+    <h4><a href="#group_results" class="depr">3.5.4 Grouping Results</a></h4>
     <h4><a href="#showhide_results">3.5.5 Hiding or Showing Results</a></h4>
     <h4><a href="#text_results">3.5.6 Viewing Text Results</a></h4>
     <h4><a href="#del_text_results">3.5.7 Deleting Text Results</a></h4>
@@ -88,16 +121,18 @@ details, documentation, demo and download can be found at <a href="http://www.bi
     <h4><a href="#csv_export">3.5.9 CSV Results Export</a></h4>
   </blockquote>
 </blockquote>
+
+
 <h3><a href="#administration">4. Administration</a></h3>
 <blockquote>
   <h4><a href="#site_admin">4.1 Site Admin</a></h4>
   <h4><a href="#site_settings">4.2 Site Settings</a></h4>
   <blockquote>
-    <h4><a href="#site_path">4.2.1 Site Path</a</h4>
+    <h4><a href="#site_path">4.2.1 Site Path</a></h4>
     <h4><a href="#site_html">4.2.2 Site HTML Path</a></h4>
     <h4><a href="#site_name">4.2.3 Site Name</a></h4>
     <h4><a href="#default_template">4.2.4 Default Template</a></h4>
-    <h4><a href="#admin_password">4.2.5 Admin Password</a></h4>
+    <h4><a href="#admin_password" class="depr">4.2.5 Admin Password</a></h4>
     <h4><a href="#page_break_text">4.2.6 Page Break Text</a></h4>
     <h4><a href="#results_per_page">4.2.7 Text Results Per Page</a></h4>
     <h4><a href="#image_extensions">4.2.8 Allowed Image Extensions</a></h4>
@@ -112,15 +147,18 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   </blockquote>
   <h4><a href="#site_templates">4.3 Site Templates</a></h4>
 </blockquote>
+
+
 <h3><a href="#technical_support">5. Technical Support</a></h3>
+
+
 <h3><a href="#tutorial">6. Tutorial</a></h3>
 </span>
 <hr>
   <!-- Introduction -->
   <h3><a name="introduction" href="#toc">1. Introduction</a></h3>
 <p> The Unit Command Climate Assessment and Survey System (UCCASS) (pronounced yoo-kas)
-  is a PHP survey script
-  used to make general purpose surveys or questionnaires. Originally designed
+  is a PHP survey script used to make general purpose surveys or questionnaires. Originally designed
   for the government, this program is intended to automate the Command Climate
   Assessment surveys that unit commanders are required to give but it can also
   be used for general purpose surveys and polls. Current news and an online
@@ -137,16 +175,25 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>* Unlimited surveys, unlimited questions per survey and unlimited answer types.
   Theme based system allows surveys to have their own look and feel once new themes
   are made.</p>
+<p>* <strong>New with v1.8.0:</strong> Complete access control system allowing for the
+  creation of multiple administrator users, public or private access to creating surveys,
+  multiple users with individual permissions to take surveys, view results, and edit surveys.
+  Access to surveys and results can be unrestricted (public), or restricted by IP address,
+  cookies, username and password or invitation only (invitation sent by email).</p>
+<p>* <strong>New with v1.8.0:</strong> Access to taking surveys can be restricted
+  to a certain number of times over a given period, i.e. <em>&quot;Allow users to
+  take 1 survey every 7 days.&quot;</em>.</p>
+<p>* <strong>New with v1.8.0:</strong> Surveys can be completely hidden and not show up
+  on the main page at all. Access to the surveys is possible by using a unique
+  URL, though, that can be delivered through email, for example. This could allow you
+  to run multiple surveys with multiple users and not advertise what each of them are. </p>
+<p>* <strong>New with v1.8.0:</strong> Individual surveys have username and password protected administration area for activating
+  or deactivating surveys, setting all properties, and editing questions and messages. Multiple
+  users can be created with access to edit surveys.</p>
 <p>* Administrative and per-survey level setting allow question, answer values, and
   user supplied text to be rendered as plain text, limited HTML or full HTML.
 <p>* Surveys can be marked as Active or Inactive or given specific start and end
   dates</p>
-<p>* Surveys can be marked as Public or Private where Private requires a password
-  to take the survey</p>
-<p>* Survey results can be marked as Public or Private where Private requires
-  a password to view the results of the survey</p>
-<p>* Individual surveys have password protected administration area for activating
-  or deactivating surveys and editing questions and messages</p>
 <p>* Administrator password allows access to edit all surveys, answer types, and
   view results of any survey</p>
 <p>* Questions can have text or multiple choice answers. Multiple choice answers
@@ -262,13 +309,40 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>9. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
   browser and make your surveys.</p>
 <h4><a href="#toc" name="installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
-<p>To upgrade from v1.04, all files associated with the old version must be deleted. The v1.04 templates
+<p>To upgrade from v1.04 to v1.05, all files associated with the old version must be deleted. The v1.04 templates
   and <strong><em>survey.ini.php</em></strong> file are not compatible with with v1.05 because of the extensive changes. All of your
   existing surveys and results will not be removed if you choose Upgrade during the installation process.
   Choosing a New Installation <strong>will remove any existing data you have</strong> if you give the
   same configuration data. Once the v1.04 files have been removed, copy the v1.05 files in their place
   and follow the <a href="#installation_webbased">Web Based Installation</a>
   or <a href="#installation_manual">Manual Installation</a> instructions.
+<h4><a href="#toc" name="installation_upgrade105_106">2.5 Upgrade from v1.05 to v1.06</a></h4>
+<p>If you are using the default templates with v1.05, you can upgrade by simply copying all of the v1.06 files
+ and overwriting the v1.05 files. There were no database changes nor configuratin file changes, so the installation
+ sequence does not need to be ran.
+ <br />
+ If you are using customized templates and wish to keep them, you need to update four of them to fix bugs. There
+ are only five files with differences between the two versions, so begin by copying the new v1.06 <strong>survey.class.php</strong>
+ file and overwriting the v1.05 version. From the v1.06 files, the following four templates must be copied
+ and placed in each of your template directories. You will need to go back and customize them again after this is done.
+ <ul>
+    <li>take_survey_question_MM_V.tpl</li>
+    <li>take_survey_question_MM_H.tpl</li>
+    <li>take_survey_question_MS_V.tpl</li>
+    <li>take_survey_question_MS_H.tpl</li>
+  </ul>
+  These files are located in the <strong>templates/Default/</strong> directory of the v1.06 files.
+</p>
+<h4><a href="#toc" name="installation_upgrade106_180">2.6 Upgrade from v1.06 to v1.8.0</a></h4>
+<p>There were quite a few changes regarding permissions with v1.8.0, so many of the templates for older
+  versions will not work and will have to be updated. To upgrade, copy all of the v1.8.0 files to your
+  directory and run that installation program. Because of the access control changes, after the upgrade,
+  any existing surveys will be marked as public (no access control) and results access will be private
+  (admin only, since that's the only user, now). It's advised that you log in as the default admin user
+  (Login: admin, Password: password) and immediately change the password. You can then go about resetting
+  the access controls for each of existing surveys. <strong>No survey data will be lost</strong> during
+  the upgrade except for the previous access control settings.
+</p>
 <!-- End Installation -->
 <!-- Using UCCASS  -->
 <hr>
@@ -329,16 +403,18 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   and dependencies and also create new or edit existing answer types and values.
 </p>
 <h4><a href="#toc" name="edit_surveys">3.3 Editing Surveys</a></h4>
-<p>Surveys have three main sections when they are being edited. The first section
+<p>Surveys have four main sections when they are being edited. The first section
   deals with the survey properties. Here you can edit the welcome and thank you
   text, activate your survey, and adjust any passwords. The second section deals
   with questions, both adding new questions and editing existing questions. This
   area is also where you'll define dependencies among the questions. </p>
-<p>The final section deals with editing answer types and values. Within the survey system, you define
+<p>The third section deals with editing answer types and values. Within the survey system, you define
   a specific answer type of a text box, multiple choice, etc, and give the answer
   values if appropriate. Then, when adding or editing questions, you'll choose
   from the defined answer values for each question. Normally an answer type is
   used for multiple questions, so it's easier to create these separately. </p>
+<p>New with v1.8.0, the fourth section of editing surveys controls who has access
+  to the surveys and how they get access. </p>
 <p>The links along the top of the page control access to each of the different
   sections of editing a survey. </p>
 <h4><a href="#toc" name="survey_properties">3.3.1 Survey Properties</a></h4>
@@ -357,7 +433,8 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <h4><a href="#toc" name="ep_active">3.3.1.2 Active and Inactive Status</a></h4>
 <p>You can use these properties to manually turn your survey on or off. Making
   the survey active will cause it to appear in the public or private available
-  survey list. If the survey has been given a start date then the survey will
+  survey list. The survey must have at least one question in order to be activated
+  (new with v1.8.0). If the survey has been given a start date then the survey will
   not actually become active until that date arrives. If you have specified a
   start date yet want the survey to be active immediately, you must remove the
   start date from the previous property. Making a survey inactive will disable
@@ -430,20 +507,22 @@ ability to use them. </p>
         for your own site (instead of the survey system main page).</li>
   </ul>
 </p>
-<h4><a href="#toc" name="ep_access">3.3.1.7 Survey and Results Access</a></h4>
-<p>This is the property that will control whether your survey is listed as public
+<h4><a href="#toc" name="ep_access" class="depr">3.3.1.7 Survey and Results Access</a></h4>
+<p>This feature was removed in v1.8.0.
+  <span class="faded">This is the property that will control whether your survey is listed as public
   or private. If you choose to make the survey private, you must give a password.
   This password will then be required from any user who tries to take the survey.
   This same property applies to the results access. Public results will be available
   to anyone while private results will require a password. You can give different
   password for taking the survey and for viewing the results to control access
-  to each area or make them the same. </p>
-<h4><a href="#toc" name="ep_password">3.3.1.8 Edit Password</a></h4>
-<p>This is the password that was already given when you created the survey. This
+  to each area or make them the same. </span></p>
+<h4><a href="#toc" name="ep_password" class="depr">3.3.1.8 Edit Password</a></h4>
+<p>This feature was removed in v1.8.0.
+  <span class="faded">This is the password that was already given when you created the survey. This
   will allow you to change the password if necessary. This password will be required
   from anyone who attempts to edit the survey. This should be strictly controlled
   as anyone who gains access to editing the survey can add or remove bogus questions,
-  clear all results, or even delete the entire survey. </p>
+  clear all results, or even delete the entire survey. </span></p>
 <h4><a href="#toc" name="ep_results_date_format">3.3.1.9 Results Date Format</a></h4>
 <p>This is a date format string used to format the dates in the Table and CSV results
   views. This date format must match the specifications given for the
@@ -565,7 +644,32 @@ ability to use them. </p>
   you are adding the first question of the survey. More dependencies can be added
   later by editing the question. Dependencies are explained in the next section.
 </p>
-<h4><a href="#toc" name="dependencies">3.3.2.3 Dependencies</a></h4>
+<h4><a href="#toc" name="lookbacks">3.3.2.2 Lookbacks</a></h4>
+<p>When writing the text for your question, you can include previous answers that
+  your users have chosen by using lookbacks. Lookbacks are a special tag that you
+  can place in your question to refer to an answer a user gave. Lookbacks only work
+  for questions that are on a previous page as they require the user to choose an
+  answer before the question with the lookback is displayed. </p>
+<p>By default, lookbacks have the format of {$lookback.123} where &quot;123&quot; refers
+  to the question ID or "qid" whose selected answer will be displayed. For example,
+  if Question 1 (which as a quid of 4534) has a user choose a favorite hobby from Reading,
+  Writing or Arithmetic, you can use a lookback in any question on a following page.
+  Writing a question such as &quot;Why did you choose {$lookback.4534}?&quot; will
+  substitute the actual answer chosen by the user for the lookback tag. If the qid
+  does not match a valid question from the survey or is a question that hasn't been
+  answered yet, then no replacement will take place.</p>
+<p>You can also have multiple lookbacks per question, such as &quot;Why did you choose
+  {$lookback.1234} for question 9 and {$lookback.1456} for question 12?&quot;</p>
+<p>Lookbacks can be used on questions that have any answer type, although using a lookback
+  for a large text area may not be a wise idea. If the lookback refers to a question where
+  the user types in an answer, the text will be encoded at the User Text Mode that's
+  set in the survey properties. This means that you can have your Survey Text Mode set to
+  Limited HTML and include markup in your question, but if you're User Text Mode is set
+  to Text Only, then including a lookback with user supplied text will not result
+  in any user supplied HTML being injected into your question. </p>
+<p>The syntax for lookbacks can be changed by editing the constants in the
+  <strong><i>main.class.php</i></strong> file. </p>
+<h4><a href="#toc" name="dependencies">3.3.2.4 Dependencies</a></h4>
 <p>Dependencies allow you to add conditions to your questions. You can choose
   to optionally hide, require or show certain questions based upon the answer to previous
   questions. By adding multiple dependencies to your questions, you can create
@@ -619,7 +723,7 @@ ability to use them. </p>
   a dependency on question 1 it's supposed to be hidden, the user will go directly
   from the page one to page 3. You may want to explain this to users or just remove
   the page count entirely from your template. </p>
-<h4><a href="#toc" name="page_break">3.3.2.4 Adding A Page Break</a></h4>
+<h4><a href="#toc" name="page_break">3.3.2.5 Adding A Page Break</a></h4>
 <p>Page breaks are useful to break up long surveys into manageable parts. To create
   a page break in your survey, you must enter a certain text in the new question
   text area. This text should be listed above or around the add new question area.
@@ -642,7 +746,7 @@ ability to use them. </p>
   directly to the third page. They will skip over question 2 and page 2 entirely
   if the dependency to hide question 2 is matched. So while the survey template
   may say &quot;Page 1 of 72&quot;, the users may not see every page. </p>
-<h4><a href="#toc" name="edit_question">3.3.2.5 Editing A Question</a></h4>
+<h4><a href="#toc" name="edit_question">3.3.2.6 Editing A Question</a></h4>
 <p>Clicking on the edit button in the question list will allow you to edit individual
   questions. You will be able to edit the text of the question, change the answer
   type, and all of the other question properties. This process is similar to adding
@@ -721,21 +825,14 @@ ability to use them. </p>
   are answering. For instance, don't use answer values of 1 - 5 without first
   explaining what the values mean. The answer values will be presented to the
   user in the same order that they are entered here. </p>
-<p>Each answer value can also be assigned a group. If you do not assign a group
-  to an answer value, then one will be assigned automatically. Groups provide
-  you a way of linking certain answer values together and when viewing the results,
-  view the number of answers according to the group instead of the specific answer
-  value. For instance, assume you had five possible answer values of &quot;<em><strong>Very
-  Likely, Likely, Unsure, Unlikely, Very Unlikely</strong></em>&quot; for a certain
-  answer value. Now, normally when you view the results of a question with this
-  answer value, you'll be shown the number of answers for each of the five values.
-  Groups will allow you to assign &quot;Very Likely&quot; and &quot;Likely&quot;
-  to the same group and view the number of answers added together. You could also
-  do the same for &quot;Unlikely&quot; and &quot;Very Unlikely&quot;. Now you
-  will have questions that'll display five possible choices to the user, yet be
-  shown grouped together into 3 choices when you view the results. Whether this
-  is useful or not depends on your survey, but most multiple choice answer types
-  will not require groups. </p>
+<p>Each answer value can also be assigned an optional numeric value along with a displayed
+  text value. This numeric value is only used when exporting the results to a CSV file.
+  When exporting, you have the option to show answers with the displayed text or
+  with the numeric value. Exporting with the numeric value may be useful if you
+  need to analize the results in another program. If you do not plan on doing this, then
+  the numeric values may be left blank or set to zero. <i>(Note: In versions prior to 1.8.0, this
+  field was known as "Group" and had a different function. Groups were removed in 1.8.0 and
+  replaced with the ability to include this numeric value.)</i></p>
 <p>Each answer value can be assigned an image to be used when creating the bar
   graph for the results. The bar graph is simply made by stretching the image
   to certain lengths based upon the percentage of answers. This means you can
@@ -776,26 +873,233 @@ ability to use them. </p>
 <p>The edit answer value interface will show you the current values of the name
   and label and allow you to edit them whether the question is being used or not.
   If you have a multiple choice question, the answer values are also shown along
-  with the groups and image choices. You can also add more answer values if necessary.
+  with the numeric value and image choices. You can also add more answer values if necessary.
 </p>
 <p>While you're allowed to change the type of the answer from the T, S, MS, MM,
   and N types, you may end up losing results to the survey if you switch from
   a multiple choice type answer to a text answer and vise versa. It's advised
   that you only switch between the MM and MS types unless you do not need to be
   concerned about losing results. </p>
+<h4><a href="#toc" name="access_control">3.3.4 Access Control</a></h4>
+<p>Access Control is a new feature added in v1.8.0 that allows you to control
+  administrative users, who can create surveys, take surveys, view results, and
+  edit surveys by a variety of means.</p>
+<h4><a href="#toc" name="ac_type">3.3.4.1 Access Control Types</a></h4>
+<p>There are five different types of access controls you can use for surveys.
+  Access to the admin section, creating surveys
+  (if private) and editing surveys is always with a username and password. Taking
+  surveys or viewing results can be public, restricted by IP address, cookie, username
+  and password or invitation code. Access Types:
+  <ol>
+    <li><strong>None - Public Survey</strong>: Anyone with that can access the survey
+      program can take a survey or view the results of a survey with this level of access
+      control. </li>
+    <li><strong>Cookies</strong>: Access to surveys is tracked with cookies. Each time a
+      user takes a survey, a flag is stored in a cookie. This cookie is checked each time
+      the user takes the survey to see if they are allowed to take the survey based upon
+      the other access control settings. <strong>Note</strong>: Cookies are stored on the
+      user's computer and the values can be changed. Cookie access control is easy to bypass
+      and cookies can be turned off entirely (bypassing this whole control). Some organizations
+      have privacy policies that do not permit persistant cookies (which this control users)
+      to be set at all. This is not a secure method of controlling access and should only be
+      used in a controlled environment.</li>
+    <li><strong>IP Address</strong>: Access to surveys is tracked by the users IP address. Each
+      time a user completes a survey, their IP address is stored. For each following request to
+      take a survey, the IP address table is checked and it's ensured that the given IP address
+      still has permission to take the survey. <em>Even though IP addresses are stored, there is no
+      way to relate a user's IP address to individual answers given in a survey.</em>
+      <strong>Note</strong>: IP Addresses are not a secure or recommended way of controlling
+      access to surveys unless used in a controlled environment. Some firewalls and proxy servers
+      will change or hide the IP address of the user, so this control can be bypassed. Many users
+      on large ISPs can be represented by the same IP address, so if one person takes the survey,
+      it will lock everyone else out. IP addresses can be spoofed, also, so users could change their
+      IP address and bypass this control. </li>
+    <li><strong>Username and Password</strong>: Access to surveys is restricted by the usernames
+      and passwords you define in the User List. This is the most secure way of controlling access
+      to surveys providing you choose hard-to-guess passwords. Passwords are case sensitive. Usernames
+      and passwords are only used for the survey they are created within. This means that different surveys
+      can have the same usernames and passwords, but not necessarily the same privileges. </li>
+    <li><strong>Invitation Only (Email)</strong>: Access to surveys is controlled by the user supplying
+      a unique invitation code that is emailed to them. This permission requires a seperate <strong>Invitee</strong>
+      list to be maintained. This is a secure method of controlling access to surveys if you use
+      at least an 8 character alphanumeric invitation code. Using an English-word code makes the
+      code easier to remember and type, but lessons security. </li>
+  </ol>
+<h4><a href="#toc" name="ac_hidden">3.3.4.2 Hidden Survey Control</a></h4>
+<p>Surveys can optionally be hidden from public view. If a survey is flagged as hidden, it will not
+  show up on the main page in either the survey listing or the Edit Survey drop down box. Users can still
+  get to the survey, results and editing, but it will require typing in the exact URL to each area. The required
+  URLs to get to each area area given in this area for reference. This setting is useful if you're running multiple
+  surveys among users and do not with to advertise what the different surveys are. </p>
+<h4><a href="#toc"  name="ac_public_results">3.3.4.3 Public Results</a></h4>
+<p>If the results of a survey are public, then no access controls are imposed and anyone can view them,
+  perform searches and filters. If this flag is set, then access to the results is restricted by the
+  same method as access to taking the survey. If the results of the survey are private, only users or
+  invitees in the lists that are given explicit results privileges can access the results. This means
+  they will either have to enter a username and password or their invitation code to get to the results. </p>
+<h4><a href="#toc" name="ac_survey_limit">3.3.4.4 Setting Limits on Taking Surveys</a></h4>
+<p>If the access control is set to IP, Cookie, Username/Password or Invitation Only, you can further restrict
+  how many times the users are authorized to take the survey with these settings. The first part of this restriction
+  is the number of times the user will be authorized to complete the survey and then you set the time limit over
+  which this is imposed. So setting the first text box to one, the second to 5, and choosing minutes in the dropdown
+  will impose a restriction of <em>Allow users to take survey 1 time every 5 minutes</em>. The time spans available
+  are minutes, hours and days.
+  <br />A fourth time span available is <em>ever</em>. This allows you to set a
+  limit on the number of surveys a user can take over any time period. The second text box is ignored in this case
+  and the first text box controls how many times a user can complete a survey. So setting the first text box to 2
+  will mean users can only complete the survey 2 times and that's it, until you either raise this limit, remove it,
+  or clear the record of who has completed the survey. </p>
+<h4><a href="#toc" name="ac_clear_completed">3.3.4.5 Clearing Completed Survey Tracking</a></h4>
+<p>Checking this option and saving the access controls will clear the records for which users have completed
+  the surveys. This means that if they were already at their limit, that is now removed and they are free to complete
+  the surveys again. <strong>No results are removed</strong> from the survey, only the records keeping track of who
+  has completed the survey. This option is only available if you're using IP address, username/password or invitation
+  only access controls. </p>
+<h4><a href="#toc" name="ac_user_list">3.3.4.6 User List</a></h4>
+<p>This is a list of users who have various privileges regarding the current survey. <strong>Ensure you save
+  any changes to the access controls before you edit this list</strong> so the proper columns are being shown.
+  These users are only for the current survey. Even if username or passwords match other users in other surveys,
+  the privileges do not overlap. The privileges for each user are determined by which checkboxes are enabled. If
+  results are private and a user does not have a check in the <em>Results Priv</em> column, then they will not
+  have any access to view the results. The following columns may be shown, depending upon your chosen access
+  control type:
+  <ul>
+    <li><strong>Name</strong>: Common name of user. This value is not required, but can be used
+      in the emails sent to the user to inform them what their username and password is. </li>
+    <li><strong>Email</strong>: Email address of user. This value is not required, but if it is
+      not supplied, you will not be able to send the user an email giving them their username and
+      password, along with links to the survey. </li>
+    <li><strong>Username</strong>: Username is required. This is what the user will supply when asked to log
+      into different areas of the system. This value is case insensitive and must be unique within this
+      survey. You can not have two usernames of <em>john</em>, for example. </li>
+    <li><strong>Password</strong>: A password for each user is required. Passwords are case sensitive. </li>
+    <li><strong>Sent Login</strong>: Shows the date of the last time the user was sent an email with their
+      username and password. Only shown when access control type is Username and Password.</li>
+    <li><strong>Completed</strong>: Shows the last date that the user completed the survey and the total
+      number of times the surey has been completed. Only shown when access control type is Username and Password. </li>
+    <li><strong>Take Survey</strong>: If this box is checked the user will be able to take the survey. Only shown when
+      access control type is set to Username and Password or Invitation Only. </li>
+    <li><strong>View Results</strong>: If this box is checked the user will be able to view the results of the survey.
+      This column will only be shown if results are private. </li>
+    <li><strong>Edit Survey</strong>: If this box is checked the user will be able to edit the survey.</li>
+    <li><strong>Action</strong>: You can check this box for a group of users and then choose an action from
+      the drop down at the bottom of the User List. You can choose to delete the users that are checked or to
+      send them an email with their username and password. If the access control type is Invitation Only, there
+      will be an additional option to move the user to the invitee list. </li>
+  </ul>
+</p>
+<h4><a href="#toc" name="ac_invitee_list">3.3.4.7 Invitee List</a></h4>
+<p>If the access control type is Invitation Only, then this additional list will be available to list invitees
+  of the survey. Adding names and email addresses here will allow you to send them invitation codes that they can
+  use to take surveys and view results. The following columns may be shown:
+  <ul>
+    <li><strong>Name</strong>: Name of invitee. This is not required, but can be used in the email templates.</li>
+    <li><strong>Email Address</strong>: Email address of invitee. Invitation codes will be sent to this address. </li>
+    <li><strong>Invited</strong>: Last date that invitee was sent an invitation code. </li>
+    <li><strong>Invite Code</strong>: Code invitee must use to access survey and results. </li>
+    <li><strong>Completed</strong>: Last date that invitee completed survey and total number of times invitee has
+      completed the survey. </li>
+    <li><strong>View Results</strong>: If the results of the survey are private, then checking this box will enable the
+      invitee to view the results of the survey. The invitee will have to give the same invitation code in order to view
+      the results. </li>
+    <li><strong>Action</strong>: You can check this box for a group of invitees and then choose an action from the
+      drop down at the bottom of the list. You can choose to delete the checked invitees, send them their invitation code
+      (codes are generated when you choose to send them and then displayed in list) or move a name from the Invitee List
+      to the User List. If a user is moved, you will then need to provide them a username and password in order for them
+      to stay on the User List (if one was not already given). </li>
+  </ul>
+</p>
+<h4><a href="#toc" name="ac_invite_code">3.3.4.8 Invitation Code Types</a></h4>
+<p>Before sending invitation codes to invitees, you have the option to choose what type of code you want to send them.
+  One option is to generate an alphanumeric code up to 20 characters long. This is the more secure option, but generates
+  a harder to remember code. The second option is to create a code out of
+  two English words. This will make the code easier to remember and supply when requested, but is created from a set list of words.
+  Even though there are around 113,000 words to choose from, a determined user could write a script to try every combination. </p>
+<h4><a href="#toc" name="ac_email_templates">3.3.4.9 Email Templates</a></h4>
+<p>The emails that are sent to remind users of their username and password or to send invitation codes are controlled by two
+template files in the template directory that your survey uses. The <strong>mail_usernamepassword.tpl</strong> file controls what's
+in the email sent to remind users of their username and password and the <strong>mail_invitation.tpl</strong> file controls the format
+of the email that sends invitation codes. </p>
+<p>The email templates are divided into two parts, the headers and the body of the message. The two parts are separated by the line
+<pre>
+&lt;!-- HEADER SEPERATOR - DO NOT REMOVE --&gt;
+</pre>
+Obviously, you should not remove this line so the UCCASS program can tell
+where to separate the headers and body. </p>
+<p><strong>Headers</strong>: If you're not familiar with how emails are formatted, the "headers" of emails control who the email
+is sent to, the subject, reply to addresses, from address and many other options. The default email templates supply two headers, a To:
+and Subject: header:
+<pre>
+To: {$user.email}
+Subject: Login information for survey
+</pre>
+You can add additional lines to create new headers. For example, if you wanted to set a default From: address and Cc: yourself on everything
+sent out, you can modify the headers to something like this:
+<pre>
+To: {$user.email}
+Subject: Login information for {$user.name}
+From: webmaster@example.org
+Reply-To: webmaster@example.org
+Cc: webmaster@example.org
+</pre>
+At the very least, you'll want to set a From: header so your users or invitees do not get the default for your webserver.</p>
+<p><strong>Body</strong>: The body of the email (the text after the seperator) can be anything you want. You should use this area to
+tell the user or invitee why they are getting this email and explain everything within it. What you provide is up to you, but the default
+text shows you how to create links and use variables. You'll notice that you can use variables in the headers, also, as seen by the {$user.name}
+and {$user.email} variables. UCCASS will fill in the appropriate values for you. There are also variable available for common links that
+you may want to provide. A full list of variables that are available to use in the headers or body are below (most only apply to internal UCCASS
+functions, but they are available, nonetheless).</p>
+<ul>
+  <li><strong>Survey Variables</strong></li>
+  <li>{$survey.sid} = Survey ID</li>
+  <li>{$survey.name} = Name of survey</li>
+  <li>{$survey.start_date} = Start date of survey</li>
+  <li>{$survey.end_date} = End date of survey</li>
+  <li>{$survey.active} = Flag (zero or one) for whether survey is active now</li>
+  <li>{$survey.template} = Template that survey uses</li>
+  <li>{$survey.redirect_page} = Page that survey will redirect to after completion (if applicable)</li>
+  <li>{$survey.survey_text_mode} = Setting for the survey text mode (0, 1 or 2)</li>
+  <li>{$survey.user_text_mode} = Setting for the user text mode (0, 1 or 2)</li>
+  <li>{$survey.date_format} = Format for dates</li>
+  <li>{$survey.created} = Unix timestamp of survey creation date</li>
+  <li>{$survey.time_limit} = Number of minutes allowed to complete survey</li>
+  <li>{$survey.hidden} = Flag (zero or one) for whether survey is hidden or not</li>
+  <li>{$survey.public_results} = Flag (zero or one) for whether results are public or not</li>
+  <li>{$survey.access_control} = Access control setting</li>
+  <li>{$survey.survey_limit_times} = Number of times user is allowed to take survey</li>
+  <li>{$survey.survey_limit_number} = Number of "units" (minute, hour, etc)</li>
+  <li>{$survey.survey_limit_unit} = Minutes, hours, days or ever setting</li>
+  <li>{$survey.survey_limit_seconds} = Number of seconds user must wait to take survey again (if applicable)</li>
+  <li>{$survey.main_url} =  URL to main page, i.e. http://example.org/uccass</li>
+  <li>{$survey.take_url} =  URL to take survey, i.e. http://example.org/uccass/survey.php?sid=26</li>
+  <li>{$survey.results_url} = URL to survey results, i.e. http://example.org/uccass/results.php?sid=26</li>
+</ul>
+<ul style="margin-top:30px">
+  <li><strong>User Variables</strong></li>
+  <li>{$user.uid} = User ID of user or invitee being sent email</li>
+  <li>{$user.sid} = Survey ID</li>
+  <li>{$user.name} = Name of user/invitee</li>
+  <li>{$user.email} = Email of user/invitee</li>
+  <li>{$user.username} = Username of user (empty for invitees)</li>
+  <li>{$user.password} = Password of user (empty for invitees)</li>
+  <li>{$user.admin_priv} = Flag (zero or one) for whether user has admin privilege</li>
+  <li>{$user.create_priv} = Flag (zero or one) for whether user has create privilege</li>
+  <li>{$user.take_priv} = Flag (zero or one) for whether user has take survey privilege</li>
+  <li>{$user.results_priv} = Flag (zero or one) for whether user has view results privlege</li>
+  <li>{$user.edit_priv} = Flag (zero or one) for whether user has edit survey privlege</li>
+  <li>{$user.status} = Status flag of user (none, user, invitee, invited)</li>
+  <li>{$user.status_date} = Unix timestamp of last status change (sent invitation, took survey, etc)</li>
+  <li>{$user.invite_code} = Old invitation code (if applicable, will be empty if this is first code sent)</li>
+  <li>{$user.code} = New invitation code that'll be required to take survey</li>
+  <li>{$user.take_url} = URL to take survey including invitation code, i.e. http://example.org/uccass/survey.php?sid=26&invite_code=secret-code</li>
+</ul>
 <h4><a href="#toc" name="take_survey">3.4 Taking A Survey</a></h4>
 <h4><a href="#toc" name="choose_survey">3.4.1 Choosing A Survey</a></h4>
-<p>There are two possible types of surveys that may be available to you to take:
-  public and private. Depending upon the types of surveys on your site, however,
-  you may only see one of these. Public surveys are available to anyone to take
-  and provide answers to. In the default template, they are shown as a list of
-  links on the main page. </p>
-<p>Private surveys require a password to complete, however. In the default template,
-  these surveys are presented in a drop down select box along with a text box
-  for the password. If you enter the correct password, you are then authorized
-  to complete the survey otherwise an error is shown. The password is common the
-  survey, not the individual. Everyone enters the same password to take the survey
-  and there is no way to issue individual passwords to individual people. </p>
+<p>A list of surveys and links to the results are shown on the main page. Clicking on any
+  of the links will start the survey. You may be prompted for a username and password or invitation code,
+  depending upon the access control for the survey. If you have already completed the survey the allowed
+  number of times, then you will be shown a message and redirected back to the main page. If a survey
+  is flagged as hidden, it will not show up on the main page. </p>
 <h4><a href="#toc" name="welcome_questions">3.4.2 Welcome Message and Questions</a></h4>
 <p>After correctly choosing a survey, you will be shown the first question of the
   survey. Version 1.04 of UCCASS allowed you to create separate Welcome and Thank You
@@ -838,11 +1142,9 @@ ability to use them. </p>
   page, or a custom URL depending upon your setting for <a href="#ep_redirect">Completion Redirect Page</a></p>
 <h4><a href="#toc" name="view_results">3.5 Viewing Results of A Survey</a></h4>
 <h4><a href="#toc" name="choose_survey2">3.5.1 Choosing A Survey</a></h4>
-<p>The results of surveys can be marked at public or private. If the results of the survey
-  are public, there will be a link on the main page after the survey name that will take you to the results.
-  If the results of a survey are private, there is a form which will allow you to choose the
-  survey name from a drop down and then provide a password. There is only one password for the
-  results of the survey, so anyone knowing that single password can view the results. </p>
+<p>Each survey shown on the main page will have a link to the results. If the results are public, then clicking
+  on this link will take you directly to the results. You may be required to enter a username and password or invitation
+  code in order to see the results. </p>
 <h4><a href="#toc" name="view_results2">3.5.2 Viewing Results</a></h4>
 <p>The results page lists all of the questions and answers in the survey along with bar graphs
   showing the percentage of what answers were chosen. The questions are shown in the same order as they
@@ -896,13 +1198,13 @@ ability to use them. </p>
   make the survey not truly anonymous. It is strongly recommended you do not remove this protection for live surveys.</p>
 <p>To clear the filter, choose the appropriate option from the drop down menu. This will clear all the filters you have
   chosen and take you back to viewing the results for everyone that answered your survey. </p>
-<h4><a href="#toc" name="group_results">3.5.4 Grouping Results</a></h4>
-<p>Answer value groups are defined when you create the answer type and are explained in <a href="#new_answer_type">Section 3.3.3.1 Adding A New Answer Type</a>.
+<h4><a href="#toc" name="group_results" class="depr">3.5.4 Grouping Results</a></h4>
+<p>This feature was removed in v1.8.0. <span class="faded">Answer value groups are defined when you create the answer type and are explained in <a href="#new_answer_type">Section 3.3.3.1 Adding A New Answer Type</a>.
   Specific answer values for a question can be assigned the same group so that when you choose to group the results, the answers
   to the questions in the same group are added together. If you had answer values of <strong><i>Very Likely</i></strong>
   and <strong><i>Likely</i></strong> defined as being in the same group, then when you choose to group the results, all of the
   survey results for those two answer values will be added together and shown as one option. Most answer values have a unique
-  group so that choosing to group results will have no effect. </p>
+  group so that choosing to group results will have no effect. </span></p>
 <h4><a href="#toc" name="showhide_results">3.5.5 Hiding or Showing Results</a></h4>
 <p>Another feature of the results list is the ability to hide or show individual questions. Whether or not this is useful
   depends on the type of survey you are conducting. If you had a group of 10 questions that dealt with a specific issue in the middle
@@ -955,7 +1257,11 @@ ability to use them. </p>
 <p>Clicking on this link will trigger a download of the results to the survey in a CSV (comma separated values) file.
   This file can then be opened using a spreadsheet or statistics analysis program for further processing. The CSV file
   will basically resemble the <a href="#table_results">Table Results View</a> but it can be opened with a separate program.
-  Any filters applied to the results will also be applied to this export.
+  You have the option of exporting the results as text or numeric. A text export will show the display values for the answers
+  the user has chosen, such as Yes, No, Maybe, etc. A numeric export will just export the numeric value that was set for
+  each answer value instead of the actual text. This may be useful if you want to export the results and use them in another
+  analysis program.</p>
+<p>Any filters applied to the results will also be applied to this export.
   If you have many results to a survey, this file can be VERY large and take a while to export. The script allows
   2 minutes to complete the export, so wait at least that long for the export to complete before troubleshooting.</p>
 <p>The date and time field for the CSV file may show up in scientific notation, such as 2.003E13, depending upon the
@@ -1000,9 +1306,9 @@ ability to use them. </p>
   <a href="#site_templates">Section 4.3 Site Templates</a>. This value can be set to any directory name
   within the templates/ directory. </p>
 <h4><a href="#toc" name="admin_password">4.2.5 Admin Password</a></h4>
-<p>This password allows access to the administration area of the survey system. Anyone supplying this
+<p>This feature was removed in v1.8.0. <span class="faded">This password allows access to the administration area of the survey system. Anyone supplying this
   password will be allowed to edit any survey as well as take private surveys and view results of private
-  surveys without supplying the individual survey password as explained in <a href="#site_admin">Section 4.1 Site Admin</a>.</p>
+  surveys without supplying the individual survey password as explained in <a href="#site_admin">Section 4.1 Site Admin</a>.</span></p>
 <h4><a href="#toc" name="page_break_text">4.2.6 Page Break Text</a></h4>
 <p>This is the text that controls how the users will create page breaks within the survey. If you add a question
   where the text matches this value, a page break will be inserted. Adding page breaks is covered in
@@ -1127,7 +1433,7 @@ ability to use them. </p>
 <hr>
 <h3><a name="technical_support" href="#toc">5. Technical Support</a> </h3>
 <p> The forums available at <a href="http://www.bigredspark.com/forums">http://www.bigredspark.com/forums</a>
-  can be used for technical support. The <a href="sourceforge.net/projects/uccass/">Sourceforge.net</a> page for UCCASS also
+  can be used for technical support. The <a href="http://www.sourceforge.net/projects/uccass/">Sourceforge.net</a> page for UCCASS also
   has a bug submission system that I monitor. As a final option, you can sign up for the
   <a href="http://bigredspark.com/mailman/listinfo/uccass-general_bigredspark.com">UCCASS-General mailing list</a>. Any of
   the methods listed can also be used for general discussion of the system and feature requests.</p>

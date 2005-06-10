@@ -10,7 +10,7 @@
   {/section}
 
   {section name="label" loop=1 show=$q.label}
-    <div class="example">{$q.label}</span>
+    <div class="example">{$q.label}</div>
   {/section}
 
   {section name="na" loop=$q.num_answers show=TRUE}

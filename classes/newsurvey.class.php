@@ -199,7 +199,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
 
         //Default values for new survey
         $s['activate'] = 0;
-        $s['template'] = $this->CONF['default_template'];
+        $s['template'] = $this->SfStr->getSafeString($this->CONF['default_template'],SAFE_STRING_ESC);
         $s['date_format'] = $this->SfStr->getSafeString($this->CONF['date_format'],SAFE_STRING_ESC);
         $s['created'] = time();
 
@@ -251,7 +251,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
 
                 $s['new_aid'][$r['aid']] = $aid;
 
-                $query = "SELECT avid, value, group_id, image FROM {$this->CONF['db_tbl_prefix']}answer_values
+                $query = "SELECT avid, value, numeric_value, image FROM {$this->CONF['db_tbl_prefix']}answer_values
                           WHERE aid = {$r['aid']}";
                 $rs3 = $this->db->Execute($query);
                 if($rs3 === FALSE)
@@ -262,8 +262,8 @@ class UCCASS_NewSurvey extends UCCASS_Main
                     $image = $this->SfStr->getSafeString($r3['image'],SAFE_STRING_ESC);
                     $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
 
-                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, group_id, image)
-                              VALUES ($avid, $aid,$value,{$r3['group_id']},$image)";
+                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, numeric_value, image)
+                              VALUES ($avid, $aid,$value,{$r3['numeric_value']},$image)";
                     $rs4 = $this->db->Execute($query);
                     if($rs4 === FALSE)
                     { $this->error('Error copying answer value: ' . $this->db->ErrorMsg()); }

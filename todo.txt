@@ -6,9 +6,6 @@ TODO:
 
     Add Numeric and Date answer types with ranges
 
-    Add Access Control including allowing a certain number of
-    accesses within a certain time period
-
   2004-01-09
 
     Add ability to list text answers from newest -> latest

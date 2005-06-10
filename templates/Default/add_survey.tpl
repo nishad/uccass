@@ -43,7 +43,7 @@
         You must create a default user that will have permissions to edit the survey you're creating. You
         can later edit this user or add others from the Access Control portion of the Edit Survey pages.
         <p>Username: <input type="text" name="username" value="{$value.username}"></p>
-        <p>Password: <input type="text" name="password" value="{$value.password}"><p>
+        <p>Password: <input type="password" name="password" value="{$value.password}"><p>
       </div>
     </td>
   </tr>
