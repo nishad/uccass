@@ -1,6 +1,6 @@
 <?php
 /*
-V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
   Released under both BSD license and Lesser GPL library license. 
   Whenever there is any discrepancy between the two licenses, 
   the BSD license will take precedence.
@@ -26,6 +26,7 @@ class ADODB_sqlite extends ADOConnection {
 	var $metaTablesSQL = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name";
 	var $sysDate = "adodb_date('Y-m-d')";
 	var $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
+	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 	
 	function ADODB_sqlite() 
 	{
@@ -126,6 +127,8 @@ class ADODB_sqlite extends ADOConnection {
 	// returns true or false
 	function _connect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
+		if (!function_exists('sqlite_open')) return false;
+		
 		$this->_connectionID = sqlite_open($argHostname);
 		if ($this->_connectionID === false) return false;
 		$this->_createFunctions();
@@ -135,6 +138,8 @@ class ADODB_sqlite extends ADOConnection {
 	// returns true or false
 	function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
+		if (!function_exists('sqlite_open')) return false;
+		
 		$this->_connectionID = sqlite_popen($argHostname);
 		if ($this->_connectionID === false) return false;
 		$this->_createFunctions();

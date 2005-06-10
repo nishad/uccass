@@ -1,7 +1,7 @@
 <?php
 /*
 
-  version V4.04 13 Nov 2003 (c) 2000-2003 John Lim. All rights reserved.
+  version V4.22 15 Apr 2004 (c) 2000-2004 John Lim. All rights reserved.
 
   Released under both BSD license and Lesser GPL library license. 
   Whenever there is any discrepancy between the two licenses, 
@@ -33,9 +33,8 @@ year entries allows you to become year-2000 compliant. For example:
 NLS_DATE_FORMAT='RR-MM-DD'
 
 You can also modify the date format using the ALTER SESSION command. 
-
-
 */
+
 class ADODB_oci8 extends ADOConnection {
 	var $databaseType = 'oci8';
 	var $dataProvider = 'oci8';
@@ -112,6 +111,14 @@ class ADODB_oci8 extends ADOConnection {
 		$rs->Close();
 		return $retarr;
 	}
+	
+	function Time()
+	{
+		$rs =& $this->Execute("select TO_CHAR($this->sysTimeStamp,'YYYY-MM-DD HH24:MI:SS') from dual");
+		if ($rs && !$rs->EOF) return $this->UnixTimeStamp(reset($rs->fields));
+		
+		return false;
+	}
  
 /*
 
@@ -149,6 +156,9 @@ NATSOFT.DOMAIN =
 */
 	function _connect($argHostname, $argUsername, $argPassword, $argDatabasename,$mode=0)
 	{
+		if (!function_exists('OCIPLogon')) return false;
+		
+		
         $this->_errorMsg = false;
 		$this->_errorCode = false;
 		
@@ -216,7 +226,7 @@ NATSOFT.DOMAIN =
 	
 	function _affectedrows()
 	{
-		if (is_resource($this->_stmt)) return OCIRowCount($this->_stmt);
+		if (is_resource($this->_stmt)) return @OCIRowCount($this->_stmt);
 		return 0;
 	}
 	
@@ -501,7 +511,7 @@ NATSOFT.DOMAIN =
 				$inputarr['adodb_offset'] = $offset;
 				
 			if ($secs2cache>0) $rs =& $this->CacheExecute($secs2cache, $sql,$inputarr);
-			else $rs &= $this->Execute($sql,$inputarr);
+			else $rs =& $this->Execute($sql,$inputarr);
 			return $rs;
 		}
 	
@@ -586,24 +596,25 @@ NATSOFT.DOMAIN =
 		if ($rez) $rs->Close();
 		return $rez;
 	}
+
 	
 	/*
 		Example of usage:
 		
 		$stmt = $this->Prepare('insert into emp (empno, ename) values (:empno, :ename)');
 	*/
-	function Prepare($sql)
+	function Prepare($sql,$cursor=false)
 	{
 	static $BINDNUM = 0;
 	
 		$stmt = OCIParse($this->_connectionID,$sql);
 
-		if (!$stmt) return $sql; // error in statement, let Execute() handle the error
-		
+		if (!$stmt) return false;
+
 		$BINDNUM += 1;
 		
 		if (@OCIStatementType($stmt) == 'BEGIN') {
-			return array($sql,$stmt,0,$BINDNUM,OCINewCursor($this->_connectionID));
+			return array($sql,$stmt,0,$BINDNUM, ($cursor) ? OCINewCursor($this->_connectionID) : false);
 		} 
 		
 		return array($sql,$stmt,0,$BINDNUM);
@@ -626,7 +637,7 @@ NATSOFT.DOMAIN =
 	*/
 	function &ExecuteCursor($sql,$cursorName='rs',$params=false)
 	{
-		$stmt = ADODB_oci8::Prepare($sql);
+		$stmt = ADODB_oci8::Prepare($sql,true); # true to allocate OCINewCursor
 			
 		if (is_array($stmt) && sizeof($stmt) >= 5) {
 			$this->Parameter($stmt, $ignoreCur, $cursorName, false, -1, OCI_B_CURSOR);
@@ -681,6 +692,11 @@ NATSOFT.DOMAIN =
 			if ($type !== false) $rez = OCIBindByName($stmt[1],":".$name,$var,$size,$type);
 			else $rez = OCIBindByName($stmt[1],":".$stmt[2],$var,$size); // +1 byte for null terminator
 			$stmt[2] += 1;
+		} else if ($type == OCI_B_BLOB){
+            //we have to create a new Descriptor here
+            $_blob = OCINewDescriptor($this->_connectionID, OCI_D_LOB);
+            $rez = OCIBindByName($stmt[1], ":".$name, &$_blob, -1, OCI_B_BLOB);
+            $rez = $_blob;
 		} else {
 			if ($type !== false) $rez = OCIBindByName($stmt[1],":".$name,$var,$size,$type);
 			else $rez = OCIBindByName($stmt[1],":".$name,$var,$size); // +1 byte for null terminator
@@ -713,7 +729,9 @@ NATSOFT.DOMAIN =
 	function Parameter(&$stmt,&$var,$name,$isOutput=false,$maxLen=4000,$type=false)
 	{
 			if  ($this->debug) {
-				ADOConnection::outp( "Parameter(\$stmt, \$php_var='$var', \$name='$name');");
+				$prefix = ($isOutput) ? 'Out' : 'In';
+				$ztype = (empty($type)) ? 'false' : $type;
+				ADOConnection::outp( "{$prefix}Parameter(\$stmt, \$php_var='$var', \$name='$name', \$maxLen=$maxLen, \$type=$ztype);");
 			}
 			return $this->Bind($stmt,$var,$maxLen,$type,$name);
 	}
@@ -795,17 +813,17 @@ NATSOFT.DOMAIN =
 					return $stmt;
 					
                 case "BEGIN":
-                    if (is_array($sql) && isset($sql[4])) {
+                    if (is_array($sql) && !empty($sql[4])) {
 						$cursor = $sql[4];
 						if (is_resource($cursor)) {
-							OCIExecute($cursor);						
+							$ok = OCIExecute($cursor);	
 	                        return $cursor;
 						}
 						return $stmt;
                     } else {
 						if (is_resource($stmt)) {
-								OCIFreeStatement($stmt);
-								return true;
+							OCIFreeStatement($stmt);
+							return true;
 						}
                         return $stmt;
                     }
@@ -984,10 +1002,10 @@ class ADORecordset_oci8 extends ADORecordSet {
 		
 		$this->_inited = true;
 		if ($this->_queryID) {
-						
+			
 			$this->_currentRow = 0;
 			@$this->_initrs();
-			$this->EOF = !$this->_fetch(); 	
+			$this->EOF = !$this->_fetch();
 			
 			/*
 			// based on idea by Gaetano Giunta to detect unusual oracle errors
@@ -1107,7 +1125,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	function _fetch() 
 	{
-		return OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode);
+		return @OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode);
 	}
 
 	/*		close() only needs to be called if you are worried about using too much memory while your script
@@ -1142,7 +1160,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 		case 'NCLOB':
 		case 'LONG':
 		case 'LONG VARCHAR':
-		case 'CLOB';
+		case 'CLOB':
 		return 'X';
 		
 		case 'LONG RAW':

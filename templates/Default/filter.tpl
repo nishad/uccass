@@ -1,4 +1,4 @@
-<form method="GET" action="{$conf.html}/results.php">
+<form method="POST" action="{$conf.html}/results.php">
 <input type="hidden" name="sid" value="{$sid}">
 
   <table width="70%" align="center" cellpadding="0" cellspacing="0">
@@ -23,7 +23,7 @@
           <div class="whitebox">
             {$smarty.section.q.iteration}. {$question.question[q]}
           </div>
-          <input type="hidden" name="name[{$question.qid[q]}]" value="{$question.question[q]}">
+          <input type="hidden" name="name[{$question.qid[q]}]" value="{$question.encquestion[q]}">
           <div class="indented_cell">
             {section name="qv" loop=$question.value[q]}
               <input type="checkbox" value="{$question.avid[q][qv]}" name="filter[{$question.qid[q]}][]" id="{$question.avid[q][qv]}">

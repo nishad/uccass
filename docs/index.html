@@ -19,8 +19,8 @@ li {
 
 <body>
 <h1><a href="http://www.bigredspark.com/survey.html">Unit Command Climate Assessment and Survey System (UCCASS)</a></h1>
-<h3>A web-based survey script written in PHP. UCCASS is used to make online surveys, polls, and questionnaires. Current
-news and an online demonstration system can be found at <a href="http://www.bigredspark.com/survey.html">http://www.bigredspark.com/survey.html</a>.</h3>
+<h3>A web-based survey script written in PHP, UCCASS is used to make online surveys, polls, and questionnaires. Current
+details, documentation, demo and download can be found at <a href="http://www.bigredspark.com/survey.html">http://www.bigredspark.com/survey.html</a>.</h3>
 <p><a name="toc" href="#toc">Table of Contents:</a> </p>
 <span class="toc">
 <h3><a href="#introduction">1. Introduction</a></h3>
@@ -32,6 +32,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   <h4><a href="#installation_requirements">2.1 Requirements</a> </h4>
   <h4><a href="#installation_webbased">2.2 Web-based Installation</a> </h4>
   <h4><a href="#installation_manual">2.3 Manual Installation</a></h4>
+  <h4><a href="#installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
 </blockquote>
 <h3><a href="#using_uccass">3. Using UCCASS</a></h3>
 <blockquote>
@@ -42,15 +43,17 @@ news and an online demonstration system can be found at <a href="http://www.bigr
     <h4><a href="#survey_properties">3.3.1 Survey Properties</a></h4>
     <blockquote>
       <h4><a href="#ep_name">3.3.1.1 Survey Name</a></h4>
-      <h4><a href="#ep_template">3.3.1.2 Survey Template</a></h4>
-      <h4><a href="#ep_welcome">3.3.1.3 Welcome Message</a></h4>
-      <h4><a href="#ep_thankyou">3.3.1.4 Thank You Message</a></h4>
-      <h4><a href="#ep_dates">3.3.1.5 Start and End Dates</a></h4>
-      <h4><a href="#ep_active">3.3.1.6 Active and Inactive Status</a></h4>
+      <h4><a href="#ep_active">3.3.1.2 Active and Inactive Status</a></h4>
+      <h4><a href="#ep_dates">3.3.1.3 Start and End Dates</a></h4>
+      <h4><a href="#ep_template">3.3.1.4 Survey Template</a></h4>
+      <h4><a href="#ep_text_mode">3.3.1.5 Survey and User Text Modes</a></h4>
+      <h4><a href="#ep_redirect">3.3.1.6 Completion Redirect Page</a></h4>
       <h4><a href="#ep_access">3.3.1.7 Survey and Results Access</a></h4>
       <h4><a href="#ep_password">3.3.1.8 Edit Password</a></h4>
-      <h4><a href="#ep_clear">3.3.1.9 Clear Survey</a></h4>
-      <h4><a href="#ep_delete">3.3.1.10 Delete Survey</a></h4>
+      <h4><a href="#ep_results_date_format">3.3.1.9 Results Date Format</a></h4>
+      <h4><a href="#ep_time_limit">3.3.1.10 Time Limit</a></h4>
+      <h4><a href="#ep_clear">3.3.1.11 Clear Survey</a></h4>
+      <h4><a href="#ep_delete">3.3.1.12 Delete Survey</a></h4>
     </blockquote>
     <h4><a href="#survey_questions">3.3.2 Survey Questions</a></h4>
     <blockquote>
@@ -70,7 +73,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   <blockquote>
     <h4><a href="#choose_survey">3.4.1 Choosing A Survey</a></h4>
     <h4><a href="#welcome_questions">3.4.2 Welcome Message and Questions</a></h4>
-    <h4><a href="#save_results">3.4.3 Saving Results and Thank You Message</a></h4>
+    <h4><a href="#save_results">3.4.3 Saving Results</a></h4>
   </blockquote>
   <h4><a href="#view_results">3.5 Viewing Results of A Survey</a></h4>
   <blockquote>
@@ -80,6 +83,9 @@ news and an online demonstration system can be found at <a href="http://www.bigr
     <h4><a href="#group_results">3.5.4 Grouping Results</a></h4>
     <h4><a href="#showhide_results">3.5.5 Hiding or Showing Results</a></h4>
     <h4><a href="#text_results">3.5.6 Viewing Text Results</a></h4>
+    <h4><a href="#del_text_results">3.5.7 Deleting Text Results</a></h4>
+    <h4><a href="#table_results">3.5.8 Table Results View</a></h4>
+    <h4><a href="#csv_export">3.5.9 CSV Results Export</a></h4>
   </blockquote>
 </blockquote>
 <h3><a href="#administration">4. Administration</a></h3>
@@ -87,18 +93,22 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   <h4><a href="#site_admin">4.1 Site Admin</a></h4>
   <h4><a href="#site_settings">4.2 Site Settings</a></h4>
   <blockquote>
-    <h4><a href="#site_name">4.2.1 Site Name</a></h4>
-    <h4><a href="#default_template">4.2.2 Default Template</a></h4>
-    <h4><a href="#admin_password">4.2.3 Admin Password</a></h4>
-    <h4><a href="#page_break_text">4.2.4 Page Break Text</a></h4>
-    <h4><a href="#results_per_page">4.2.5 Text Results Per Page</a></h4>
-    <h4><a href="#image_extensions">4.2.6 Allowed Image Extensions</a></h4>
-    <h4><a href="#image_width">4.2.7 Results Image Width</a></h4>
-    <h4><a href="#filter_limit">4.2.8 Results Filter Limit</a></h4>
-    <h4><a href="#track_ip">4.2.9 Track IP</a></h4>
-    <h4><a href="#text_filter">4.2.10 Results Text Filter</a></h4>
-    <h4><a href="#database_settings">4.2.11 Database Settings</a></h4>
-    <h4><a href="#smarty_adodb">4.2.12 Smarty and ADOdb Paths</a></h4>
+    <h4><a href="#site_path">4.2.1 Site Path</a</h4>
+    <h4><a href="#site_html">4.2.2 Site HTML Path</a></h4>
+    <h4><a href="#site_name">4.2.3 Site Name</a></h4>
+    <h4><a href="#default_template">4.2.4 Default Template</a></h4>
+    <h4><a href="#admin_password">4.2.5 Admin Password</a></h4>
+    <h4><a href="#page_break_text">4.2.6 Page Break Text</a></h4>
+    <h4><a href="#results_per_page">4.2.7 Text Results Per Page</a></h4>
+    <h4><a href="#image_extensions">4.2.8 Allowed Image Extensions</a></h4>
+    <h4><a href="#image_width">4.2.9 Results Image Width</a></h4>
+    <h4><a href="#filter_limit">4.2.10 Results Filter Limit</a></h4>
+    <h4><a href="#track_ip">4.2.11 Track IP</a></h4>
+    <h4><a href="#text_filter">4.2.12 Results Text Filter</a></h4>
+    <h4><a href="#text_modes">4.2.13 Survey and User Text Modes</a></h4>
+    <h4><a href="#date_format">4.2.14 Date Format</a></h4>
+    <h4><a href="#database_settings">4.2.15 Database Settings</a></h4>
+    <h4><a href="#smarty_adodb">4.2.16 Smarty and ADOdb Paths</a></h4>
   </blockquote>
   <h4><a href="#site_templates">4.3 Site Templates</a></h4>
 </blockquote>
@@ -124,9 +134,11 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>* Database abstraction layer using <a href="http://php.weblogs.com/ADODB">ADOdb</a>,
   enabling the Survey System to be used with multiple databases (Survey System
   is only tested with MySQL at this time, though)</p>
-<p>* Unlimited surveys, unlimited questions per survey, and unlimited answer types.
+<p>* Unlimited surveys, unlimited questions per survey and unlimited answer types.
   Theme based system allows surveys to have their own look and feel once new themes
   are made.</p>
+<p>* Administrative and per-survey level setting allow question, answer values, and
+  user supplied text to be rendered as plain text, limited HTML or full HTML.
 <p>* Surveys can be marked as Active or Inactive or given specific start and end
   dates</p>
 <p>* Surveys can be marked as Public or Private where Private requires a password
@@ -137,28 +149,29 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   or deactivating surveys and editing questions and messages</p>
 <p>* Administrator password allows access to edit all surveys, answer types, and
   view results of any survey</p>
-<p>* Surveys have customizable &quot;Welcome&quot; message displayed at the beginning
-  of the survey and &quot;Thank You&quot; message displayed at the end</p>
 <p>* Questions can have text or multiple choice answers. Multiple choice answers
   can be presented horizontally, vertically, in a HTML drop down or a Matrix (grid).</p>
 <p>* Questions can be can be marked as required or left optional</p>
 <p>* Questions can be optionally hidden or required based upon answers to previous
-  questions (called dependencies)</p>
-<p>* Unlimited dependencies per question</p>
+  questions (called dependencies)</p> with unlimited dependencies per question</p>
 <p>* Survey results are presented in bar graphs showing percentage of answers
-  for each value. Each answer type can be assigned an image to be used for it's
+  for each value. Each answer value can be assigned an image to be used for it's
   bar graph.</p>
 <p>* Specific questions can be temporarily hidden from the results page so you
   only see the questions you want</p>
 <p>* Survey results can be filtered based upon the results of any question, i.e.
   if you have a Gender question, you can filter the results to see just how Females
-  answered your survey to look for trends</p>
+  answered your survey to look for trends. Survey results can be viewed in a &quot;table&quot;
+  format which shows each response on it's own table row. Results can also be exported
+  to a CSV file for further processing. Individual text answers that are inappropriate
+  can be deleted from the results.</p>
 <p>* Admin controlled &quot;filter limit&quot; to prevent survey results being
   shown if the results are narrowed down to 3 or less (by default) distinct respondents
   (this is to maintain anonymity of the users who take your survey, so that the
   results can not be filtered to such a degree as to identify</p>
 <p>* New surveys can be created by copying existing surveys, so there will be
-  no need to rewrite all of the questions and recreate answer types and values</p>
+  no need to rewrite all of the questions and recreate answer types and values. New empty
+  surveys receive a default set of answer types and values.</p>
 <p>This program was originally obtained under the <a href="http://www.usdoj.gov/04foia/">Freedom
   of Information Act</a> and has since been modified from it's original version.
   The modified version is released under the <a href="http://www.affero.org/oagpl.html">Affero General Public License</a>
@@ -174,7 +187,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>* Smarty Template Engine 2.3.0 (included) available from <a href="http://smarty.php.net">smarty.php.net</a></p>
 <p>* ADOdb Database Abstraction Layer (included) available from <a href="http://php.weblogs.com/ADODB">php.weblogs.com</a></p>
 <h4 name="installation_webbased" href="#toc"><a name="installation_webbased" href="#toc">2.2
-  Web Based Installation</a> </h4>
+  Web Based Installation and Upgrade</a> </h4>
 <p>1. Place all files into a directory under your web root. </p>
 <p>2. If you are installing the database tables into a new database, create the
   database.</p>
@@ -197,49 +210,65 @@ news and an online demonstration system can be found at <a href="http://www.bigr
     user or group installing this program access to read and write the file.</p>
 </blockquote>
 <p>5. Load http://&lt;server name&gt;/&lt;path to files&gt;/install.php into your
-  web browser. Fill out the form according to your settings and save the data.
+  web browser. Choose either New Installation or upgrade from a previous version.
+  If you choose a new installation, <strong>any existing data in the database you specify
+  will be lost</strong>. If you choose to upgrade, your existing database will be modified
+  to include any new column additions and/or data. </p>
+<p>6. Fill out the remainder of the form according to your settings and save the data.
   See section 4.1 Site Settings for an explanation of each setting. After saving
   the data, the <em><strong>survey.ini.php</strong></em> file will be written
-  with the new data and the tables and initial data will be created. </p>
-<p>6. At this point, it is recommended you remove write permissions for the from
+  with the new data and the tables and initial data will be created or updated. </p>
+<p>7. At this point, it is recommended you remove write permissions for the from
   the <em><strong>survey.ini.php</strong></em> file so your settings are not overwritten.
 </p>
-<p>7. You must move or rename the<em><strong> install.php</strong></em> file so
+<p>8. You must move or rename the<em><strong> install.php</strong></em> file so
   the installation procedure cannot be run again unless you choose to do so. The
   program will not run if <em><strong>install.php</strong></em> is present. </p>
-<p>8. If you are using the version of Smarty included with this distribution,
+<p>9. If you are using the version of Smarty included with this distribution,
   ensure the web-server can write to the <em><strong>Smarty/templates_c/</strong></em>
   directory.</p>
-<p>9. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
+<p>10. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
   browser and make your surveys.</p>
 <h4 name="installation_manual" href="#toc"><a name="installation_manual" href="#toc">2.3
   Manual Installation</a> </h4>
 <p>1. Place all files into a directory under your web root. </p>
 <p>2. If you are installing the database tables into a new database, create the
   database.</p>
-<p>3. The <strong>survey.sql file</strong> contains the table definitions and
+<p>3. If this is a new installation, the <strong>survey.sql file</strong> contains the table definitions and
   initial data. You must import this file into the database you created in Step
   2. With MySQL, this is normally done from the command line with a &quot;<em><strong>mysql
   -u</strong></em>user<em><strong> -p</strong></em>password<em><strong> </strong></em>database_name<em><strong>
   &lt; survey.sql</strong></em>&quot; command (where user, password, and database_name
-  are the actual values for your server). If you or your host provide a program
+  are the actual values for your server). If you or your host provides a program
   like PHPMyAdmin, then the file can be imported through there, also. </p>
-<p>4. Table prefixes are not supported when doing a manual installation unless
+<p>4. If this is an upgrade, it is recommended you use the web-based installation process. If using
+  the manual process, each upgrade file in the /upgrades/ folder must be run to bring your database
+  up to date. upgrade_104_105.php must be run to upgrade from v1.04 to v1.05, for example. You must
+  run all of the files in sequence until you get to the version you are upgrading to.</p>
+<p>5. Table prefixes are not supported when doing a manual installation unless
   you physically rename each of the tables to include the prefix and then include
   that prefix into the <em><strong>survey.ini.php</strong></em> file. </p>
-<p>5. Edit the fields in the <em><strong>survey.ini.php</strong></em> file to
+<p>6. Edit the fields in the <em><strong>survey.ini.php</strong></em> file to
   match the setting of your site and server. See section 4.1 Site Settings for
   an explanation of each setting in the <em><strong>survey.ini.php</strong></em>
   file. </p>
-<p>6. You must move or rename the <em><strong>install.php</strong></em> file that
+<p>7. You must move or rename the <em><strong>install.php</strong></em> file that
   is used for web-based installation. The program will not run if <strong><em>install.php</em></strong>
   is present.. </p>
-<p>7. If you are using the version of Smarty included with this distribution,
+<p>8. If you are using the version of Smarty included with this distribution,
   ensure the web-server can write to the <em><strong>Smarty/templates_c/</strong></em>
   directory. See Step 4 of section <a href="#installation_webbased">2.2 Web Based
   Installation</a> for instructions. </p>
-<p>8. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
+<p>9. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
   browser and make your surveys.</p>
+<h4><a href="#toc" name="installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
+<p>To upgrade from v1.04, all files associated with the old version must be deleted. The v1.04 templates
+  and <strong><em>survey.ini.php</em></strong> file are not compatible with with v1.05 because of the extensive changes. All of your
+  existing surveys and results will not be removed if you choose Upgrade during the installation process.
+  Choosing a New Installation <strong>will remove any existing data you have</strong> if you give the
+  same configuration data. Once the v1.04 files have been removed, copy the v1.05 files in their place
+  and follow the <a href="#installation_webbased">Web Based Installation</a>
+  or <a href="#installation_manual">Manual Installation</a> instructions.
 <!-- End Installation -->
 <!-- Using UCCASS  -->
 <hr>
@@ -305,7 +334,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   text, activate your survey, and adjust any passwords. The second section deals
   with questions, both adding new questions and editing existing questions. This
   area is also where you'll define dependencies among the questions. </p>
-<p>The final section deal with answer types and values. Within the survey system, you define
+<p>The final section deals with editing answer types and values. Within the survey system, you define
   a specific answer type of a text box, multiple choice, etc, and give the answer
   values if appropriate. Then, when adding or editing questions, you'll choose
   from the defined answer values for each question. Normally an answer type is
@@ -319,28 +348,23 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   After you have made any changes to the survey properties, don't forget to click
   the save changes button at the bottom of the page before moving into any other
   sections. </p>
-<h4><a href="#toc" name="ep_name">3.3.1.1 Survey Name</a></h4>
+<h4><a href="#toc" name="ep_name">3.3.1.1 Survey Name and Creation Date</a></h4>
 <p>The survey name was already given when you created the survey, but this will
   allow you to edit the name is necessary. Remember that if you change the name
-  to drastically, users may not be able to find the survey. </p>
-<h4><a href="#toc" name="ep_template">3.3.1.2 Survey Template</a></h4>
-<p>Each survey can be assigned a template to control the looks and layout. While
-  the main site and available survey list can be assigned one template, the system
-  you designate here will be used for people taking the survey and viewing the
-  results. You may wish to create different templates to go along with the questions
-  and audience of your surveys or use the same template for all surveys on your
-  site. </p>
-<h4><a href="#toc" name="ep_welcome">3.3.1.3 Welcome Message</a></h4>
-<p>This is the text that all users taking your survey will see when they begin.
-  It's a good idea to welcome user to the survey, explain it's purpose, and explain
-  any rules that may apply to the survey. The information you give here is dependent
-  upon you and the type of survey you are creating. </p>
-<h4><a href="#toc" name="ep_thankyou">3.3.1.4 Thank You Message</a></h4>
-<p>This is the text that users will see after they complete your survey. By the
-  time the user views this text, all answers will have already been saved in the
-  database. Use this area to optionally thank your users for completing the survey,
-  contact information, and possibly how to view the results of the survey. </p>
-<h4><a href="#toc" name="ep_dates">3.3.1.5 Start and End Date</a></h4>
+  too drastically, users may not be able to find the survey. The creation date
+  lists the date this survey was initially created. This field is not editable
+  and just serves are a reminder or notice of how old the survey is.</p>
+<h4><a href="#toc" name="ep_active">3.3.1.2 Active and Inactive Status</a></h4>
+<p>You can use these properties to manually turn your survey on or off. Making
+  the survey active will cause it to appear in the public or private available
+  survey list. If the survey has been given a start date then the survey will
+  not actually become active until that date arrives. If you have specified a
+  start date yet want the survey to be active immediately, you must remove the
+  start date from the previous property. Making a survey inactive will disable
+  anyone from completing the survey. The results of the survey are only available
+  if the survey is active. Making a survey inactive will not remove any results,
+  however. </p>
+<h4><a href="#toc" name="ep_dates">3.3.1.3 Start and End Date</a></h4>
 <p>After you are through creating your survey, you can use the start and end date
   area to specify when the survey should become active and inactive. At midnight
   on the start date, the survey will appear in the public or private area depending
@@ -348,16 +372,64 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   date that you specify. Dates must be given in a YYYY-MM-DD format, such as 2004-01-20
   for January 20th, 2004. Also note that the start and end dates you give will
   override the active or inactive status. </p>
-<h4><a href="#toc" name="ep_active">3.3.1.6 Active and Inactive Status</a></h4>
-<p>You can use this properties to manually turn your survey on or off. Making
-  the survey active will cause it to appear in the public or private available
-  survey list. If the survey has been given a start date, then the survey will
-  not actually become active until that date arrives. If you have specified a
-  start date yet want the survey to be active immediately, you must remove the
-  start date from the previous property. Making a survey inactive will disable
-  anyone from completing the survey. The results of the survey are only available
-  if the survey is active. Making a survey inactive will not remove any results,
-  however. </p>
+<h4><a href="#toc" name="ep_template">3.3.1.4 Survey Template</a></h4>
+<p>Each survey can be assigned a template to control the looks and layout. While
+  the main site and available survey list can be assigned one template, the system
+  you designate here will be used for people taking the survey and viewing the
+  results. You may wish to create different templates to go along with the questions
+  and audience of your surveys or use the same template for all surveys on your
+  site. </p>
+<h4><a href="#toc" name="ep_text_mode">3.3.1.5 Survey and User Text Modes</a></h4>
+<p>These settings control the rendering of text supplied for the survey properties,
+  questions, answer values, and user supplied text. The Survey Text Mode setting
+  applies to any text used to create the survey, such as name, questions, and answer values.
+  User Text Mode applied to any text supplied by users as they answer the surveys. If you
+  do not have any text answers in your survey, then the User Text Mode will not affect anything.
+  There are three options for each mode, although an administrator might have restricted the
+  use of the HTML settings.
+  <ul>
+    <li>Text Only: Any text provided will be shown exactly as it's typed. Any HTML code that's
+        included will be shown as plain text and not be rendered within the browser. This is the
+        <strong>recommended setting</strong> for User Text Mode for security reasons. </li>
+    <li>Limited HTML: This mode will allow the use of b, i, u, div, span, a, and img HTML tags
+        with restrictions on what attributes can be used with each tag. The restriction on attributes
+        is enforced so that <i>onchange</i>, <i>onmouseover</i>, etc JavaScript code cannot be injected
+        into these limited HTML tags. This is the recommended setting for Survey Text Mode so that
+        you can use additional formatting within your questions and answer values. </li>
+    <li>Full HTML: <strong>Warning:</strong> Full HTML is a security risk unless used in a controlled
+        environment. The Full HTML setting will render any and all HTML, JavaScript, DHTML, etc that's
+        supplied in the text. In a controlled environment, this may be useful for including tables, code examples,
+        etc within your surveys, but it can be abused. Injected JavaScript could be used to steal cookies,
+        redirect users, and change any page content. This setting should <strong>never</strong> be used
+        for the User Text Mode.</li>
+  </ul>
+  These settings can be changed back and forth after the survey has been created. If you use Limited HTML
+  and create a question that includes images, for example, then switch to Text Only, the actual HTML code
+  will be displayed within the question and not rendered in the browser. The user will see &lt;b&gt;bold text&lt;/b&gt;
+  instead of <b>bold text</b>.
+</p>
+<p>With the Limited HTML and Full HTML options, you have two placeholders that you can use in your questions
+and/or answers. The first is {$html} will will resolve to the HTTP address of your current installation such
+as http://www.bigredspark.com/survey. {$images_html} will resolve to the images folder of the current template
+such as http://www.bigredspark.com/survey/templates/Default/images. So if you wanted to make a link to another survey
+within a question, you could use &lt;a href=&quot;{$html}/survey.php?sid=55&quot;&gt;Click Here&lt;/a&gt;. If you
+wanted to include images in your questions or answer values, you can place them in the images/ folder of your
+template and refer to them as &lt;img src=&quot;{$images_html}/aquabar.gif&quot;&gt;. If you change templates, you
+do not have to change these placeholders so long as the images are also available in the new template. Users can
+also use these placeholder in their answers but it's up to you to inform them (or rather not inform them) of their
+ability to use them. </p>
+<h4><a href="#toc" name="ep_redirect">3.3.1.6 Completion Redirect Page</a></h4>
+<p>This setting allows you to set an action to take when the user has completed the survey. There are three options.
+  <ul>
+    <li>Main Survey Page: This will redirect the user back to the index.php (available surveys list) upon completing
+        the survey.</li>
+    <li>Survey Results Page: This will redirect the user to the results page when they complete the survey. This setting
+        should only be used if the results are public, otherwise the user will get a notice that the results require a password.</li>
+    <li>Custom URL: You can also provide a complete URL including http:// or https:// to redirect the user to upon
+        completion. This can be used to redirect the user to your own custom thank you page or back to the main page
+        for your own site (instead of the survey system main page).</li>
+  </ul>
+</p>
 <h4><a href="#toc" name="ep_access">3.3.1.7 Survey and Results Access</a></h4>
 <p>This is the property that will control whether your survey is listed as public
   or private. If you choose to make the survey private, you must give a password.
@@ -372,12 +444,27 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   from anyone who attempts to edit the survey. This should be strictly controlled
   as anyone who gains access to editing the survey can add or remove bogus questions,
   clear all results, or even delete the entire survey. </p>
-<h4><a href="#toc" name="ep_clear">3.3.1.10 Clear Survey</a></h4>
+<h4><a href="#toc" name="ep_results_date_format">3.3.1.9 Results Date Format</a></h4>
+<p>This is a date format string used to format the dates in the Table and CSV results
+  views. This date format must match the specifications given for the
+  <a href="http://www.php.net/date">PHP date()</a> function. Default value is
+  <strong>Y-m-d H:i:s</strong> but can be changed in the <i>survey.ini.php</i>
+  file or during the installation process.</p>
+<h4><a href="#toc" name="ep_time_limit">3.3.1.10 Time Limit</a></h4>
+<p>This is an optional time limit in minutes that can be imposed on your survey.
+  The user taking your survey is informed of the time limit and the approximate time
+  elapsed on each page of the survey. If the user exceeds the time limit, the last page
+  entered is not saved into the database. Because there is no automatic submission of the
+  survey when the time limit is exceeded the system simply rejects the last page even
+  though some of the questions may have been answered within the time limit. For this reason,
+  it's recommended you use as many pages as possible when using a survey with a time limit
+  to prevent valid answers from being rejected.</p>
+<h4><a href="#toc" name="ep_clear">3.3.1.11 Clear Survey</a></h4>
 <p>This option is used to clear all of the results to your survey. This does not
   change any questions or answer types or values of the survey, it simply clears
   the existing results. After developing and testing your survey, this option
   is useful to clear out all of the test results to prepare the survey to go live</p>
-<h4><a href="#toc" name="ep_delete">3.3.1.9 Delete Survey</a></h4>
+<h4><a href="#toc" name="ep_delete">3.3.1.12 Delete Survey</a></h4>
 <p> This is used to delete your survey and all results. If you click the checkbox
   and save the properties, your survey will be permanently deleted. There is no
   way to retrieve your survey once it's been deleted. Just checking the box will
@@ -395,9 +482,10 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   the users will see them. This section allows you to jump to an edit page for
   individual questions, delete questions, and move questions up or down. Page
   breaks are also listed, but they are not assigned a question number. Any questions
-  that have been assigned an answer types of None will not be assigned a question
-  number, either. </p>
-<p>The first column gives the question number followed by the actual text of the
+  that have an N type answer will be given an L1, L2, etc question number. These
+  questions are not actually assigned numbers when taking the survey, but giving them
+  an Lx label allows you to insert questions following these.</p>
+<p>The first column gives the question or label number followed by the actual text of the
   question in the next column. If the question has any dependencies, you'll see
   them listed under the question text. For example, if a question about fishing
   is given a dependency of being hidden to females answering the survey, you'll
@@ -469,7 +557,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   of question, four through six in this case, must all have the same answer type
   and be assigned a matrix orientation. The survey program will automatically
   group those questions into a matrix. If you were to insert a new question into
-  the middle, say after question number 5, that had a different answer type, then
+  the middle, say after question number 5, which had a different answer type, then
   this would ruin the matrix as it's shown. You may wish to have a question with
   an answer type of <em><strong>None</strong></em> before the matrix that can
   be used to describe the questions and answers within the matrix. </p>
@@ -479,7 +567,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 </p>
 <h4><a href="#toc" name="dependencies">3.3.2.3 Dependencies</a></h4>
 <p>Dependencies allow you to add conditions to your questions. You can choose
-  to optionally hide or require certain questions based upon the answer to previous
+  to optionally hide, require or show certain questions based upon the answer to previous
   questions. By adding multiple dependencies to your questions, you can create
   complex branching logic so that users may see different surveys based upon their
   answers. This is useful, for example, when you need to show one set of questions
@@ -502,6 +590,13 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   for required versus not required, too. If you want to not require question 2
   if question 1 is answered yes, then you choose to require question 2 if question
   1 is answered anything but yes. </p>
+<p>The actual <strong>show</strong> dependency is only useful for Multiple Choice -
+  Multiple Answer (MM) answer types and when used in conjunction with the <strong>hide</strong>
+  dependency. When a user can choose multiple answers and you want to base dependencies
+  on their answers, you must choose to <strong>hide</strong> based upon certain answers
+  and then <strong>show</strong> based upon the remaining. Simply choosing <strong>hide</strong>
+  for MM type questions will not work unless the user chooses each and every one of the
+  hide options.</p>
 <p>After deciding if you want to hide or require the question, you next need to
   choose what question number to base this dependency on. Remember that you can
   only choose questions that are going to appear before the question you are adding
@@ -531,7 +626,10 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   With the default template, this text is provided as a link that'll enter it
   in the text area for you. When creating a page break, the only question property
   that applies is the question number that you decide to insert it after. The
-  answer type, orientation, and dependencies do not apply to page breaks. </p>
+  answer type, orientation, and dependencies do not apply to page breaks.
+  Page breaks can not be added at the end of the survey. You must choose a
+  question to insert the page break after by using the <strong>Insert After Number</strong>
+  drop down.</p>
 <p>Page breaks may be added automatically by the survey program, also, based upon
   dependencies. If question 2 has a dependency based upon question 1, there must
   be a page break between the two. This is because we must first get the answer
@@ -569,8 +667,11 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   multiple questions. The answer types you create are specific to your survey,
   also. Answer types created in other surveys will not be available unless you
   chose to copy an existing survey. This allows you to customize similar answer
-  types and values for the specific survey that's being created or edited. </p>
-<h4><a href="#toc" name="new_answer_type">3.3.3.1 Adding A New Answer Value</a></h4>
+  types and values for the specific survey that's being created or edited. New
+  surveys that are created blank and not copied from an existing survey will
+  be given a default set of answer types and values that will fulfill most needs.
+  You can always add or delete from them as you create your survey. </p>
+<h4><a href="#toc" name="new_answer_type">3.3.3.1 Adding A New Answer Type</a></h4>
 <p>The first thing you'll need when adding a new answer type is a unique name.
   The name can not match the name of any other answer type that already exists
   in your survey. This name is the value you'll see in the drop down when adding
@@ -696,40 +797,45 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   survey, not the individual. Everyone enters the same password to take the survey
   and there is no way to issue individual passwords to individual people. </p>
 <h4><a href="#toc" name="welcome_questions">3.4.2 Welcome Message and Questions</a></h4>
-<p>After correctly choosing a survey, you will be shown the welcome message that
-  was created specifically for the survey you chose. The welcome message should
+<p>After correctly choosing a survey, you will be shown the first question of the
+  survey. Version 1.04 of UCCASS allowed you to create separate Welcome and Thank You
+  messages to display to the user. For subsequent versions, these were removed from
+  the survey properties. You're still able to include the message though, by making
+  the first and last question have an N-type answer and put in the appropriate page
+  breaks. This makes the survey system more flexible because you don't <strong>have</strong>
+  to include the messages now. If included, the welcome message should
   introduce you to the survey and explain it's purpose. It's also a good idea
   to tell the user how to navigate through the survey. Users should not use the
   browser's forward and back buttons while taking the survey, only the buttons
   provided within the survey itself. </p>
+<p>If the survey has a <a href="#ep_time_limit">Time Limit</a> then the user will
+  be shown the time limit and the approximate elapsed time. The elapsed time is
+  based upon when the last page was submitted and does not dynamically update
+  while the user is viewing the page.</p>
 <p>The survey questions will be shown next, according to the order and orientation
   set by whomever created the survey. Some questions may be required while others
   may be left blank. Questions that are required should be clearly marked, but the
   specific marking depends upon the template for the survey. If a survey page is
   submitted without required answers being completed, the user is redirected back
-  to the same page with an error message being displayed.
-</p>
+  to the same page with an error message being displayed.</p>
 <p>Multiple choice questions are presented without any specific answer being chosen
   as the default. In fact, there is no way to choose a default answer as you define
   them. This is to prevent users from accepting the default answers without actually
   taking the time to choose an answer. This also means that unless the question
   is marked as required, the question can be passed by without actually answering
-  it. </p>
+  it. Having a default answer would make it too easy for users to just click through
+  the survey, accepting the defaults, and will skew your results.</p>
 <p>Depending upon the number of questions and design of the survey chosen, there
   may be more than one page of questions. After answering all of the questions
   on one page, there will be a button or link to proceed to the next. Once you
   reach the final page of questions, the button or link text will change to notify
   you that you are about to complete the survey. </p>
-<h4><a href="#toc" name="save_results">3.4.3 Saving Results and Thank You Message</a></h4>
-<p>After the last page of questions and before the Thank You message is displayed,
-  the actual answers to the questions are saved in the database. Once they are saved
-  there is no way for the user to change their answers. On the last page of the survey
-  (or on the first page if there is only one page) the button should say "Finish" or something
-  similar to indicate that this is the final page of the survey. </p>
-<p>Once the results are saved,
-  the user is then shown the thank you message for the survey. This message can be a simple thanks
-  or also include follow up information such as how to view the results or where the results will
-  be made available. </p>
+<h4><a href="#toc" name="save_results">3.4.3 Saving Results</a></h4>
+<p>On the last page of the survey (or on the first page if there is only one page) the
+  button should say "Finish" or something similar to indicate that this is the final page
+  of the survey. Once the user clicks Finish, the results are saved in the database and there
+  is no way for the user to change them. The user is then redirected to the main page, results
+  page, or a custom URL depending upon your setting for <a href="#ep_redirect">Completion Redirect Page</a></p>
 <h4><a href="#toc" name="view_results">3.5 Viewing Results of A Survey</a></h4>
 <h4><a href="#toc" name="choose_survey2">3.5.1 Choosing A Survey</a></h4>
 <p>The results of surveys can be marked at public or private. If the results of the survey
@@ -741,7 +847,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>The results page lists all of the questions and answers in the survey along with bar graphs
   showing the percentage of what answers were chosen. The questions are shown in the same order as they
   are displayed to the user. The possible answer values are listed below the question. Next to each possible answer
-  value is a number showing how many people actually chose that answer. The bar graphs shows a visual
+  value is a number showing how many people actually chose that answer. The bar graph shows a visual
   representation of the percentages. </p>
 <p>The percentages are not calculated from how many people
   took the survey, but rather how many answered specific question. Remember that if you have questions that are
@@ -751,6 +857,11 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>Each question also has a checkbox before the question number. This is used to select individual questions
   and then used in conjunction with the drop down choices to either filter the results, group results, or
   hide and show questions.</p>
+<p>The results page also lists some time statistics for your survey including the average time it took
+  for users to complete the entire survey along with the minimum and maximum times. The average
+  time before a user clicked the Quit button is also shown. These statistics can be used to judge whether
+  your survey is too long or too short and how long people are willing to take the survey before becoming
+  bored and/or frustrated and quitting.</p>
 <h4><a href="#toc" name="filter_results">3.5.3 Filtering Results</a></h4>
 <p>While it's useful to learn that 20% of the people who took the survey have low morale, for example, it
   doesn't help you a whole lot when it comes down to fixing things. One of the most useful features of the
@@ -777,7 +888,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   telling you there were no matches and be shown the full results of the survey again. </p>
 <p>There is a protection feature built into the survey system as explained in <a href="#filter_limit">Section 4.1.8 Results Filter Limit</a>.
   This protection prevents the results from being filtered in such a way as to identify an individual person.
-  The filter is set to 3 by default, which means that if your filter criteria matches the results of 3 or less
+  The filter is set to 3 by default, which means that if your filter criteria match the results of 3 or less
   surveys, you will not be shown the filtered results. This is to maintain anonymity for the people answering the survey. For example,
   if you have a question that asks how long you have been employed and only one person has been employed for less than a month,
   without this limit, you'd be able to filter the results based upon that answer and see that persons answers to each
@@ -823,6 +934,32 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   do not provide any useful information. For example, a question such as <strong>Any other comments?</strong> at the
   end of the survey is common, but answers such as no, nope, none, etc, don't provide any useful information, so
   they can be filtered out and not saved in the database at all. </p>
+<h4><a href="#toc" name="del_text_results">3.5.7 Deleting Text Results</a></h4>
+<p>If you are logged in as an administrator or have previously logged in to edit the survey, you will be shown
+  checkboxes next to each text answer and a Delete button at the bottom of the page. This enables you to delete
+  individual answers from the text results of the survey. Check the answers you'd like to delete and press the
+  Delete button to remove those answers. There is confirmation of your choices, so ensure you've checked the
+  correct answers. If you hit the delete button without any boxes checked, then nothing is deleted. This delete
+  function should only be used to remove inappropriate answers provided to your questions and not to remove
+  comments that do not fit a particular view or answer type. </p>
+<h4><a href="#toc" name="table_results">3.5.8 Table Results View</a></h4>
+<p>This view of the results will show a table where each user's results are shown on a row of the table. This will
+  basically give you an overall view of all answers provided to your survey. If you are asking for name and/or email
+  address, for example, a scan of that column would tell you who answered your survey. Any filters that were applied
+  to the results will be carried over into this view, also.</p>
+<p><img src="doc_images/table_result_view.jpg"></p>
+<p><strong>NOTE</strong>: This table can be VERY large if there are many answers to your survey. This view is going
+  to show you ALL of the results. If there are a lot of answers to your survey, this view is going to be too much data
+  to really be useful. It's recommended you export the results to a CSV file and process it that way. </p>
+<h4><a href="#toc" name="csv_export">3.5.9 CSV Export</a></h4>
+<p>Clicking on this link will trigger a download of the results to the survey in a CSV (comma separated values) file.
+  This file can then be opened using a spreadsheet or statistics analysis program for further processing. The CSV file
+  will basically resemble the <a href="#table_results">Table Results View</a> but it can be opened with a separate program.
+  Any filters applied to the results will also be applied to this export.
+  If you have many results to a survey, this file can be VERY large and take a while to export. The script allows
+  2 minutes to complete the export, so wait at least that long for the export to complete before troubleshooting.</p>
+<p>The date and time field for the CSV file may show up in scientific notation, such as 2.003E13. To fix the number, highlight
+  the column and format it as a number with zero decimal points. </p>
   <!-- End Using UCCASS -->
   <!-- Administration -->
 <hr>
@@ -840,61 +977,117 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   the password text box blank. </p>
 <h4><a href="#toc" name="site_settings">4.2 Site Settings</a></h4>
 <p>This section explains each of the configuration settings that are set when the program is first installed. </p>
-<h4><a href="#toc" name="site_name">4.2.1 Site Name</a></h4>
+<h4><a href="#toc" name="site_path">4.2.1 Site Path</a></h4>
+<p>This is the file system path to your UCCASS installation. The installation process will attempt
+  to detect this path automatically for you but you can edit it if it is not correct. Pay attention
+  to the Path Examples listed at the beginning of the <i>survey.ini.php</i> file for your specific
+  operating system. Do not include a trailing slash (/) on the end of this path.</p>
+<h4><a href="#toc" name="site_html">4.2.2 Site HTML Path</a></h4>
+<p>This is the web address to your UCCASS installation. The installation process will attempt
+  to detect this path automatically for you but you can edit it if it is not correct. Do not
+  include a trailing slash (/) on the end of this path.</p>
+<h4><a href="#toc" name="site_name">4.2.3 Site Name</a></h4>
 <p>This value will be shown at the top of each page within the survey program with the default
   template. You can set this to the name of your web site or whatever you want to call your version
   of the survey system. </p>
-<h4><a href="#toc" name="default_template">4.2.2 Default Template</a></h4>
+<h4><a href="#toc" name="default_template">4.2.4 Default Template</a></h4>
 <p>This is the default template used for the main portions of the site and the administration area. If additional
   templates are created, then individual surveys can be assigned different templates. These alternate templates
   will only be used when taking or viewing the results of the survey, though. Templates are explained in
   <a href="#site_templates">Section 4.3 Site Templates</a>. This value can be set to any directory name
   within the templates/ directory. </p>
-<h4><a href="#toc" name="admin_password">4.2.3 Admin Password</a></h4>
+<h4><a href="#toc" name="admin_password">4.2.5 Admin Password</a></h4>
 <p>This password allows access to the administration area of the survey system. Anyone supplying this
   password will be allowed to edit any survey as well as take private surveys and view results of private
   surveys without supplying the individual survey password as explained in <a href="#site_admin">Section 4.1 Site Admin</a>.</p>
-<h4><a href="#toc" name="page_break_text">4.2.4 Page Break Text</a></h4>
+<h4><a href="#toc" name="page_break_text">4.2.6 Page Break Text</a></h4>
 <p>This is the text that controls how the users will create page breaks within the survey. If you add a question
   where the text matches this value, a page break will be inserted. Adding page breaks is covered in
   <a href="#page_break">Section 3.3.2.4 Adding A Page Break</a>.</p>
-<h4><a href="#toc" name="results_per_page">4.2.5 Text Results Per Page</a></h4>
+<h4><a href="#toc" name="results_per_page">4.2.7 Text Results Per Page</a></h4>
 <p>This value controls how many results will be shown on each page for questions that allow the user to type in an
   answer. If there are more answers than this value, then they will be shown on additional page as explained
   in <a href="#text_results">Section 3.5.6 Viewing Text Results</a>. </p>
-<h4><a href="#toc" name="image_extensions">4.2.6 Allowed Image Extensions</a></h4>
+<h4><a href="#toc" name="image_extensions">4.2.8 Allowed Image Extensions</a></h4>
 <p>This should be a comma separated list of what image extensions you want to allow for bar graphs.
   This controls what images will be read from the file system and shown in a drop down as possible
   bar graph images for answer values. Creating answer types and values is discussed in
   <a href="#answer_types">Section 3.3.3 Answer Types and Values</a>.</p>
-<h4><a href="#toc" name="image_width">4.2.7 Results Image Width</a></h4>
-<p>This should be a the number of pixels for the widest bar graph (100%) on the results
+<h4><a href="#toc" name="image_width">4.2.9 Results Image Width</a></h4>
+<p>This should be the number of pixels for the widest bar graph (100%) on the results
   page. This will allow you to control how long the survey system stretches the images.
-  If a specific answer value has 50% of the results, for example, it's stretched image
+  If a specific answer value has 50% of the results, for example, its stretched image
   length will be half of this value. </p>
-<h4><a href="#toc" name="filter_limit">4.2.8 Results Filter Limit</a></h4>
+<h4><a href="#toc" name="filter_limit">4.2.10 Results Filter Limit</a></h4>
 <p>As explained in <a href="#filter_results">Section 3.5.3 Filtering Results</a>, the results of a survey
   can be filtered based upon certain answers to specific questions. When using this filter, however, it
   would be possible to filter the results according to specific criteria so that the results of an
   individual user would be shown. This could violate any anonymity the users have when they take a survey.
   This setting should be a number that controls a lower limit on the filter. If certain filter criteria
   limits the number of survey results to this number or less, the filtered results are not shown. For example,
-  if you have one female in your organization and you choose to filter the results based upon the those that
+  if you have one female in your organization and you choose to filter the results based upon those that
   answered female for the gender question, you'd be able to view the results she gave to every other question.
   This limit would prevent the results from being shown to protect the anonymous nature of a survey. </p>
-<h4><a href="#toc" name="track_ip">4.2.9 Track IP</a></h4>
+<h4><a href="#toc" name="track_ip">4.2.11 Track IP</a></h4>
 <p>This setting will either turn on or off the tracking of IP addresses of users taking surveys. If turned on,
   the IP addresses of each user who takes a survey is inserted into a database table. NOTE: There is no way to
   relate the IP address of a user back to the actual answers they gave! This is to maintain anonymity of the
   users as they take the surveys. Nothing else is done with the IP addresses other than storing them in a table.
   Any further analysis or actions based upon the IP addresses will have to be implemented on your own. </p>
-<h4><a href="#toc" name="text_filter">4.2.10 Results Text Filter</a></h4>
+<h4><a href="#toc" name="text_filter">4.2.12 Results Text Filter</a></h4>
 <p>This should be a comma separated list of words that when given as a text answer by a user, they are not
   saved in the database. This allows you to get rid of answers that do not provide any information. For example,
   a question such as <strong>Any other comments?</strong> is common to have at the end of the survey. Answers
   such as no, nope, none, n/a, etc, do not provide any useful information so they can be filtered out and not saved
   if included in this list. If this list is empty, then all answers will be saved. </p>
-<h4><a href="#toc" name="database_settings">4.2.11 Database Settings</a></h4>
+<h4><a href="#toc" name="text_modes">4.2.13 Survey and User Text Modes</a></h4>
+<p>These settings control the rendering of text supplied for the survey properties,
+  questions, answer values, and user supplied text. The Survey Text Mode setting
+  applies to any text used to create the survey, such as name, questions, and answer values.
+  User Text Mode applied to any text supplied by users as they answer the surveys. If you
+  do not have any text answers in your survey, then the User Text Mode will not affect anything.
+  There are three options for each mode. The setting in the configuration file represents the
+  <strong>maximum</strong> value that can be used on a per-survey basis. This means that if you
+  set each one to Limited HTML, then when surveys are created, they will not be able to use
+  the Full HTML mode.
+  <ul>
+    <li>Text Only: Any text provided will be shown exactly as it's typed. Any HTML code that's
+        included will be shown as plain text and not be rendered within the browser. This is the
+        <strong>recommended setting</strong> for User Text Mode for security reasons. </li>
+    <li>Limited HTML: This mode will allow the use of b, i, u, div, span, a, and img HTML tags
+        with restrictions on what attributes can be used with each tag. The restriction on attributes
+        is enforced so that <i>onchange</i>, <i>onmouseover</i>, etc JavaScript code cannot be injected
+        into these limited HTML tags. This is the recommended setting for Survey Text Mode so that
+        you can use additional formatting within your questions and answer values. </li>
+    <li>Full HTML: <strong>Warning:</strong> Full HTML is a security risk unless used in a controlled
+        environment. The Full HTML setting will render any and all HTML, JavaScript, DHTML, etc that's
+        supplied in the text. In a controlled environment, this may be useful for including tables, code examples,
+        etc within your surveys, but it can be abused. Injected JavaScript could be used to steal cookies,
+        redirect users, and change any page content. This setting should <strong>never</strong> be used
+        for the User Text Mode.</li>
+  </ul>
+  These settings can be changed back and forth after the survey has been created. If you use Limited HTML
+  and create a question that includes images, for example, then switch to Text Only, the actual HTML code
+  will be displayed within the question and not rendered in the browser. The user will see &lt;b&gt;bold text&lt;/b&gt;
+  instead of <b>bold text</b>.
+</p>
+<p>With the Limited HTML and Full HTML options, you have two placeholders that you can use in your questions
+and/or answers. The first is {$html} will will resolve to the HTTP address of your current installation such
+as http://www.bigredspark.com/survey. {$images_html} will resolve to the images folder of the current template
+such as http://www.bigredspark.com/survey/templates/Default/images. So if you wanted to make a link to another survey
+within a question, you could use &lt;a href=&quot;{$html}/survey.php?sid=55&quot;&gt;Click Here&lt;/a&gt;. If you
+wanted to include images in your questions or answer values, you can place them in the images/ folder of your
+template and refer to them as &lt;img src=&quot;{$images_html}/aquabar.gif&quot;&gt;. If you change templates, you
+do not have to change these placeholders so long as the images are also available in the new template. Users can
+also use these placeholder in their answers but it's up to you to inform them (or rather not inform them) of their
+ability to use them. </p>
+<h4><a href="#toc" name="date_format">4.2.14 Date Format</a></h4>
+<p>This is the default date format used to create the date and times in the Results Table view
+  and CSV exports. This value is also used to display the survey creation date/time on the
+  survey properties page. This setting can be changed on a per-survey basis for the Table view
+  and CSV exports. This setting must match the specifications given for the
+  <a href="http://www.php.net/date">PHP date()</a> function. </p>
+<h4><a href="#toc" name="database_settings">4.2.15 Database Settings</a></h4>
 <p>This section controls how the program connects to the database used to save all of the survey information
   and results. The <strong>db_type</strong> setting controls what type of database system is being used and
   is set to MySQL by default. With ADOdb, the survey system should be able to use multiple database types, but
@@ -908,7 +1101,7 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   a table prefix, you will need to create the prefixes on your tables manually. This setting allows the survey
   system to be installed into an existing database and be given a unique prefix so that it does not interfere with any
   already existing tables. </p>
-<h4><a href="#toc" name="smarty_adodb">4.2.12 Smarty and ADOdb Paths</a></h4>
+<h4><a href="#toc" name="smarty_adodb">4.2.16 Smarty and ADOdb Paths</a></h4>
 <p>These settings are blank by default and will cause the survey system to use the versions of Smarty and ADOdb
   included with all of the other files. If you already have an installation of Smarty or ADOdb, though, you can
   give the complete path to the Smarty or ADOdb directories and the survey system will look there for the include
@@ -918,11 +1111,11 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>The survey system makes use of the <a href="http://smarty.php.net">Smarty</a> template engine to separate all of the
   presentation files from the PHP code files. The main site and admin area can be assigned a certain template and individual
   surveys can be assigned different templates as they are created. The template choices are controlled by the
-  names of the directories in the templates/ directory. The default template is named &quote;Default&quote; and the
+  names of the directories in the templates/ directory. The default template is named &quot;Default&quot; and the
   templates/Default directory contains all of the files that controls what that template looks like and all of the images that
   are used with that template. Any additional directories that are created within the templates/ directory will be
   assumed to contain template files. </p>
-<p>Additional templates can be created to give your survey system site it's own look or to integrate it into your
+<p>Additional templates can be created to give your survey system site its own look or to integrate it into your
   own design. Simply copy an existing template to a new directory and modify to your liking. Each template should include
   an images/ directory, also. If an images/ directory is not found, though, the survey system will look in the template
   directory for any images (to be used in bar graphs, for example). </p>
@@ -930,8 +1123,11 @@ news and an online demonstration system can be found at <a href="http://www.bigr
   <!-- Technical Support -->
 <hr>
 <h3><a name="technical_support" href="#toc">5. Technical Support</a> </h3>
-<p> Please use the forums available at <a href="http://www.bigredspark.com/forums">http://www.bigredspark.com/forums</a>
-  for technical support or e-mail the author listed at the top of this page. </p>
+<p> The forums available at <a href="http://www.bigredspark.com/forums">http://www.bigredspark.com/forums</a>
+  can be used for technical support. The <a href="sourceforge.net/projects/uccass/">Sourceforge.net</a> page for UCCASS also
+  has a bug submission system that I monitor. As a final option, you can sign up for the
+  <a href="http://bigredspark.com/mailman/listinfo/uccass-general_bigredspark.com">UCCASS-General mailing list</a>. Any of
+  the methods listed can also be used for general discussion of the system and feature requests.</p>
   <!-- End Technical Support -->
   <!-- Tutorial  -->
 <hr>
@@ -956,22 +1152,21 @@ news and an online demonstration system can be found at <a href="http://www.bigr
 <p>5. After clicking <em><strong>Next Step</strong></em>, you'll be taken to the
   Survey Properties page. You essentially have created an empty survey that you
   are now editing in order to add messages and questions. </p>
-<p><img src="tutorial/step2.jpg" width="529" height="296" border="1"></p>
-<p>6. For the next step, you can choose the template for the survey. This template
-  will be used when taking the survey and viewing the results. You'll also want
-  to set a welcome and thank you message. The welcome message will be shown to
-  the users taking the survey on the very first page. The thank you message will
-  be displayed after the users have completed the survey and the answers have
-  already been saved in the database. If the user quits the survey, they will
-  not see the thank you message. </p>
-<p><img src="tutorial/step3.jpg" width="384" height="188" border="1"></p>
-<p>7. On the same page, you can optionally choose to include a start and end date
+<p>6. The next page you are brought to allows you to change any of the survey
+  properties. The first property is the name, which you've already given. Next,
+  you can activate or inactivate your survey and you can optionally choose to include a start and end date
   for this survey or just automatically make it active. If no dates are given,
   the survey will be controlled by the Active/Inactive status. If dates are given,
   the survey will only be available if it's also marked as Active and the date
   is between the dates you specify. Making a survey inactive or passing the end
-  date does not affect the answers to the survey that have already been given.
-</p>
+  date does not affect the answers to the survey that have already been given.</p>
+<p>7. You can choose a template to use for this survey. This template will take effect
+  when users begin to take your survey or when they are viewing the results. The next option
+  allows you to set the text mode for the survey. The administrator may have limited what
+  text modes you are allowed to choose from. You can also set the action to be taken
+  when the user finishes your survey. The can be returned to the main page, the results
+  page or sent to a custom URL that you provide. For the example survey, I've set
+  both text modes to Text Only and the completion page to redirect back to the Main Page.</p>
 <p>8. You also control the survey access from this page. You have the option to
   make the survey public, meaning everyone will see it in the list of surveys
   and anyone can take it, or you can choose to have it protected by a password.

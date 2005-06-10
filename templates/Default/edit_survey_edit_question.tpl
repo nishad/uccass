@@ -94,8 +94,9 @@
       &nbsp;&nbsp;&nbsp;
       <select name="option[{$smarty.section.dep.iteration}]" size="1">
         <option value=""></option>
-        <option value="Hide">Hide</option>
-        <option value="Require">Require</option>
+        {section name="dep_mode" loop=$conf.dependency_modes show=TRUE}
+          <option value="{$conf.dependency_modes[dep_mode]}">{$conf.dependency_modes[dep_mode]}</option>
+        {/section}
       </select>
       if question
       <select name="dep_qid[{$smarty.section.dep.iteration}]" onchange="populate({$smarty.section.dep.iteration});">

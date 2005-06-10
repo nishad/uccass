@@ -72,7 +72,7 @@
         <input type="hidden" name="sid" value="{$property.sid}">
 
         <div class="whitebox">
-          Add A New Question
+          Add A New Question  <a href="{$conf.html}/docs/index.html#new_question">[?]</a>
         </div>
 
         <script language="javascript">
@@ -155,7 +155,7 @@
         {section name="dependencies" loop=1 show=$show.dep}
 
           <div class="whitebox">
-           Dependencies
+           Dependencies <a href="{$conf.html}/docs/index.html#dependencies">[?]</a>
           </div>
 
           <div class="indented_cell">
@@ -175,8 +175,9 @@
               &nbsp;&nbsp;&nbsp;
               <select name="option[{$smarty.section.dep.iteration}]" size="1">
                 <option value=""></option>
-                <option value="Hide">Hide</option>
-                <option value="Require">Require</option>
+                {section name="dep_mode" loop=$conf.dependency_modes show=TRUE}
+                  <option value="{$conf.dependency_modes[dep_mode]}">{$conf.dependency_modes[dep_mode]}</option>
+                {/section}
               </select>
               if question
               <select name="dep_qid[{$smarty.section.dep.iteration}]" onchange="populate({$smarty.section.dep.iteration});">

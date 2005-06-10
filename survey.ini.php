@@ -36,11 +36,19 @@
 ; SITE SETUP ;
 ;;;;;;;;;;;;;;
 
+; File Path to UCCASS files
+; ex: /home/user/name/public_html/uccass
+path =
+
+; HTML Path to UCCASS installation
+; ex: https://www.youdomain.com/subdir/uccass
+html =
+
 ; Site Name
 ;
 ; Will appear in Title Bar and Main Page
 site_name = "Unit Command Climate Assessment and Survey System (UCCASS)"
-
+
 ; Default Template
 ;
 ; Default template to use for the
@@ -52,7 +60,7 @@ default_template = Default
 ; Administrator Password
 ;
 ; Used to log into Admin area
-admin_password = password
+admin_password = "Pass!word"
 
 ; Page Break Text
 ;
@@ -67,7 +75,7 @@ page_break = "%PAGE BREAK%"
 ; Number of text results to show
 ; per page when viewing text answers
 ; to surveys.
-text_results_per_page = 50
+text_results_per_page = 5
 
 ; Image Extensions
 ;
@@ -109,8 +117,8 @@ filter_limit = 3
 ; react to the stored IP addresses
 ; 0 = OFF
 ; 1 = ON
-track_ip = 0
-
+track_ip = 1
+
 ; Text Filter
 ;
 ; A comma separated list of words that
@@ -121,6 +129,49 @@ track_ip = 0
 ; they will not be saved. Leave empty
 ; to not filter anything from user's answers
 text_filter = "none, na, n/a, no, nothing, nope, asdf"
+
+; Text Modes
+;
+; The following two settings control the display of
+; text provided as a part of the survey text (questions,
+; answer values, etc) and as a part of the
+; user-supplied text. Although the mode is
+; controlled on a per-survey basis by it's
+; creator, they cannot go over the setting
+; you provide here.
+;
+; There are three text modes you can have
+; in the survey system.
+;
+; 0 = Text only. All input is shown as plain text
+; 1 = Limited HTML. <b>, <i>, <u>, <div>, <span>, <a>, and <img>
+;     tags are allowed. All other tags are shown as plain text
+; 2 = Full HTML. Text is shown as supplied
+;     including any HTML, Javascript, images, etc.
+;
+; WARNING: Allowing FULL HTML is a security risk. You
+;     are letting users write the HTML for the page
+;     and they could introduce malicious code. It is
+;     recommended that you never use Full HTML mode for
+;     the user-supplied text and only use it for survey
+;     text under very controlled situations.
+;
+; Survey Text Mode (default is 0)
+survey_text_mode = 0
+;
+; User Text Mode (default is 0)
+user_text_mode = 0
+
+; Date Format
+;
+; Default format used to report date and times when
+; viewing table results or exporting results
+; to a CSV file. This must match the specifications
+; given at http://www.php.net/manual/en/function.date.php
+; This format is also used to report the Survey
+; creation date on the Edit Properties page.
+;
+date_format = "Y-m-d H:i:s"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Database Configuration ;

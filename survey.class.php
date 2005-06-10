@@ -19,15 +19,23 @@
 // Affero General Public License for more details.
 //======================================================
 
-//Enable / Disable Error Reporting
-//If experiencing problems during
-//installation, you may wish to
-//comment this line out.
-error_reporting(E_ALL);
+//Set Error Reporting Level to not
+//show notices or warnings
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+//error_reporting(E_ALL);
+
+//Turn off runtime escaping of quotes
+set_magic_quotes_runtime(0);
 
 //Define CONSTANTS
 define('BY_AID',1);
 define('BY_QID',2);
+
+define('SAFE_STRING_TEXT',0);
+define('SAFE_STRING_LIMHTML',1);
+define('SAFE_STRING_FULLHTML',2);
+define('SAFE_STRING_DB',3);
+define('SAFE_STRING_ESC',4);
 
 class Survey
 {
@@ -51,52 +59,27 @@ class Survey
     *********************/
     function load_configuration()
     {
-        //Install path (path to survey.class.php)
-        $path = dirname($_SERVER['PATH_TRANSLATED']);
-        $ini_file = $path . '/survey.ini.php';
+        //Ensure install.php file has be removed
+        if(!isset($_REQUEST['config_submit']) && file_exists('install.php'))
+        { $this->error("WARNING: install.php file still exists. Survey System will not run with this file present. Click <a href=\"install.php\">here</a> to run the installation program or move/rename the install.php file so that the installation program can not be re-run."); return; }
 
+        $ini_file = 'survey.ini.php';
         //Load values from .ini. file
         if(file_exists($ini_file))
         {
-            $this->CONF = @parse_ini_file($path . '/survey.ini.php');
+            $this->CONF = @parse_ini_file($ini_file);
             if(count($this->CONF) == 0)
-            { $this->error("Error parsing survey.ini.php file"); return; }
+            { $this->error("Error parsing {$ini_file} file"); return; }
         }
         else
-        { $this->error("Cannot find $ini_file"); return; }
-
-        //System path to program
-        $this->CONF['path'] = $path;
+        { $this->error("Cannot find {$ini_file}"); return; }
 
         //Version of Survey System
-        $this->CONF['version'] = 'v1.04';
-
-        //Determine protocol of web pages
-        if(isset($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'],'ON') == 0)
-        { $this->CONF['protocol'] = 'https://'; }
-        else
-        { $this->CONF['protocol'] = 'http://'; }
-
-        //HTML address of this program
-        $dir_name = dirname($_SERVER['SCRIPT_NAME']);
-        if($dir_name == '\\')
-        { $dir_name = ''; }
-
-        $this->CONF['html'] = $this->CONF['protocol'] . $_SERVER['SERVER_NAME'] . $dir_name;
-
-        //Determine web address of current page
-        $this->CONF['current_page'] = $this->CONF['protocol'] . $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'];
-
-        //Ensure install.php file has be removed
-        if(!isset($_REQUEST['config_submit']) && file_exists($this->CONF['path'] . '/install.php'))
-        { $this->error("WARNING: install.php file still exists. Survey System will not run with this file present. Click <a href=\"install.php\">here</a> to run the installation program or move/rename the install.php file so that the installation program can not be re-run."); return; }
+        $this->CONF['version'] = 'v1.05';
 
         //Default path to Smarty
         if(!isset($this->CONF['smarty_path']) || $this->CONF['smarty_path'] == '')
         { $this->CONF['smarty_path'] = $this->CONF['path'] . '/smarty'; }
-
-        if(!$this->set_template_paths($this->CONF['default_template']))
-        { $this->error("WARNING: Cannot find default template path. Expecting: {$this->CONF['template_path']}"); return; }
 
         //Default path to ADOdb
         if(!isset($this->CONF['adodb_path']) || $this->CONF['adodb_path'] == '')
@@ -119,19 +102,41 @@ class Survey
         //Create Smarty object and set
         //paths within object
         $this->smarty = new Smarty;
-        $this->smarty->template_dir    =  $this->CONF['template_path'];                    // name of directory for templates
+        $this->smarty->template_dir    =  $this->CONF['path'] . '/templates';                    // name of directory for templates
         $this->smarty->compile_dir     =  $this->CONF['smarty_path'] . '/templates_c';     // name of directory for compiled templates
         $this->smarty->config_dir      =  $this->CONF['smarty_path'] . '/configs';         // directory where config files are located
         $this->smarty->plugins_dir     =  array($this->CONF['smarty_path'] . '/plugins');  // plugin directories
 
+        if(!$this->set_template_paths($this->CONF['default_template']))
+        { $this->error("WARNING: Cannot find default template path. Expecting: {$this->CONF['template_path']}"); return; }
+
+        //Ensure templates_c directory is writable
+        if(!is_writable($this->smarty->compile_dir))
+        { $this->error("WARNING: Compiled template directory is not writable ({$this->smarty->compile_dir}). Please refer to the installation document for instructions."); return; }
+
+        //If SAFE_MODE is ON in PHP, turn off subdirectory use for Smarty
+        if(ini_get('safe_mode'))
+        { $this->smarty->use_sub_dirs = FALSE; }
+
         //Establish Connection to database
         $this->db = NewADOConnection($this->CONF['db_type']);
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-        $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
-        if($e = $this->db->ErrorMsg())
-        { $this->error("Error connecting to database: $e"); return; }
+        $conn = $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
+        if(!$conn)
+        { $this->error('Error connecting to database: '. $this->db->ErrorMsg()); return; }
 
         $this->CONF['orientation'] = array('Vertical','Horizontal','Dropdown','Matrix');
+        $this->CONF['text_modes'] = array('Text Only','Limited HTML','Full HTML');
+        $this->CONF['dependency_modes'] = array('Hide','Require','Show');
+
+        //Validate and set default survey and user text modes
+        $this->CONF['survey_text_mode'] = (int)$this->CONF['survey_text_mode'];
+        if($this->CONF['survey_text_mode'] < 0 || $this->CONF['survey_text_mode'] > 2)
+        { $this->CONF['survey_text_mode'] = 0; }
+
+        $this->CONF['user_text_mode'] = (int)$this->CONF['user_text_mode'];
+        if($this->CONF['user_text_mode'] < 0 || $this->CONF['user_text_mode'] > 2)
+        { $this->CONF['user_text_mode'] = 0; }
 
         //Assign configuration values to template
         $this->smarty->assign_by_ref('conf',$this->CONF);
@@ -144,6 +149,8 @@ class Survey
     *********************/
     function set_template_paths($template)
     {
+        $this->template = $template;
+
         $this->CONF['template_path'] = $this->CONF['path'] . '/templates/' . $template;
         if(!file_exists($this->CONF['template_path']))
         { return(FALSE); }
@@ -174,10 +181,10 @@ class Survey
         if(empty($title))
         { $values['title'] = $this->CONF['site_name']; }
         else
-        { $values['title'] = $title; }
+        { $values['title'] = $this->safe_string($title,SAFE_STRING_TEXT); }
 
         $this->smarty->assign_by_ref('values',$values);
-        return $this->smarty->fetch('main_header.tpl');
+        return $this->smarty->fetch($this->template.'/main_header.tpl') . $this->showmessage();
     }
 
     /*********
@@ -189,7 +196,7 @@ class Survey
         $this->db->Close();
 
         //Return footer template
-        return $this->smarty->fetch('main_footer.tpl');
+        return $this->smarty->fetch($this->template.'/main_footer.tpl');
     }
 
     /*********************
@@ -205,69 +212,70 @@ class Survey
         $oid = 1;
 
         //Default values for new survey
-        $s['welcome_message'] = 'Welcome Message';
-        $s['thank_you_message'] = 'Thank You Message';
         $s['activate'] = 0;
         $s['template'] = $this->CONF['default_template'];
+        $s['date_format'] = $this->safe_string($this->CONF['date_format'],SAFE_STRING_ESC);
+        $s['created'] = time();
 
         //////////////////
         //CREATE SURVEY //
         //////////////////
-        $sql[1] = "INSERT INTO {$this->CONF['db_tbl_prefix']}surveys (sid, name, welcome_text,
-                   thank_you_text, active, edit_password, template) VALUES
-                   (NULL,'{$s['survey_name']}','{$s['welcome_message']}','{$s['thank_you_message']}',
-                   {$s['activate']},'{$s['edit_password']}','{$s['template']}')";
+        $sid = $this->db->GenID($this->CONF['db_tbl_prefix'].'surveys_sequence');
 
+        $sql[1] = "INSERT INTO {$this->CONF['db_tbl_prefix']}surveys (sid, name, active, edit_password, template, date_format, created) VALUES
+                   ($sid,'{$s['survey_name']}',{$s['activate']},'{$s['edit_password']}','{$s['template']}','{$s['date_format']}',{$s['created']})";
         if($rs1 = $this->query($sql[1],'Error creating survey'))
         {
-            //Retrieve unique ID assigned to
-            //newly created survey
-            $sid = $this->db->Insert_ID();
+            //Make copy of "copy_sid". If "copy_sid" key is not
+            //passed in $s array, then use Zero to copy a
+            //predetermined set of answer types and values
+            //to new servey.
+            if(!isset($s['copy_sid']))
+            { $copy_sid = 0; }
+            else
+            { $copy_sid = $s['copy_sid']; }
 
-            if(isset($s['copy_sid']))
+            ///////////////////////////////////////////////
+            // COPY ANSWERS AND VALUES FROM OTHER SURVEY //
+            ///////////////////////////////////////////////
+            $query = "SELECT aid, name, type, label FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = {$copy_sid}";
+            $rs = $this->db->Execute($query);
+            if($rs === FALSE)
+            { $this->error('Error retrieving answer types: ' . $this->db->ErrorMsg()); }
+            while($r = $rs->FetchRow($rs))
             {
-                ///////////////////////////////////////////////
-                // COPY ANSWERS AND VALUES FROM OTHER SURVEY //
-                ///////////////////////////////////////////////
-                $query = "SELECT aid, name, type, label FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = {$s['copy_sid']}";
-                $rs = $this->db->Execute($query);
-                if($rs === FALSE)
-                { $this->error('Error retrieving answer types: ' . $this->db->ErrorMsg()); }
-                while($r = $rs->FetchRow($rs))
+                $name = $this->safe_string($r['name'],SAFE_STRING_ESC);
+                $type = $this->safe_string($r['type'],SAFE_STRING_ESC);
+                $label = $this->safe_string($r['label'],SAFE_STRING_ESC);
+                $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES
+                          ($aid, '$name','$type','$label',$sid)";
+                $rs2 = $this->db->Execute($query);
+                if($rs2 === FALSE)
+                { $this->error('Error copying answer type: ' . $this->db->ErrorMsg()); }
+
+                $s['new_aid'][$r['aid']] = $aid;
+
+                $query = "SELECT avid, value, group_id, image FROM {$this->CONF['db_tbl_prefix']}answer_values
+                          WHERE aid = {$r['aid']}";
+                $rs3 = $this->db->Execute($query);
+                if($rs3 === FALSE)
+                { $this->error('Error retrieving answer values: ' . $this->db->ErrorMsg()); }
+                while($r3 = $rs3->FetchRow($rs3))
                 {
-                    $name = addslashes($r['name']);
-                    $type = addslashes($r['type']);
-                    $label = addslashes($r['label']);
-                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (name, type, label, sid) VALUES
-                              ('$name','$type','$label',$sid)";
-                    $rs2 = $this->db->Execute($query);
-                    if($rs2 === FALSE)
-                    { $this->error('Error copying answer type: ' . $this->db->ErrorMsg()); }
+                    $value = $this->safe_string($r3['value'],SAFE_STRING_ESC);
+                    $image = $this->safe_string($r3['image'],SAFE_STRING_ESC);
+                    $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
 
-                    $aid = $this->db->Insert_ID();
-                    $s['new_aid'][$r['aid']] = $aid;
+                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, group_id, image)
+                              VALUES ($avid, $aid,'$value',{$r3['group_id']},'$image')";
+                    $rs4 = $this->db->Execute($query);
+                    if($rs4 === FALSE)
+                    { $this->error('Error copying answer value: ' . $this->db->ErrorMsg()); }
 
-                    $query = "SELECT avid, value, group_id, image FROM {$this->CONF['db_tbl_prefix']}answer_values
-                              WHERE aid = {$r['aid']}";
-                    $rs3 = $this->db->Execute($query);
-                    if($rs3 === FALSE)
-                    { $this->error('Error retrieving answer values: ' . $this->db->ErrorMsg()); }
-                    while($r3 = $rs3->FetchRow($rs3))
-                    {
-                        $value = addslashes($r3['value']);
-                        $image = addslashes($r3['image']);
-
-                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (aid, value, group_id, image)
-                                  VALUES ($aid,'$value',{$r3['group_id']},'$image')";
-                        $rs4 = $this->db->Execute($query);
-                        if($rs4 === FALSE)
-                        { $this->error('Error copying answer value: ' . $this->db->ErrorMsg()); }
-
-                        $s['new_avid'][$r3['avid']] = $this->db->Insert_ID();
-                    }
+                    $s['new_avid'][$r3['avid']] = $avid;
                 }
             }
-
 
             //////////////////////
             // INSERT QUESTIONS //
@@ -287,11 +295,11 @@ class Survey
                     {
                         $aid = $s['new_aid'][$s['answer'][$x]];
                         //Create SQL to insert question and increment order ID (oid)
-                        $q = "(NULL,'{$s['question'][$x]}',$aid,{$s['num_answers'][$x]},$sid,$page,{$s['num_required'][$x]},$oid,'{$s['orientation'][$x]}')";
+                        $qid = $this->db->GenID($this->CONF['db_tbl_prefix'].'questions_sequence');
+                        $q = "($qid,'{$s['question'][$x]}',$aid,{$s['num_answers'][$x]},$sid,$page,{$s['num_required'][$x]},$oid,'{$s['orientation'][$x]}')";
                         $sql[2] = "INSERT INTO {$this->CONF['db_tbl_prefix']}questions (qid,question,aid,num_answers,sid,page,num_required,oid,orientation) VALUES $q";
                         $rs2 = $this->query($sql[2],'Error inserting question');
-
-                        $s['new_qid'][$s['qid'][$x]] = $this->db->Insert_ID();
+                        $s['new_qid'][$s['qid'][$x]] = $qid;
 
                         $oid++;
                     }
@@ -315,12 +323,16 @@ class Survey
                         $dep_qid = $s['new_qid'][$r['dep_qid']];
                         $dep_aid = $s['new_avid'][$r['dep_aid']];
 
-                        $dep_insert .= "($sid, $qid, $dep_qid, $dep_aid, '{$r['dep_option']}'),";
+                        $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
+                        $dep_insert .= "($dep_id, $sid, $qid, $dep_qid, $dep_aid, '{$r['dep_option']}'),";
                     }
 
-                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (sid, qid, dep_qid, dep_aid, dep_option)
-                              VALUES " . substr($dep_insert,0,-1);
-                    $rs = $this->db->query($query,'Error inserting dependencies');
+                    if(!empty($dep_insert))
+                    {
+                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id, sid, qid, dep_qid, dep_aid, dep_option)
+                                  VALUES " . substr($dep_insert,0,-1);
+                        $rs = $this->db->Query($query,'Error inserting dependencies');
+                    }
                 }
             }
         }
@@ -335,6 +347,12 @@ class Survey
     ********************/
     function available_surveys()
     {
+        if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'logout')
+        {
+            unset($_SESSION['admin_logged_in']);
+            unset($_SESSION['edit_survey']);
+        }
+
         $survey = array();
 
         $x = 0;
@@ -342,40 +360,48 @@ class Survey
         $now = time();
 
         //Turn on/off surveys depending on start/end date
-        $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 1 WHERE start != 0 AND (start < $now) || (start < $now AND $now < end)");
-        $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 0 WHERE end != 0 AND ($now < start || $now > end)");
+        $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 1 WHERE start_date != 0 AND (start_date < $now) OR (start_date < $now AND $now < end_date)");
+        $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 0 WHERE end_date != 0 AND ($now < start_date OR $now > end_date)");
 
-        $query = "SELECT sid, name, survey_access, results_access, active FROM {$this->CONF['db_tbl_prefix']}surveys ORDER BY name ASC";
+        $query = "SELECT sid, name, survey_access, results_access, active, survey_text_mode FROM {$this->CONF['db_tbl_prefix']}surveys ORDER BY name ASC";
         $rs = $this->Query($query,'Unable to get survey access information');
         while($r = $rs->FetchRow())
         {
-            $all_surveys['name'][] = $r['name'];
+            $survey_name = $this->safe_string($r['name'],$r['survey_text_mode']);
+            $all_surveys['name'][] = $survey_name;
             $all_surveys['sid'][] = $r['sid'];
 
             if($r['active'] == 1)
             {
                 if($r['survey_access'] == 'public')
                 {
-                    $survey[$x]['display'] = $r['name'];
+                    $survey[$x]['display'] = $survey_name;
                     $survey[$x]['sid'] = $r['sid'];
                     if($r['results_access'] == 'public')
                     { $results[$x] = TRUE; }
                     else
                     {
-                        $priv_results['display'][] = $r['name'];
+                        $priv_results['display'][] = $survey_name;
                         $priv_results['sid'][] = $r['sid'];
                     }
                     $x++;
                 }
                 else
                 {
-                    $priv_survey['display'][] = $r['name'];
+                    $priv_survey['display'][] = $survey_name;
                     $priv_survey['sid'][] = $r['sid'];
-                    $priv_results['display'][] = $r['name'];
+                    $priv_results['display'][] = $survey_name;
                     $priv_results['sid'][] = $r['sid'];
                 }
             }
         }
+
+        if(isset($_SESSION['admin_logged_in']) || !empty($_SESSION['edit_survey']))
+        { $show['logout'] = TRUE; }
+        else
+        { $show['logout'] = FALSE; }
+
+        $this->smarty->assign_by_ref('show',$show);
 
         $this->smarty->assign_by_ref("all_surveys",$all_surveys);
 
@@ -388,7 +414,7 @@ class Survey
         if(isset($priv_results))
         { $this->smarty->assign_by_ref('priv_results',$priv_results); }
 
-        $retval = $this->smarty->fetch("available_surveys.tpl");
+        $retval = $this->smarty->fetch($this->template.'/available_surveys.tpl');
 
         return $retval;
     }
@@ -416,7 +442,7 @@ class Survey
             // PROCESS NAME OF FORM
             if(strlen($_REQUEST['survey_name']) > 0)
             {
-                $name = htmlentities($_REQUEST['survey_name']);
+                $name = $this->safe_string($_REQUEST['survey_name'],SAFE_STRING_DB);
                 $query = "SELECT 1 FROM {$this->CONF['db_tbl_prefix']}surveys WHERE name = '$name'";
                 $rs = $this->Query($query,'Unable to see if survey name matches another');
 
@@ -424,7 +450,7 @@ class Survey
                 { $error = "A survey already exists with that name."; }
                 else
                 {
-                    $_SESSION['new_survey']['survey_name'] = htmlentities($_REQUEST['survey_name']);
+                    $_SESSION['new_survey']['survey_name'] = $name;
                     @$_SESSION['new_survey']['step']++;
                 }
             }
@@ -433,14 +459,12 @@ class Survey
 
             if($copy_sid = (int)$_REQUEST['copy_survey'])
             {
-                $query = "SELECT welcome_text, thank_you_text FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $copy_sid AND survey_access='Public'";
-                $rs = $this->Query($query,'Error getting welcome/thank you text to copy survey');
+                $query = "SELECT sid FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $copy_sid AND survey_access='Public'";
+                $rs = $this->Query($query,'Error getting copy survey info');
 
                 if($r = $rs->FetchRow($rs))
                 {
                     $_SESSION['new_survey']['copy_sid'] = $copy_sid;
-                    $_SESSION['new_survey']['welcome_message'] = $r['welcome_text'];
-                    $_SESSION['new_survey']['thank_you_message'] = $r['thank_you_text'];
 
                     $query = "SELECT qid, question, aid, num_answers, num_required, page, orientation FROM {$this->CONF['db_tbl_prefix']}questions
                               WHERE sid = $copy_sid ORDER BY page, oid";
@@ -463,7 +487,7 @@ class Survey
                         }
 
                         $_SESSION['new_survey']['qid'][$x] = $r['qid'];
-                        $_SESSION['new_survey']['question'][$x] = addslashes($r['question']);
+                        $_SESSION['new_survey']['question'][$x] = $r['question'];
                         $_SESSION['new_survey']['answer'][$x] = $r['aid'];
                         $_SESSION['new_survey']['num_answers'][$x] = $r['num_answers'];
                         $_SESSION['new_survey']['num_required'][$x] = $r['num_required'];
@@ -500,15 +524,15 @@ class Survey
         $show['start_over_button'] = TRUE;
         $show['next_button'] = TRUE;
 
-        ////////////////////
-        // DISPLAY SURVEY //
-        ////////////////////
+        //////////////////////////////
+        // DISPLAY COPY SURVEY LIST //
+        //////////////////////////////
         $public_surveys = Array();
 
         $show['survey_name'] = TRUE;
 
         if(isset($_SESSION['new_survey']['survey_name']))
-        { $this->smarty->assign('survey_name',stripslashes($_SESSION['new_survey']['survey_name'])); }
+        { $this->smarty->assign('survey_name',$this->safe_string($_SESSION['new_survey']['survey_name'],SAFE_STRING_TEXT)); }
 
         $query = "SELECT sid, name FROM {$this->CONF['db_tbl_prefix']}surveys WHERE survey_access = 'Public' order by name ASC";
         $rs = $this->db->Execute($query);
@@ -521,7 +545,7 @@ class Survey
         while($r = $rs->FetchRow($rs))
         {
             $public_surveys['sid'][] = $r['sid'];
-            $public_surveys['name'][] = $r['name'];
+            $public_surveys['name'][] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
         }
         $this->smarty->assign('public_surveys',$public_surveys);
 
@@ -538,7 +562,7 @@ class Survey
         { $this->smarty->assign('error',$error); }
 
         //Retrieve parsed smarty template
-        $retval = $this->smarty->fetch('add_survey.tpl');
+        $retval = $this->smarty->fetch($this->template.'/add_survey.tpl');
 
         return $retval;
     }
@@ -546,15 +570,19 @@ class Survey
     /***************************
     * DISPLAY POSSIBLE ANSWERS *
     ***************************/
-    function display_answers()
+    function display_answers($sid)
     {
         $old_name = '';
         $x = 0;
-        $sid = (int)$_REQUEST['sid'];
+        $sid = (int)$sid;
 
-        $rs = $this->db->Execute("SELECT at.name, at.type, at.label, av.value FROM {$this->CONF['db_tbl_prefix']}answer_types at
-                                  LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av ON at.aid = av.aid
-                                  WHERE sid = $sid ORDER BY name, av.avid ASC");
+        $rs = $this->db->Execute("SELECT at.name, at.type, at.label, av.value, s.survey_text_mode
+                                  FROM {$this->CONF['db_tbl_prefix']}answer_types at
+                                  LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av ON at.aid = av.aid,
+                                  {$this->CONF['db_tbl_prefix']}surveys s
+                                  WHERE s.sid = $sid AND s.sid = at.sid
+                                  ORDER BY name, av.avid ASC");
+
         if($rs === FALSE) { die($this->db->ErrorMsg()); }
         while($r = $rs->FetchRow())
         {
@@ -563,20 +591,25 @@ class Survey
                 if(!empty($old_name))
                 { $x++; }
 
-                $answers[$x]['name'] = $r['name'];
+                $answers[$x]['name'] = $this->safe_string($r['name'],$r['survey_text_mode']);
                 $answers[$x]['type'] = $r['type'];
-                $answers[$x]['label'] = (empty($r['label'])) ? '&nbsp;' : $r['label'];
-                $answers[$x]['value'][] = $r['value'];
+                $answers[$x]['value'][] = $this->safe_string($r['value'],$r['survey_text_mode']);
+
+                if(empty($r['label']))
+                { $answers[$x]['label'] = '&nbsp;'; }
+                else
+                { $answers[$x]['label'] = $this->safe_string($r['label'],$r['survey_text_mode']); }
+
 
                 $old_name = $r['name'];
             }
             else
-            { $answers[$x]['value'][] = $r['value']; }
+            { $answers[$x]['value'][] = $this->safe_string($r['value'],$r['survey_text_mode']); }
         }
 
         $this->smarty->assign_by_ref("answers",$answers);
 
-        $retval = $this->smarty->fetch('display_answers.tpl');
+        $retval = $this->smarty->fetch($this->template.'/display_answers.tpl');
 
         return $retval;
     }
@@ -607,10 +640,13 @@ class Survey
         if(!isset($_SESSION['take_survey']['page']))
         { $_SESSION['take_survey']['page'] = 1; }
 
+        if(!isset($_SESSION['take_survey']['start_time']))
+        { $_SESSION['take_survey']['start_time'] = time(); }
+
         //Retrieve survey information
-        $rs = $this->db->Execute("SELECT s.name, s.welcome_text, s.thank_you_text, s.start, s.end,
-            s.active, MAX(q.page) AS max_page, s.survey_access, s.survey_password, s.template FROM
-            {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
+        $rs = $this->db->Execute("SELECT s.name, s.start_date, s.end_date, s.redirect_page,
+            s.active, MAX(q.page) AS max_page, s.survey_access, s.survey_password, s.template, s.survey_text_mode, s.time_limit
+            FROM {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
             WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid");
 
         if($rs === FALSE) { $this->error("Error retrieving Survey:" . $this->db->ErrorMsg());return; }
@@ -629,14 +665,17 @@ class Survey
                 { $this->error("This survey requires a password"); return; }
             }
 
-            if($r['active'] == 0 || $now < $r['start'] || ($now > $r['end'] && $r['end'] != 0))
+            if($r['active'] == 0 || $now < $r['start_date'] || ($now > $r['end_date'] && $r['end_date'] != 0))
             { $this->error("Survey #$sid. <em>{$r['name']}</em> in not active at this time");return; }
         }
         else
         { $this->error("Survey $sid does not exist or has no questions."); return; }
 
         $survey = array_merge($survey,$r);
+        //Set survey name to be used outside
+        //of class to set page title
         $this->survey_name = $r['name'];
+        $_SESSION['take_survey']['redirect_page'] = $r['redirect_page'];
 
         if($this->CONF['default_template'] != $survey['template'])
         {
@@ -644,12 +683,14 @@ class Survey
             { $this->error("Unable to load template for survey. Expecting to find template in {$this->CONF['template_path']}"); return; }
         }
 
-        $survey['total_pages'] = $r['max_page'] + 2;
-        $survey['welcome_text'] = nl2br($survey['welcome_text']);
-        $survey['thank_you_text'] = nl2br($survey['thank_you_text']);
+        $survey['total_pages'] = $r['max_page'];
+        $now = time();
+        $survey['elapsed_hours'] = floor(($now - $_SESSION['take_survey']['start_time']) / 3600);
+        $survey['elapsed_minutes'] = floor(($now - $_SESSION['take_survey']['start_time']) / 60);
+        $survey['elapsed_seconds'] = sprintf('%02d',($now - $_SESSION['take_survey']['start_time']) % 60);
 
         if(isset($_REQUEST['quit']))
-        { $_SESSION['take_survey']['page'] = $survey['total_pages']+1; }
+        { $_SESSION['take_survey']['page'] = $survey['total_pages']+2; }
 
         /////////////////////////
         // PROCESS SURVEY PAGE //
@@ -696,7 +737,10 @@ class Survey
             }
         }
 
-        if(isset($_REQUEST['answer']))
+        //Check for answers being present and only
+        //save answers into session if time limit hasn't
+        //been passed
+        if(isset($_REQUEST['answer']) && ($survey['time_limit']==0 || ($now < $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5)))
         {
             foreach($_REQUEST['answer'] as $qid=>$value)
             {
@@ -713,23 +757,13 @@ class Survey
                             foreach($value2 as $key3=>$value3)
                             {
                                 if(strlen($value3) > 0)
-                                {
-                                    if(is_numeric($value3))
-                                    { $_SESSION['take_survey']['answer'][$qid][$key2][$key3] = $value3; }
-                                    else
-                                    { $_SESSION['take_survey']['answer'][$qid][$key2][$key3] = $this->safe_string($value); }
-                                }
+                                {$_SESSION['take_survey']['answer'][$qid][$key2][$key3] = $value3; }
                             }
                         }
                         else
                         {
                             if(strlen($value2) > 0)
-                            {
-                                if(is_numeric($value2))
-                                { $_SESSION['take_survey']['answer'][$qid][$key2] = $value2; }
-                                else
-                                { $_SESSION['take_survey']['answer'][$qid][$key2] = $this->safe_string($value2); }
-                            }
+                            { $_SESSION['take_survey']['answer'][$qid][$key2] = $value2; }
                         }
                     }
                 }
@@ -738,10 +772,16 @@ class Survey
 
         if(!$stay_on_same_page)
         {
-            if(isset($_REQUEST['next']) && $_SESSION['take_survey']['page'] < $survey['total_pages'])
+            if(isset($_REQUEST['next']) && $_SESSION['take_survey']['page'] < $survey['total_pages']+1)
             { $_SESSION['take_survey']['page']++; }
             elseif(isset($_REQUEST['previous']) && $_SESSION['take_survey']['page'] > 1)
             { $_SESSION['take_survey']['page']--; }
+        }
+
+        if($survey['time_limit'] && ($now > $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5))
+        {
+            $_SESSION['take_survey']['page'] = $survey['total_pages']+1;
+            $this->setmessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');
         }
 
         //////////////////////
@@ -749,37 +789,49 @@ class Survey
         //////////////////////
         switch($_SESSION['take_survey']['page'])
         {
-            //Welcome message
-            case 1:
-                $show['welcome'] = TRUE;
-                $show['previous_button'] = FALSE;
-                break;
-
-            //Thank you message
-            case $survey['total_pages']:
-                $show['thank_you'] = TRUE;
-                $show['main_url'] = TRUE;
-                $show['previous_button'] = FALSE;
-                $show['next_button'] = FALSE;
-                $show['quit_button'] = FALSE;
-                $survey['page'] = $survey['total_pages'];
+            //Process answers to survey
+            case $survey['total_pages']+1:
                 $this->process_answers($_SESSION['take_survey']);
+
+                switch($_SESSION['take_survey']['redirect_page'])
+                {
+                    case 'index':
+                    case '':
+                        $url = $this->CONF['html'] . '/index.php';
+                    break;
+                    case 'results':
+                        $url = $this->CONF['html'] . '/results.php?sid=' . $sid;
+                    break;
+                    default:
+                        $url = $_SESSION['take_survey']['redirect_page'];
+                    break;
+                }
+
                 unset($_SESSION['take_survey']);
+                header("Location: $url");
+                exit();
                 break;
 
             //Quit survey message
-            case $survey['total_pages']+1:
+            case $survey['total_pages']+2:
                 $show['quit'] = TRUE;
                 $show['main_url'] = TRUE;
                 $show['previous_button'] = FALSE;
                 $show['next_button'] = FALSE;
                 $show['quit_button'] = FALSE;
                 $show['page_num'] = FALSE;
+
+                $etime = $now - $_SESSION['take_survey']['start_time'];
+                $sequence = $this->db->GenID($this->CONF['db_tbl_prefix'].'sequence');
+                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}time_limit (sequence,sid,elapsed_time,quitflag)
+                          VALUES ($sequence,$sid,$etime,1)";
+                $rs = $this->db->Execute($query);
+                if($rs === FALSE) { $this->error('Error updating elapsed time: ' . $this->db->ErrorMsg()); }
                 unset($_SESSION['take_survey']);
                 break;
 
             //Questions
-            case $survey['total_pages']-1:
+            case $survey['total_pages']:
                 $button['next'] = 'Finish';
 
             default:
@@ -791,10 +843,10 @@ class Survey
                 //Clear requirements for current page
                 $_SESSION['take_survey']['req'][$page] = array();
 
-                $qpage = $_SESSION['take_survey']['page']-1;
+                $qpage = $_SESSION['take_survey']['page'];
 
-                if(!isset($_SESSION['take_survey']['qstart'][2]))
-                { $_SESSION['take_survey']['qstart'][2] = 1; }
+                if(!isset($_SESSION['take_survey']['qstart'][1]))
+                { $_SESSION['take_survey']['qstart'][1] = 1; }
 
                 $qstart = $_SESSION['take_survey']['qstart'][$page];
 
@@ -839,6 +891,7 @@ class Survey
                 {
                     $hide_question = 0;
                     $require_question = 0;
+                    $show_question = 0;
                     $q = array();
 
                     //Check if current question has any dependencies
@@ -866,20 +919,28 @@ class Survey
                                         {
                                             if(in_array($depend[$r['qid']]['dep_aid'][$key],$aid))
                                             {
-                                                //answer is present, so set "hide" or "require" flag
-                                                if($depend[$r['qid']]['dep_option'][$key] == 'Hide')
-                                                { $hide_question = 1; }
-                                                elseif($depend[$r['qid']]['dep_option'][$key] == 'Require')
-                                                { $require_question = 1; }
+                                                switch($depend[$r['qid']]['dep_option'][$key])
+                                                {
+                                                    case 'Hide':
+                                                        $hide_question = 1; break;
+                                                    case 'Require':
+                                                        $require_question = 1; break;
+                                                    case 'Show':
+                                                        $show_question = 1; break;
+                                                }
                                             }
                                         }
                                         elseif($aid == $depend[$r['qid']]['dep_aid'][$key])
                                         {
-                                            //answer is present, so set "hide" or "require" flag
-                                            if($depend[$r['qid']]['dep_option'][$key] == 'Hide')
-                                            { $hide_question = 1; }
-                                            elseif($depend[$r['qid']]['dep_option'][$key] == 'Require')
-                                            { $require_question = 1; }
+                                            switch($depend[$r['qid']]['dep_option'][$key])
+                                            {
+                                                case 'Hide':
+                                                    $hide_question = 1; break;
+                                                case 'Require':
+                                                    $require_question = 1; break;
+                                                case 'Show':
+                                                    $show_question = 1; break;
+                                            }
                                         }
                                     }
                                 }
@@ -887,12 +948,12 @@ class Survey
                         }
                     }
 
-                    if($hide_question)
+                    if($hide_question && !$show_question)
                     { unset($_SESSION['take_survey']['answer'][$r['qid']]); }
                     else
                     {
                         $q['qid'] = $r['qid'];
-                        $q['question'] = nl2br($r['question']);
+                        $q['question'] = nl2br($this->safe_string($r['question'],$survey['survey_text_mode']));
                         $q['num_answers'] = $r['num_answers'];
 
                         if($require_question)
@@ -906,10 +967,10 @@ class Survey
                             if($r['num_answers'] > 1)
                             { $q['req_label'] = $r['num_required']; }
 
-                            $q['required_text'] = $this->smarty->fetch('question_required.tpl');
+                            $q['required_text'] = $this->smarty->fetch($this->template.'/question_required.tpl');
                         }
 
-                        $q['label'] = $r['label'];
+                        $q['label'] = $this->safe_string($r['label'],$survey['survey_text_mode']);
 
                         if($r['type'] == 'T' || $r['type'] == 'S' || $r['type'] == 'N')
                         {
@@ -917,24 +978,30 @@ class Survey
                             $q['value'][$x] = '';
 
                             if(isset($_SESSION['take_survey']['answer'][$r['qid']]))
-                            { $q['answer'] = $_SESSION['take_survey']['answer'][$r['qid']]; }
+                            { $q['answer'] = $this->safe_string($_SESSION['take_survey']['answer'][$r['qid']],SAFE_STRING_TEXT,1); }
 
                             $template = "take_survey_question_{$r['type']}.tpl";
                         }
                         else
                         {
-                            $tmp = $this->get_answer_values($r['aid']);
+                            //Get arrays of answers values and answer avid numbers
+                            //Answer values are returned properly escaped according
+                            //to the survey_text_mode setting for the survey
+                            $tmp = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode']);
                             $q['value'] = $tmp['value'];
                             $q['avid'] = $tmp['avid'];
 
                             $q['num_values'] = count($q['value']);
 
+                            $r['orientation'] = substr($r['orientation'],0,1);
+
                             $xx = 0;
 
                             switch($r['orientation'])
                             {
-                                case 'Vertical':
-                                case 'Horizontal':
+                                //Vertical & Horizontal
+                                case 'V':
+                                case 'H':
                                     $template = "take_survey_question_{$r['type']}_{$r['orientation']}.tpl";
                                     $selected_text = ' checked';
                                     if($matrix_aid)
@@ -944,7 +1011,8 @@ class Survey
                                     }
                                 break;
 
-                                case 'Dropdown':
+                                //Dropdown
+                                case 'D':
                                     $template = "take_survey_question_{$r['type']}_{$r['orientation']}.tpl";
                                     $selected_text = ' selected';
                                     if($matrix_aid)
@@ -954,7 +1022,8 @@ class Survey
                                     }
                                 break;
 
-                                case 'Matrix':
+                                //Matrix
+                                case 'M':
                                     $selected_text = ' checked';
                                     if($matrix_aid != $r['aid'])
                                     {
@@ -1008,17 +1077,17 @@ class Survey
 
                         if($end_matrix)
                         {
-                            $question_text .= $this->smarty->fetch("take_survey_question_MatrixFooter.tpl");
+                            $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MF.tpl');
                             $end_matrix = FALSE;
                         }
 
                         if($begin_matrix)
                         {
-                            $question_text .= $this->smarty->fetch("take_survey_question_MatrixHeader.tpl");
+                            $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MH.tpl');
                             $begin_matrix = FALSE;
                         }
 
-                        $question_text .= $this->smarty->fetch($template);
+                        $question_text .= $this->smarty->fetch($this->template.'/'.$template);
 
                         $x++;
                     }
@@ -1029,12 +1098,12 @@ class Survey
                     $matrix_aid = FALSE;
                     $end_matrix = FALSE;
                     $begin_matrix = FALSE;
-                    $question_text .= $this->smarty->fetch("take_survey_question_MatrixFooter.tpl");
+                    $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MF.tpl');
                 }
 
                 $_SESSION['take_survey']['qstart'][$page+1] = $qstart + $x - $no_counts;
 
-                if(empty($q))
+                if(empty($question_text))
                 { return $this->take_survey($sid); }
 
             //End default display
@@ -1058,13 +1127,13 @@ class Survey
         if(isset($message))
         { $this->smarty->assign('message',$message); }
 
-        return $this->smarty->fetch('take_survey.tpl');
+        return $this->smarty->fetch($this->template.'/take_survey.tpl');
     }
 
     /*************************
     * RETRIEVE ANSWER VALUES *
     *************************/
-    function get_answer_values($id,$by=BY_AID)
+    function get_answer_values($id,$by=BY_AID,$mode=SAFE_STRING_TEXT)
     {
         $retval = FALSE;
         static $answer_values;
@@ -1095,7 +1164,7 @@ class Survey
             while($r = $rs->FetchRow($rs))
             {
                 $retval['avid'][] = $r['avid'];
-                $retval['value'][] = $r['value'];
+                $retval['value'][] = $this->safe_string($r['value'],$mode);
                 $retval['group_id'][] = $r['group_id'];
                 $retval['image'][] = $r['image'];
                 $retval[$r['avid']] = $r['value'];
@@ -1116,12 +1185,13 @@ class Survey
     function process_answers($survey)
     {
         //Get sequence number to identify this answer set
-        $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}sequence (sequence) VALUES (NULL)");
-        $id = $this->db->Insert_ID();
+        $id = $this->db->GenID($this->CONF['db_tbl_prefix'].'sequence');
+        $now = time();
+
         //Track the IP address of user and the survey
         //they are answering if enabled
         if($this->CONF['track_ip'])
-        { $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}ip_track (ip,sid) VALUES('{$_SERVER['REMOTE_HOST']}',{$survey['sid']})"); }
+        { $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}ip_track (ip,sid) VALUES('{$_SERVER['REMOTE_ADDR']}',{$survey['sid']})"); }
 
         //Get all question numbers for current survey
         $results_text = array();
@@ -1137,7 +1207,9 @@ class Survey
         else
         { $text_filter = array(); }
 
-        $rs = $this->db->Execute("SELECT q.qid, a.type FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}answer_types a WHERE q.aid = a.aid AND q.sid = {$survey['sid']}");
+        $rs = $this->db->Execute("SELECT q.qid, a.type FROM {$this->CONF['db_tbl_prefix']}questions q,
+                                  {$this->CONF['db_tbl_prefix']}answer_types a WHERE q.aid = a.aid AND
+                                  q.sid = {$survey['sid']}");
         if($rs === FALSE) { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); }
         while($r = $rs->FetchRow($rs))
         {
@@ -1152,7 +1224,10 @@ class Survey
                             //Do not save answer if it's empty or matches a word
                             //in the text filter list set in the INI file.
                             if(!empty($answer) && !in_array(strtolower($answer),$text_filter))
-                            { $results_text[] = "($id,{$survey['sid']},{$r['qid']},'$answer')"; }
+                            {
+                                $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_text_sequence');
+                                $results_text[] = "($rid,$id,{$survey['sid']},{$r['qid']},'$answer',$now)";
+                            }
                             break;
 
                         case "MM":
@@ -1162,7 +1237,10 @@ class Survey
                                 {
                                     $a = (int)$a;
                                     if($a)
-                                    { $results[] = "($id,{$survey['sid']},{$r['qid']},$a)"; }
+                                    {
+                                        $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_sequence');
+                                        $results[] = "($rid,$id,{$survey['sid']},{$r['qid']},$a,$now)";
+                                    }
                                 }
                             }
                             break;
@@ -1170,7 +1248,10 @@ class Survey
                         case "MS":
                             $answer = (int)$answer;
                             if($answer)
-                            { $results[] = "($id,{$survey['sid']},{$r['qid']},$answer)"; }
+                            {
+                                $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_sequence');
+                                $results[] = "($rid,$id,{$survey['sid']},{$r['qid']},$answer,$now)";
+                            }
                             break;
                     }
                 }
@@ -1181,7 +1262,7 @@ class Survey
         if(count($results_text) > 0)
         {
             $t_string = implode(",",$results_text);
-            $rs = $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}results_text (sequence, sid, qid, answer) VALUES $t_string");
+            $rs = $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}results_text (rid, sequence, sid, qid, answer, entered) VALUES $t_string");
             if($rs === FALSE)
             { $this->error("Error inserting text answers: " . $this->db->ErrorMsg()); }
         }
@@ -1189,10 +1270,17 @@ class Survey
         if(count($results) > 0)
         {
             $r_string = implode(",",$results);
-            $rs = $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}results (sequence, sid, qid, avid) VALUES $r_string");
+            $rs = $this->db->Execute("INSERT INTO {$this->CONF['db_tbl_prefix']}results (rid, sequence, sid, qid, avid, entered) VALUES $r_string");
             if($rs === FALSE)
-            { $this->error("Error inserting integer answers: " . $this->db->ErrorMsg()); }
+            { $this->error("Error inserting numeric answers: " . $this->db->ErrorMsg()); }
         }
+
+        //Insert elapsed time to take survey
+        $etime = $now - $survey['start_time'];
+        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}time_limit (sequence,sid,elapsed_time) VALUES ($id,{$survey['sid']},$etime)";
+        $rs = $this->db->Execute($query);
+        if($rs === FALSE)
+        { $this->error('Error inserting elapsed time: ' . $this->db->ErrorMsg()); }
 
         return;
     }
@@ -1200,17 +1288,19 @@ class Survey
     /*************************
     * VIEW RESULTS OF SURVEY *
     *************************/
-    function survey_results()
+    function survey_results($sid=0)
     {
-        if(!isset($_REQUEST['sid']))
+        $sid = (int)$sid;
+
+        if($sid <= 0)
         { $this->error("Invalid Survey ID"); return; }
 
         //defaults
-        $sid = (int)$_REQUEST['sid'];
         $q_num = 1;
 
         //Retrieve survey information
-        $rs = $this->db->Execute("SELECT name, results_access, results_password FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $sid");
+        $rs = $this->db->Execute("SELECT name, results_access, results_password, survey_text_mode
+                                  FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $sid");
         if($rs === FALSE) { $this->error("Survey $sid does not exist"); return; }
         if($r = $rs->FetchRow($rs))
         {
@@ -1220,39 +1310,31 @@ class Survey
                 {
                     if($_REQUEST['password'] == $r['results_password'])
                     {
-                        $survey['name'] = $r['name'];
-                        $survey['sid'] = $sid;
                         $_SESSION['result_access'][$sid] = 1;
-                        header("Location: {$this->CONF['current_page']}?sid=$sid");
+                        header("Location: {$this->CONF['html']}/results.php?sid=$sid");
                         exit();
                     }
                     else
                     { $this->error("Incorrect password for results"); return; }
                 }
-                elseif(isset($_SESSION['result_access'][$sid]))
-                {
-                    $survey['name'] = $r['name'];
-                    $survey['sid'] = $sid;
-                }
-                else
+                elseif(!isset($_SESSION['result_access'][$sid]))
                 { $this->error("Results for this survey require a password"); return; }
-            }
-            else
-            {
-                $survey['name'] = $r['name'];
-                $survey['sid'] = $sid;
             }
         }
         else
         { $this->error("Survey $sid does not exist"); return; }
 
+        $survey['name'] = $this->safe_string($r['name'],$r['survey_text_mode']);
+        $survey['sid'] = $sid;
+        $survey['survey_text_mode'] = $r['survey_text_mode'];
+
         //Set class variable of name to use outside of function
-        $this->survey_name = $survey['name'];
+        $this->survey_name = $this->safe_string($r['name'],SAFE_STRING_TEXT);
 
         //if viewing answers to single
         //question with text box
         if(isset($_REQUEST['qid']))
-        { return $this->survey_results_text($sid,(int)$_REQUEST['qid']); }
+        { return $this->survey_results_text($sid,$_REQUEST['qid']); }
         elseif(isset($_SESSION['results']['page']))
         { unset($_SESSION['results']['page']); }
 
@@ -1282,7 +1364,7 @@ class Survey
             $survey['hide_show_questions'] = FALSE;
         }
 
-        $survey['required'] = $this->smarty->fetch('question_required.tpl');
+        $survey['required'] = $this->smarty->fetch($this->template.'/question_required.tpl');
 
         if(isset($_REQUEST['results_action']))
         {
@@ -1328,9 +1410,7 @@ class Survey
 
                 case "filter":
                     if(isset($_REQUEST['select_qid']) && !empty($_REQUEST['select_qid']))
-                    {
-                        return $this->filter($sid);
-                    }
+                    { return $this->filter($sid); }
                 break;
 
                 case "clear_filter":
@@ -1342,7 +1422,7 @@ class Survey
         }
 
         //Determine sequence filter for following queries
-        if(isset($_REQUEST['filter']))
+        if(isset($_REQUEST['filter_submit']))
         {
             $_SESSION['filter'][$sid] = '';
             $_SESSION['filter_total'][$sid] = '';
@@ -1360,14 +1440,27 @@ class Survey
                 $_SESSION['filter_total'][$sid] = '';
                 foreach($_REQUEST['filter'] as $filter_qid=>$value)
                 {
-                    $criteria[] = "(q.qid = $filter_qid AND r.avid IN (" . implode(",",$value) . "))";
-                    $answer_values = $this->get_answer_values($filter_qid,BY_QID);
-                    $selected_answers = '';
-                    foreach($value as $avid)
-                    { $selected_answers .= $answer_values[$avid] . ', '; }
-                    $selected_answers = substr($selected_answers,0,-2);
+                    if(is_array($value))
+                    {
+                        $answer_values = $this->get_answer_values($filter_qid,BY_QID,$survey['survey_text_mode']);
+                        $selected_answers = '';
+                        $avid_list = '';
+                        foreach($value as $avid)
+                        {
+                            if(isset($answer_values[$avid]))
+                            {
+                                $selected_answers .= $answer_values[$avid] . ', ';
+                                $avid_list .= $avid . ',';
+                            }
+                        }
+                        $selected_answers = $this->safe_string(substr($selected_answers,0,-2),$survey['survey_text_mode']);
+                        $avid_list = substr($avid_list,0,-1);
+                        $criteria[] = "(q.qid = $filter_qid AND r.avid IN ({$avid_list}))";
 
-                    $_SESSION['filter_text'][$sid] .= "{$_REQUEST['name'][$filter_qid]} = $selected_answers<br>";
+                        $question_text = $this->safe_string($_REQUEST['name'][$filter_qid],$survey['survey_text_mode'],1);
+
+                        $_SESSION['filter_text'][$sid] .= "{$question_text} => $selected_answers<br>";
+                    }
                 }
 
                 if($num_criteria = count($criteria))
@@ -1376,23 +1469,26 @@ class Survey
                     $having = " having c = {$num_criteria}";
                 }
             }
+
             if(isset($_REQUEST['date_filter']))
             {
                 if(!empty($_REQUEST['start_date']))
                 {
-                    if($start_date = date('YmdHis',strtotime($_REQUEST['start_date'] . ' 00:00:01')))
+                    if($start_date = strtotime($_REQUEST['start_date'] . ' 00:00:01'))
                     {
                         $where .= " AND r.entered > $start_date ";
-                        $_SESSION['filter_text'][$sid] .= "Start Date: {$_REQUEST['start_date']}<br />";
+                        $start_date = $this->safe_string($_REQUEST['start_date'],SAFE_STRING_TEXT);
+                        $_SESSION['filter_text'][$sid] .= "Start Date: {$start_date}<br />";
                         $num_dates++;
                     }
                 }
                 if(!empty($_REQUEST['end_date']))
                 {
-                    if($end_date = date('YmdHis',strtotime($_REQUEST['end_date'] . ' 23:59:59')))
+                    if($end_date = strtotime($_REQUEST['end_date'] . ' 23:59:59'))
                     {
                         $where .= " AND r.entered < $end_date ";
-                        $_SESSION['filter_text'][$sid] .= "End Date: {$_REQUEST['end_date']}<br />";
+                        $end_date = $this->safe_string($_REQUEST['end_date'],SAFE_STRING_TEXT);
+                        $_SESSION['filter_text'][$sid] .= "End Date: {$end_date}<br />";
                         $num_dates++;
                     }
                 }
@@ -1418,7 +1514,7 @@ class Survey
                         $seq_list = implode(',',$sequence);
 
                         $_SESSION['filter'][$sid] = " AND r.sequence IN ($seq_list) ";
-                        $_SESSION['filter_total'][$sid] = " AND (r.sequence IN ($seq_list) OR rt.sequence IN ($seq_list) OR (r.sequence IS NULL AND rt.sequence IS NULL)) ";
+                        $_SESSION['filter_total'][$sid] = " AND (r.sequence IN ($seq_list) OR rt.sequence IN ($seq_list) OR (".$this->db->IfNull('r.sequence',1)." AND ".$this->db->IfNull('rt.sequence',1).")) ";
                     }
                     else
                     { $_SESSION['filter_text'][$sid] = "<span class=\"error\">Number of completed surveys matching filter is below the Filter Limit set in the configuration. Showing all results.</span><br>\n"; }
@@ -1440,24 +1536,56 @@ class Survey
 
         $x = 0;
 
+        $survey['quittime']['minutes'] = 0;
+        $survey['quittime']['seconds'] = 0;
+        $survey['avgtime']['minutes']  = 0;
+        $survey['avgtime']['seconds']  = 0;
+        $survey['mintime']['minutes']  = 0;
+        $survey['mintime']['seconds']  = 0;
+        $survey['maxtime']['minutes']  = 0;
+        $survey['maxtime']['seconds']  = 0;
+
+        $sql = "SELECT r.quitflag, AVG(r.elapsed_time) AS avgtime, MIN(r.elapsed_time) AS mintime, MAX(r.elapsed_time) AS maxtime
+                FROM {$this->CONF['db_tbl_prefix']}time_limit r WHERE r.sid = $sid {$_SESSION['filter'][$sid]}
+                GROUP BY r.quitflag";
+        $rs = $this->db->Execute($sql);
+        if($rs === FALSE) {$this->error('Error getting average, min and max survey times: ' . $this->db->ErrorMsg()); return; }
+        while($r = $rs->FetchRow($rs))
+        {
+            if($r['quitflag'])
+            {
+                $survey['quittime']['minutes'] = floor($r['avgtime'] / 60);
+                $survey['quittime']['seconds'] = $r['avgtime'] % 60;
+            }
+            else
+            {
+                $survey['avgtime']['minutes'] = floor($r['avgtime'] / 60);
+                $survey['avgtime']['seconds'] = $r['avgtime'] % 60;
+                $survey['mintime']['minutes'] = floor($r['mintime'] / 60);
+                $survey['mintime']['seconds'] = $r['mintime'] % 60;
+                $survey['maxtime']['minutes'] = floor($r['maxtime'] / 60);
+                $survey['maxtime']['seconds'] = $r['maxtime'] % 60;
+            }
+        }
+
         //retrieve questions
         $sql = "SELECT q.qid, q.question, q.num_required, q.aid, a.type, a.label, COUNT(r.qid) AS r_total, COUNT(rt.qid) AS rt_total
                 FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results r
                   ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid,
                   {$this->CONF['db_tbl_prefix']}answer_types a
                 WHERE q.sid = $sid and q.aid = a.aid
-                  and ((q.qid = r.qid AND rt.qid IS NULL) OR (q.qid = rt.qid AND r.qid IS NULL) OR (r.qid IS NULL AND rt.qid IS NULL))
+                  and ((q.qid = r.qid AND ".$this->db->IfNull('rt.qid',1).") OR (q.qid = rt.qid AND ".$this->db->IfNull('r.qid',1).")
+                  OR (".$this->db->IfNull('r.qid',1)." AND ".$this->db->IfNull('rt.qid',1)."))
                   $hide_show_where {$_SESSION['filter_total'][$sid]}
                 GROUP BY q.qid
                 ORDER BY q.page, q.oid";
-
         $rs = $this->db->Execute($sql);
         if($rs === FALSE) { $this->error("Error retrieving questions: " . $this->db->ErrorMsg()); return;}
 
         while($r = $rs->FetchRow($rs))
         {
             $qid[$x] = $r['qid'];
-            $question[$x] = nl2br($r['question']);
+            $question[$x] = nl2br($this->safe_string($r['question'],$survey['survey_text_mode']));
             $num_answers[$x] = max($r['r_total'],$r['rt_total']);
 
             if($r['num_required']>0)
@@ -1470,24 +1598,32 @@ class Survey
             {
                 case "MM":
                 case "MS":
-                    $answer[$x] = $this->get_answer_values($r['aid']);
+                    $answer[$x] = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode']);
                     $count[$x] = array_fill(0,count($answer[$x]['avid']),0);
-                    break;
+                    $show['numanswers'][$x] = TRUE;
+                break;
+
                 case "T":
                 case "S":
                     $text[$x] = $r['qid'];
-                    break;
+                    $show['numanswers'][$x] = TRUE;
+                break;
+
+                case 'N':
+                    $show['numanswers'][$x] = FALSE;
+                break;
             }
             $x++;
         }
 
         //retrieve answers to questions
-        $sql = "SELECT r.qid, r.avid, av.value, count(*) AS c FROM {$this->CONF['db_tbl_prefix']}results r,
+        $sql = "SELECT r.qid, r.avid, count(*) AS c FROM {$this->CONF['db_tbl_prefix']}results r,
                 {$this->CONF['db_tbl_prefix']}answer_values av,
                 {$this->CONF['db_tbl_prefix']}questions q
                 WHERE r.qid = q.qid and r.sid = $sid and r.avid = av.avid $hide_show_where
                 {$_SESSION['filter'][$sid]}
-                GROUP BY r.qid, r.avid";
+                GROUP BY r.qid, r.avid
+                ORDER BY r.avid ASC";
         $rs = $this->db->Execute($sql);
         if($rs === FALSE) { $this->error("Error retrieving answers: " . $this->db->ErrorMsg()); return;}
         while($r = $rs->FetchRow($rs))
@@ -1501,6 +1637,7 @@ class Survey
             }
         }
 
+        //Filter text has already had safe_string() applied
         if(isset($_SESSION['filter_text'][$sid]) && strlen($_SESSION['filter_text'][$sid])>0)
         { $this->smarty->assign('filter_text',$_SESSION['filter_text'][$sid]); }
         if(strlen($_SESSION['filter'][$sid])>0)
@@ -1512,6 +1649,8 @@ class Survey
         if(isset($_SESSION['group_answers'][$sid]))
         {
             //loop through each answer
+            //answer values within $answer are
+            //already encoded with safe_string()
             foreach($answer as $num=>$answer_array)
             {
                 //determine if answer has groups or not
@@ -1618,7 +1757,11 @@ class Survey
         if(isset($show))
         { $this->smarty->assign_by_ref('show',$show); }
 
-        $retval = $this->smarty->fetch('results.tpl');
+        $retval = $this->smarty->fetch($this->template.'/results.tpl');
+
+        if(empty($_SESSION['filter'][$sid]))
+        { unset($_SESSION['filter_text'][$sid]); }
+
         return $retval;
     }
 
@@ -1627,14 +1770,33 @@ class Survey
     ********************/
     function survey_results_text($sid,$qid)
     {
-        $rs = $this->db->Execute("SELECT q.question, a.type FROM {$this->CONF['db_tbl_prefix']}questions q,
-                                  {$this->CONF['db_tbl_prefix']}answer_types a WHERE q.sid = $sid AND q.qid = $qid
+        $delete_access = $this->check_access($sid);
+
+        if(!empty($_REQUEST['delete_rid']) && $delete_access)
+        {
+            $rid_list = '';
+            foreach($_REQUEST['delete_rid'] as $rid)
+            { $rid_list .= (int)$rid . ','; }
+            $rid_list = substr($rid_list,0,-1);
+            $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}results_text WHERE rid IN ($rid_list) AND sid = $sid AND qid = $qid";
+            $rs = $this->db->Execute($query);
+            if($rs === FALSE)
+            { $this->error('Error deleting checked answers: ' . $this->db->ErrorMsg()); return; }
+        }
+
+        $rs = $this->db->Execute("SELECT q.question, a.type, s.survey_text_mode, s.user_text_mode
+                                  FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}answer_types a,
+                                  {$this->CONF['db_tbl_prefix']}surveys s
+                                  WHERE q.sid = $sid AND q.qid = $qid AND q.sid = s.sid
                                   AND q.aid = a.aid AND a.type IN ('T','S')");
         if($rs === FALSE) { return $this->error("Unable to select question: " . $this->db->ErrorMsg()); }
         if($r = $rs->FetchRow($rs))
-        { $question = nl2br($r['question']); }
+        { $question = nl2br($this->safe_string($r['question'],$r['survey_text_mode'])); }
         else
         { return $this->error("Question $qid does not exist for survey $sid or is not the correct type (Text or Sentence)"); }
+
+        $survey_text_mode = $r['survey_text_mode'];
+        $user_text_mode = $r['user_text_mode'];
 
         if(!isset($_SESSION['results']['page']))
         { $_SESSION['results']['page'] = 0; }
@@ -1648,7 +1810,7 @@ class Survey
 
         if(isset($_REQUEST['search']) && strlen($_REQUEST['search']) > 0)
         {
-            $answer['search_text'] = $this->safe_string($_REQUEST['search']);
+            $answer['search_text'] = $this->safe_string($_REQUEST['search'],SAFE_STRING_TEXT);
 
             $search = " AND answer LIKE '%{$answer['search_text']}%' ";
             $button['clear'] = TRUE;
@@ -1670,7 +1832,7 @@ class Survey
         if(isset($_REQUEST['per_page']))
         {
             $per_page = (int)$_REQUEST['per_page'];
-            $selected[$per_page] = " SELECTED";
+            $selected[$per_page] = " selected";
         }
         else
         { $per_page = $this->CONF['text_results_per_page']; }
@@ -1684,18 +1846,21 @@ class Survey
         $r = $rs->FetchRow($rs);
         $answer['num_answers'] = $r['c'];
 
-        $rs = $this->db->Execute("SELECT answer FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
-                                  $search {$_SESSION['filter'][$sid]} ORDER BY entered DESC LIMIT $start,$per_page");
+        $rs = $this->db->SelectLimit("SELECT rid, answer FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
+                                  $search {$_SESSION['filter'][$sid]} ORDER BY entered DESC",$per_page,$start);
         if($rs === FALSE)
         { return $this->error("Error selecting answers: " . $this->db->ErrorMsg()); }
 
         $answer['text'] = array();
+        $answer['rid'] = array();
         $answer['num'] = array();
+        $answer['delete_access'] = $answer['num_answers'] & $delete_access;
         $cnt = 0;
         while($r = $rs->FetchRow($rs))
         {
             $answer['num'][] = $answer['num_answers'] - $start - $cnt++;
-            $answer['text'][] = $r['answer'];
+            $answer['text'][] = $this->safe_string($r['answer'],$user_text_mode);
+            $answer['rid'][] = $r['rid'];
         }
 
         if(($start + $per_page) >= $answer['num_answers'])
@@ -1721,7 +1886,7 @@ class Survey
         $this->smarty->assign('qid',$qid);
         $this->smarty->assign('button',$button);
 
-        $retval = $this->smarty->fetch('results_text.tpl');
+        $retval = $this->smarty->fetch($this->template.'/results_text.tpl');
         return $retval;
     }
 
@@ -1734,13 +1899,15 @@ class Survey
         $qid_list = '';
 
         foreach($_REQUEST['select_qid'] as $qid)
-        { $qid_list .= $qid . ','; }
+        { $qid_list .= (int)$qid . ','; }
         $qid_list = substr($qid_list,0,-1);
 
-        $query = "SELECT at.aid, q.qid, q.question FROM {$this->CONF['db_tbl_prefix']}answer_types at,
-            {$this->CONF['db_tbl_prefix']}questions q
-            WHERE q.aid = at.aid AND q.sid = $sid AND q.qid IN ($qid_list) AND at.type IN ('MM','MS')
-            ORDER BY q.page, q.oid";
+        $query = "SELECT at.aid, q.qid, q.question, s.survey_text_mode
+                  FROM {$this->CONF['db_tbl_prefix']}answer_types at,
+                  {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}surveys s
+                  WHERE q.aid = at.aid AND q.sid = $sid AND q.qid IN ($qid_list) AND at.type IN ('MM','MS')
+                  AND q.sid = s.sid
+                  ORDER BY q.page, q.oid";
 
         $rs = $this->db->Execute($query);
 
@@ -1750,30 +1917,31 @@ class Survey
         {
             do
             {
-                $question['question'][] = $r['question'];
+                $question['question'][] = nl2br($this->safe_string($r['question'],$r['survey_text_mode']));
+                $question['encquestion'][] = $this->safe_string($r['question'],SAFE_STRING_TEXT);
                 $question['aid'][] = $r['aid'];
                 $question['qid'][] = $r['qid'];
-                $temp = $this->get_answer_values($r['aid']);
+                $temp = $this->get_answer_values($r['aid'],BY_AID,$r['survey_text_mode']);
                 $question['value'][] = $temp['value'];
                 $question['avid'][] = $temp['avid'];
                 $x++;
             }while($r = $rs->FetchRow());
             $this->smarty->assign("question",$question);
         }
-        $rs = $this->db->Execute("SELECT UPPER(DATE_FORMAT(MIN(entered),'%d%b%y')) a,
-                                  UPPER(DATE_FORMAT(MAX(entered),'%d%b%y')) b FROM
+        $rs = $this->db->Execute("SELECT MIN(entered) AS mindate,
+                                  MAX(entered) AS maxdate FROM
                                   {$this->CONF['db_tbl_prefix']}results WHERE sid = $sid");
         if($rs === FALSE) { $this->error("Error selecting min/max survey dates: " . $this->db->ErrorMsg()); }
         $r = $rs->FetchRow();
-        $date['min'] = $r['a'];
-        $date['max'] = $r['b'];
+        $date['min'] = date('Y-m-d',$r['mindate']);
+        $date['max'] = date('Y-m-d',$r['maxdate']);
 
         $this->smarty->assign('date',$date);
 
 
         $this->smarty->assign('sid',$sid);
 
-        $retval = $this->smarty->fetch('filter.tpl');
+        $retval = $this->smarty->fetch($this->template.'/filter.tpl');
 
 
         return $retval;
@@ -1782,31 +1950,33 @@ class Survey
     /******************
     * NEW ANSWER TYPE *
     ******************/
-    function new_answer_type()
+    function new_answer_type($sid)
     {
         $error = '';
 
-        if(!$this->check_login($_REQUEST['sid']))
+        if(!$this->check_login($sid))
         { return(FALSE); }
 
         //The following values are also set
         //upon a successful submission to "reset"
         //the form...
+        $input['name'] = '';
+        $input['label'] = '';
         $input['value'] = array();
         $input['group'] = array();
         $input['num_answers'] = 6;
         $input['show_add_answers'] = TRUE;
-        $input['sid'] = (int)$_REQUEST['sid'];
+        $input['sid'] = (int)$sid;
         $input['allowable_images'] = $this->get_image_names();
 
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
             if(strlen($_REQUEST['name']) > 0)
-            { $input['name'] = $this->safe_string($_REQUEST['name']); }
+            { $input['name'] = $this->safe_string($_REQUEST['name'],SAFE_STRING_DB); }
             else
             { $error .= "Please enter a name. "; }
 
-            $input['label'] = $this->safe_string($_REQUEST['label']);
+            $input['label'] = $this->safe_string($_REQUEST['label'],SAFE_STRING_DB);
 
             switch($_REQUEST['type'])
             {
@@ -1839,8 +2009,8 @@ class Survey
                         {
                             if(strlen($value) > 0)
                             {
-                                $input['value'][] = $this->safe_string($value);
-                                $user_image = $this->safe_string($_REQUEST['image'][$key]);
+                                $input['value'][] = $this->safe_string($value,SAFE_STRING_DB);
+                                $user_image = $this->safe_string($_REQUEST['image'][$key],SAFE_STRING_DB);
 
                                 $image_key = array_search($user_image,$input['allowable_images']);
                                 if($image_key === FALSE)
@@ -1899,20 +2069,23 @@ class Survey
 
             if(!isset($_REQUEST['add_answers_submit']) && (!isset($error) || strlen($error) == 0))
             {
-                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (name, type, label, sid) VALUES
-                          ('{$input['name']}','{$input['type']}','{$input['label']}',{$input['sid']})";
+                $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES
+                          ($aid, '{$input['name']}','{$input['type']}','{$input['label']}',{$input['sid']})";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->error("Error inserting new answer: " . $this->db->ErrorMsg()); }
                 else
                 {
-                    $aid = $this->db->Insert_ID();
                     if($c = count($input['value']))
                     {
                         $sql = '';
                         for($x=0;$x<$c;$x++)
-                        { $sql .= "($aid,'{$input['value'][$x]}',{$input['group'][$x]},'{$input['image'][$x]}'),"; }
-                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (aid, value, group_id, image) VALUES " . substr($sql,0,-1);
+                        {
+                            $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
+                            $sql .= "($avid,$aid,'{$input['value'][$x]}',{$input['group'][$x]},'{$input['image'][$x]}'),";
+                        }
+                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, group_id, image) VALUES " . substr($sql,0,-1);
                         $rs = $this->db->Execute($query);
 
 
@@ -1929,6 +2102,8 @@ class Survey
                     $allowable_images = $input['allowable_images'];
 
                     $input = array();
+                    $input['name'] = '';
+                    $input['label'] = '';
                     $input['value'] = array();
                     $input['group'] = array();
                     $input['num_answers'] = 6;
@@ -1938,6 +2113,13 @@ class Survey
                 }
             }
         }
+
+        //Encode $input values so they are safe to "reshow"
+        //in the form in case of an error
+        $input['name'] = $this->safe_string($input['name'],SAFE_STRING_TEXT,1);
+        $input['label'] = $this->safe_string($input['label'],SAFE_STRING_TEXT,1);
+        foreach($input['value'] as $key => $value)
+        { $input['value'][$key] = $this->safe_string($value,SAFE_STRING_TEXT,1); }
 
         $this->smarty->assign_by_ref('input',$input);
 
@@ -1949,12 +2131,12 @@ class Survey
         }
 
         $this->smarty->assign('property',array('sid'=>$input['sid']));
-        $show['links'] = $this->smarty->fetch('edit_survey_links.tpl');
-        $show['content'] = $this->smarty->fetch('edit_survey_new_answer_type.tpl');
+        $show['links'] = $this->smarty->fetch($this->template.'/edit_survey_links.tpl');
+        $show['content'] = $this->smarty->fetch($this->template.'/edit_survey_new_at.tpl');
 
         $this->smarty->assign_by_ref('show',$show);
 
-        $retval = $this->smarty->fetch('edit_survey.tpl');
+        $retval = $this->smarty->fetch($this->template.'/edit_survey.tpl');
 
         return $retval;
     }
@@ -1962,7 +2144,7 @@ class Survey
     /***************************
     * GET TEMPLATE IMAGE NAMES *
     ***************************/
-    function get_image_names()
+    function get_image_names($mode = SAFE_STRING_TEXT)
     {
         $retval = array();
 
@@ -1973,7 +2155,7 @@ class Survey
         while($file = $d->read())
         {
             if(preg_match('/\.(' . $allowable_extensions . ')$/i',$file))
-            { $retval[] = $this->safe_string($file); }
+            { $retval[] = $this->safe_string($file,$mode); }
         }
 
         if(empty($retval))
@@ -1985,9 +2167,9 @@ class Survey
     /**************
     * EDIT SURVEY *
     **************/
-    function edit_survey()
+    function edit_survey($sid)
     {
-        $sid = (int)$_REQUEST['sid'];
+        $sid = (int)$sid;
         $show['error'] = '';
 
         //Default is to show links at
@@ -2016,7 +2198,7 @@ class Survey
                     if(isset($_REQUEST['delete_survey']))
                     {
                         //Delete all references to this survey in database
-                        $tables = array('questions','results','results_text','ip_track','surveys','dependencies');
+                        $tables = array('questions','results','results_text','ip_track','surveys','dependencies','time_limit');
                         foreach($tables as $tbl)
                         { $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}$tbl WHERE sid = $sid"); }
 
@@ -2026,13 +2208,17 @@ class Survey
                         { $this->error('Error getting aid values from answer_types table: ' . $this->db->ErrorMsg()); return; }
                         else
                         {
+                            $aid_list = '';
                             while($r = $rs->FetchRow($rs))
-                            { $aid_list = $r['aid'] . ','; }
-                            $aid_list = substr($aid_list,0,-1);
-                            $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
-                            $rs = $this->db->Execute($query2);
-                            if($rs === FALSE)
-                            { $this->error('Error deleting answer values: ' . $this->db->ErrorMsg()); return; }
+                            { $aid_list .= $r['aid'] . ','; }
+                            if(!empty($aid_list))
+                            {
+                                $aid_list = substr($aid_list,0,-1);
+                                $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
+                                $rs = $this->db->Execute($query2);
+                                if($rs === FALSE)
+                                { $this->error('Error deleting answer values: ' . $this->db->ErrorMsg()); return; }
+                            }
                         }
 
                         $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = $sid";
@@ -2065,30 +2251,20 @@ class Survey
                     ////////////////
                     //validate data
                     if(strlen($_REQUEST['name']) > 0)
-                    { $input['name'] = htmlentities($_REQUEST['name']); }
+                    { $input['name'] = $this->safe_string($_REQUEST['name'],SAFE_STRING_DB); }
                     else
                     { $show['error'] .= "Enter a Survey Name. "; }
 
                     if(!empty($_REQUEST['template']))
-                    { $input['template'] = addslashes(str_replace(array('\\','/'),'',$_REQUEST['template'])); }
+                    { $input['template'] = $this->safe_string(str_replace(array('\\','/'),'',$_REQUEST['template']),SAFE_STRING_DB); }
                     else
                     { $show['error'] = 'Invalid Template'; }
 
-                    if(strlen($_REQUEST['welcome_text']) > 0)
-                    { $input['welcome_text'] = htmlentities($_REQUEST['welcome_text']); }
-                    else
-                    { $show['error'] .= "Enter a welcome message. "; }
-
-                    if(strlen($_REQUEST['welcome_text']) > 0)
-                    { $input['thank_you_text'] = htmlentities($_REQUEST['thank_you_text']); }
-                    else
-                    { $show['error'] .= "Enter a Thank You message. "; }
-
                     $today = mktime(0,0,0,date('m'),date('d'),date('Y'));
 
-                    if(strlen($_REQUEST['start']) > 0)
+                    if(!empty($_REQUEST['start']))
                     {
-                        $s = @strtotime($_REQUEST['start']);
+                        $s = strtotime($_REQUEST['start'] . '00:00:01');
                         if($s >= 0)
                         { $input['start'] = $s; }
                         else
@@ -2096,9 +2272,9 @@ class Survey
                     }
                     else {$input['start'] = 0; }
 
-                    if(strlen($_REQUEST['end']) > 0)
+                    if(!empty($_REQUEST['end']))
                     {
-                        $e = strtotime($_REQUEST['end']);
+                        $e = strtotime($_REQUEST['end'] . ' 23:59:59');
                         if($e >= 0)
                         { $input['end'] = $e; }
                         else
@@ -2111,11 +2287,58 @@ class Survey
                     else
                     { $show['error'] .= "Invalid Active/Inactive status. "; }
 
+                    $input['survey_text_mode'] = (int)$_REQUEST['survey_text_mode'];
+                    if($input['survey_text_mode'] < 0 || $input['survey_text_mode'] > 2)
+                    { $show['error'] .= 'Invalid Survey Text Mode selected. '; }
+
+                    $input['user_text_mode'] = (int)$_REQUEST['user_text_mode'];
+                    if($input['user_text_mode'] < 0 || $input['user_text_mode'] > 2)
+                    { $show['error'] .= 'Invalid User Text Mode selected. '; }
+
+                    if(!empty($_REQUEST['date_format']))
+                    { $input['date_format'] = $this->safe_string($_REQUEST['date_format'],SAFE_STRING_DB); }
+                    else
+                    { $input['date_format'] = $this->safe_string($this->CONF['date_format'],SAFE_STRING_ESC); }
+
+                    if(!empty($_REQUEST['time_limit']))
+                    { $input['time_limit'] = (int)$_REQUEST['time_limit']; }
+                    else
+                    { $input['time_limit'] = 0; }
+
+                    if(!isset($_REQUEST['redirect_page']))
+                    { $show['error'] .= 'Invalid Completion Redirect Page. '; }
+                    else
+                    {
+                        switch($_REQUEST['redirect_page'])
+                        {
+                            case 'index':
+                            case 'results':
+                                $input['redirect_page'] = $this->safe_string($_REQUEST['redirect_page'],SAFE_STRING_DB);
+                            break;
+
+                            case 'custom':
+                                if(empty($_REQUEST['redirect_page_text']))
+                                { $show['error'] .= 'You must supply a redirect page when choosing "Custom" for Completion Redirect Page'; }
+                                else
+                                {
+                                    if(preg_match('/https?:\/\//i',$_REQUEST['redirect_page_text']))
+                                    { $input['redirect_page'] = $this->safe_string($_REQUEST['redirect_page_text'],SAFE_STRING_DB); }
+                                    else
+                                    { $show['error'] .= 'Invalid custom Completion Redirect page. Pages must be complete URLs and start with http:// or https://'; }
+                                }
+                            break;
+
+                            default:
+                                $show['error'] .= 'Invalid Completion Redirect Page. ';
+                            break;
+                        }
+                    }
+
                     if($_REQUEST['survey_access'] == 'private')
                     {
                         $input['survey_access'] = 'private';
                         if(strlen($_REQUEST['survey_password']) > 0)
-                        { $input['survey_password'] = $_REQUEST['survey_password']; }
+                        { $input['survey_password'] = $this->safe_string($_REQUEST['survey_password'],SAFE_STRING_DB); }
                         else
                         { $show['error'] = "Must set password to take survey. "; }
                     }
@@ -2129,7 +2352,7 @@ class Survey
                     {
                         $input['results_access'] = 'private';
                         if(strlen($_REQUEST['results_access']) > 0)
-                        { $input['results_password'] = $_REQUEST['results_password']; }
+                        { $input['results_password'] = $this->safe_string($_REQUEST['results_password'],SAFE_STRING_DB); }
                         else
                         { $show['error'] .= "Must set password for results. "; }
                     }
@@ -2142,18 +2365,19 @@ class Survey
                     if(strlen($_REQUEST['edit_password']) == 0 || strlen($_REQUEST['edit_password'] > 20))
                     { $show['error'] .= "Edit Password is not set or exceeds 20 characters. "; }
                     else
-                    { $input['edit_password'] = $_REQUEST['edit_password']; }
+                    { $input['edit_password'] = $this->safe_string($_REQUEST['edit_password'],SAFE_STRING_DB); }
 
                     //if the validation did not
                     //set an error, proceed with update
                     if(strlen($show['error']) == 0)
                     {
-                        $query = "UPDATE {$this->CONF['db_tbl_prefix']}surveys SET name='{$input['name']}', welcome_text='{$input['welcome_text']}',
-                                  thank_you_text='{$input['thank_you_text']}', start={$input['start']},
-                                  end={$input['end']}, active={$input['active']}, survey_access='{$input['survey_access']}',
+                        $query = "UPDATE {$this->CONF['db_tbl_prefix']}surveys SET name='{$input['name']}', start_date={$input['start']},
+                                  end_date={$input['end']}, active={$input['active']}, survey_access='{$input['survey_access']}',
                                   survey_password='{$input['survey_password']}', results_access='{$input['results_access']}',
                                   results_password='{$input['results_password']}', edit_password='{$input['edit_password']}',
-                                  template = '{$input['template']}'
+                                  template = '{$input['template']}', redirect_page = '{$input['redirect_page']}',
+                                  survey_text_mode = {$input['survey_text_mode']}, user_text_mode = {$input['user_text_mode']},
+                                  date_format = '{$input['date_format']}', time_limit = {$input['time_limit']}
                                   WHERE sid = $sid";
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
@@ -2189,7 +2413,7 @@ class Survey
 
                         $query = "SELECT COUNT(*) AS c FROM {$this->CONF['db_tbl_prefix']}dependencies d, {$this->CONF['db_tbl_prefix']}questions q1,
                                   {$this->CONF['db_tbl_prefix']}questions q2 WHERE q1.page = $prev_page AND d.dep_qid = q1.qid AND q2.page = $page
-                                  AND d.qid = q2.qid";
+                                  AND d.qid = q2.qid AND d.sid = $sid";
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
                         { $this->error('Error getting dependant count: ' . $this->db->ErrorMsg()); return; }
@@ -2228,7 +2452,7 @@ class Survey
                         /////////////////////
                         if(isset($_REQUEST['del_qid']))
                         {
-                            $tables = array("questions","results","results_text","dependencies");
+                            $tables = array('questions','results','results_text','dependencies');
                             $error='';
                             foreach($tables as $tbl)
                             {
@@ -2255,7 +2479,7 @@ class Survey
                     // EDIT QUESTION //
                     ///////////////////
                     //Validate data from user
-                    $question = $this->safe_string($_REQUEST['question']);
+                    $question = $this->safe_string($_REQUEST['question'],SAFE_STRING_DB);
                     if(strlen($question) == 0)
                     { $error = "Question cannot be empty"; }
                     else
@@ -2267,7 +2491,7 @@ class Survey
                         $num_required = (int)$_REQUEST['num_required'];
 
                         if(in_array($_REQUEST['orientation'],$this->CONF['orientation']))
-                        { $orientation = $_REQUEST['orientation']; }
+                        { $orientation = $this->safe_string($_REQUEST['orientation'],SAFE_STRING_DB); }
                         else
                         { $orientation = 'Vertical'; }
 
@@ -2310,7 +2534,7 @@ class Survey
                             foreach($_REQUEST['option'] as $num=>$option)
                             {
                                 if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_REQUEST['dep_aid'][$num])
-                                   && ($option == 'Hide' || $option == 'Require'))
+                                   && in_array($option,$this->CONF['dependency_modes']))
                                 {
                                     $dep_qid = (int)$_REQUEST['dep_qid'][$num];
 
@@ -2325,19 +2549,23 @@ class Survey
                                     while($r = $rs->FetchRow($rs))
                                     {
                                         if($r['dep_page'] > $r['page'] || ($r['dep_page'] == $r['page'] && $r['dep_oid'] > $r['oid']))
-                                        { $error = "Error: Dependencies can only be based on questions displayed BEFORE the question being added"; }
+                                        { $error = 'Error: Dependencies can only be based on questions displayed BEFORE the question being added'; }
                                         elseif($r['page'] == $r['dep_page'])
                                         { $dep_require_pagebreak = 1; }
                                     }
 
                                     foreach($_REQUEST['dep_aid'][$num] as $dep_aid)
-                                    { $dep_insert .= "($sid,$qid,$dep_qid,$dep_aid,'$option'), "; }
+                                    {
+                                        $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
+                                        $dep_insert .= "($dep_id,$sid,$qid,$dep_qid," . (int)$dep_aid . ",'$option'), ";
+                                    }
                                 }
                             }
 
-                            if(!empty($dep_insert))
+                            if(empty($error) && !empty($dep_insert))
                             {
-                                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (sid, qid, dep_qid, dep_aid, dep_option) VALUES " . substr($dep_insert,0,-2);
+                                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id, sid, qid, dep_qid, dep_aid, dep_option)
+                                          VALUES " . substr($dep_insert,0,-2);
                                 $rs = $this->db->Execute($query);
                                 if($rs === FALSE)
                                 { $this->error('Error inserting dependencies: ' . $this->db->ErrorMsg()); return; }
@@ -2376,8 +2604,8 @@ class Survey
                         //the question being moved up.
                         $query = "SELECT qid, page, oid FROM {$this->CONF['db_tbl_prefix']}questions WHERE sid = $sid AND
                                   ((page = {$row['page']} AND oid < {$row['oid']}) OR page < {$row['page']}) AND page > 0
-                                  ORDER BY page DESC, oid DESC LIMIT 1";
-                        $rs2 = $this->db->Execute($query);
+                                  ORDER BY page DESC, oid DESC";
+                        $rs2 = $this->db->SelectLimit($query,1);
                         if($rs2 === FALSE)
                         { $this->error("Error retrieving swap data to move question up: " . $this->db->ErrorMsg()); return; }
                         elseif($row2 = $rs2->FetchRow($rs2))
@@ -2443,8 +2671,8 @@ class Survey
                     {
                         $query = "SELECT qid, page, oid FROM {$this->CONF['db_tbl_prefix']}questions WHERE sid = $sid AND
                                   ((page = {$row['page']} AND oid > {$row['oid']}) OR page > {$row['page']})
-                                  ORDER BY page ASC, oid ASC LIMIT 1";
-                        $rs2 = $this->db->Execute($query);
+                                  ORDER BY page ASC, oid ASC";
+                        $rs2 = $this->db->SelectLimit($query,1);
                         if($rs2 === FALSE)
                         { $this->error("Error retrieving swap data to move question down: " . $this->db->ErrorMsg()); return; }
                         elseif($row2 = $rs2->FetchRow($rs2))
@@ -2502,13 +2730,13 @@ class Survey
                     else
                     {
                         $x = explode('-',$_REQUEST['insert_after']);
-                        $page = $x[0];
-                        $oid = $x[1];
+                        $page = (int)$x[0];
+                        $oid = (int)$x[1];
 
                         if(strcasecmp($_REQUEST['question'],$this->CONF['page_break'])==0)
                         {
                             if($page == 0 && $oid == 0)
-                            { $error = "Cannot insert PAGE BREAK as first question."; }
+                            { $error = "Cannot insert PAGE BREAK as first question. Please use the drop down to select what question to insert the page break after."; }
                             else
                             {
                                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
@@ -2537,7 +2765,7 @@ class Survey
                             //Increment oid, since new question is
                             //inserted "after" what was chosen
                             $oid++;
-                            $question = $this->safe_string($_REQUEST['question']);
+                            $question = $this->safe_string($_REQUEST['question'],SAFE_STRING_DB);
                             $num_answers = (int)$_REQUEST['num_answers'];
                             $num_required = (int)$_REQUEST['num_required'];
                             $aid = (int)$_REQUEST['answer'];
@@ -2546,10 +2774,11 @@ class Survey
                             { $error = 'Number of required answers cannot exceed the number of answers'; }
 
                             if(in_array($_REQUEST['orientation'],$this->CONF['orientation']))
-                            { $orientation = $_REQUEST['orientation']; }
+                            { $orientation = $this->safe_string($_REQUEST['orientation'],SAFE_STRING_DB); }
                             else
                             { $orientation = 'Vertical'; }
-                            $_SESSION['answer_orientation'] = $orientation;
+
+                            $_SESSION['answer_orientation'] = $_REQUEST['orientation'];
 
                             if(!isset($error) || empty($error))
                             {
@@ -2562,7 +2791,7 @@ class Survey
                                     foreach($_REQUEST['option'] as $num=>$option)
                                     {
                                         if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_REQUEST['dep_aid'][$num])
-                                           && ($option == 'Hide' || $option == 'Require'))
+                                           && in_array($option,$this->CONF['dependency_modes']))
                                         {
                                             $dep_qid = (int)$_REQUEST['dep_qid'][$num];
 
@@ -2581,15 +2810,19 @@ class Survey
                                             }
 
                                             foreach($_REQUEST['dep_aid'][$num] as $dep_aid)
-                                            { $dep_insert .= "($sid,%%,$dep_qid,$dep_aid,'$option'), "; }
+                                            {
+                                                $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
+                                                $dep_insert .= "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",'$option'), ";
+                                            }
                                         }
                                     }
                                 }
 
                                 if(!isset($error) || empty($error))
                                 {
-                                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}questions (sid, question, aid, num_answers, num_required, page, oid, orientation)
-                                              VALUES ($sid, '$question', $aid, $num_answers, $num_required, $page, $oid, '$orientation')";
+                                    $qid = $this->db->GenID($this->CONF['db_tbl_prefix'].'questions_sequence');
+                                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}questions (qid, sid, question, aid, num_answers, num_required, page, oid, orientation)
+                                              VALUES ($qid, $sid, '$question', $aid, $num_answers, $num_required, $page, $oid, '$orientation')";
                                     $rs = $this->db->Execute($query);
                                     if($rs === FALSE)
                                     { $this->error("Error inserting new question: " . $this->db->ErrorMsg()); return; }
@@ -2597,8 +2830,7 @@ class Survey
                                     {
                                         if(!empty($dep_insert))
                                         {
-                                            $qid = $this->db->Insert_ID();
-                                            $dep_query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (sid,qid,dep_qid,dep_aid,dep_option) VALUES " . substr($dep_insert,0,-2);
+                                            $dep_query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id,sid,qid,dep_qid,dep_aid,dep_option) VALUES " . substr($dep_insert,0,-2);
                                             $dep_query = str_replace('%%',$qid,$dep_query);
 
                                             $rs = $this->db->Execute($dep_query);
@@ -2631,7 +2863,8 @@ class Survey
         }
 
         //load survey
-        if(!isset($_REQUEST['mode'])) { $_REQUEST['mode'] = 'properties'; }
+        if(!isset($_REQUEST['mode']))
+        { $_REQUEST['mode'] = 'properties'; }
 
         switch($_REQUEST['mode'])
         {
@@ -2645,20 +2878,25 @@ class Survey
                 $property['sid'] = $sid;
 
                 //load all questions for this survey
-                $query = "SELECT q.qid, q.aid, q.question, q.page, a.type, q.oid FROM {$this->CONF['db_tbl_prefix']}questions q,
-                          {$this->CONF['db_tbl_prefix']}answer_types a
-                          WHERE q.aid = a.aid and q.sid = $sid order by q.page, q.oid, a.aid";
+                $query = "SELECT q.qid, q.aid, q.question, q.page, a.type, q.oid, s.survey_text_mode
+                          FROM {$this->CONF['db_tbl_prefix']}questions q,
+                          {$this->CONF['db_tbl_prefix']}answer_types a, {$this->CONF['db_tbl_prefix']}surveys s
+                          WHERE q.aid = a.aid and q.sid = $sid AND q.sid = s.sid order by q.page, q.oid, a.aid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); return; }
                 $page = 1;
                 $x = 0;
                 $q_num = 1;
+                $label_num = 1;
                 $num_demographics = 0;
+                $answer = array();
                 $show['dep'] = TRUE;
 
                 if($r = $rs->FetchRow($rs))
                 {
+                    $survey_text_mode = $r['survey_text_mode'];
+
                     do
                     {
                         while($page != $r['page'])
@@ -2672,11 +2910,13 @@ class Survey
                             $page += 1;
                         }
                         $property['qid'][$x] = $r['qid'];
-                        $property['question'][$x] = nl2br($r['question']);
+                        $property['question'][$x] = nl2br($this->safe_string($r['question'],$survey_text_mode));
 
                         if($r['type'] == 'MS' || $r['type'] == 'MM')
                         {
-                            $temp = $this->get_answer_values($r['aid']);
+                            //Retrieve answer value in safe_text mode
+                            //so they can be shown in <select>
+                            $temp = $this->get_answer_values($r['aid'],BY_AID,SAFE_STRING_TEXT);
                             $property['dep_avid'][$r['qid']] = $temp['avid'];
                             $property['dep_value'][$r['qid']] = $temp['value'];
                         }
@@ -2696,7 +2936,12 @@ class Survey
 
                         }
                         else
-                        { $property['qnum'][$x] = '&nbsp;'; }
+                        {
+                            $property['qnum'][$x] = 'L'.$label_num++;
+                            $property['page_oid'][] = $r['page'] . '-' . $r['oid'];
+                            $property['qnum2'][] = $property['qnum'][$x];
+                            $property['qnum2_selected'][] = '';
+                        }
 
                         $property['show_edep'][$x] = FALSE;
 
@@ -2723,18 +2968,18 @@ class Survey
                             $key2 = array_search($qnum,$property['edep_qnum'][$x]);
 
                             if($property['edep_option'][$x][$key2] == $r['dep_option'])
-                            { $property['edep_value'][$x][$key2] .= ', ' . $r['value']; }
+                            { $property['edep_value'][$x][$key2] .= ', ' . $this->safe_string($r['value'],$survey_text_mode); }
                             else
                             {
-                                $property['edep_option'][$x][] = $r['dep_option'];
-                                $property['edep_value'][$x][] = $r['value'];
+                                $property['edep_option'][$x][] = $this->safe_string($r['dep_option'],$survey_text_mode);
+                                $property['edep_value'][$x][] = $this->safe_string($r['value'],$survey_text_mode);
                                 $property['edep_qnum'][$x][] = $qnum;
                             }
                         }
                         else
                         {
-                            $property['edep_option'][$x][] = $r['dep_option'];
-                            $property['edep_value'][$x][] = $r['value'];
+                            $property['edep_option'][$x][] = $this->safe_string($r['dep_option'],$survey_text_mode);
+                            $property['edep_value'][$x][] = $this->safe_string($r['value'],$survey_text_mode);
                             $property['edep_qnum'][$x][] = $qnum;
                         }
                     }
@@ -2781,7 +3026,10 @@ class Survey
                 if($rs === FALSE)
                 { $this->error('Unable to retrieve answer types: ' . $this->db->ErrorMsg()); return; }
                 while ($r = $rs->FetchRow($rs))
-                { $answer[] = $r; }
+                {
+                    $r['name'] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
+                    $answer[] = $r;
+                }
 
                 if(isset($_SESSION['answer_orientation']))
                 {
@@ -2798,6 +3046,9 @@ class Survey
                 $this->smarty->assign('property',$property);
             break;
 
+            ///////////////////
+            // EDIT QUESTION //
+            ///////////////////
             case "edit_question":
                 $mode = "edit_question";
                 $content = 'edit_question';
@@ -2805,17 +3056,19 @@ class Survey
                 $qid = (int)$_REQUEST['qid'];
 
                 //Retrieve Question data
-                $query = "SELECT question, aid, num_answers, num_required, page, oid, orientation
-                          FROM {$this->CONF['db_tbl_prefix']}questions
-                          WHERE sid = $sid and qid = $qid";
+                $query = "SELECT q.question, q.aid, q.num_answers, q.num_required, q.page, q.oid, q.orientation, s.survey_text_mode
+                          FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}surveys s
+                          WHERE q.sid = $sid AND q.sid = s.sid AND qid = $qid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->Error("Error selecting data for question: ". $this->db->ErrorMsg()); return; }
 
                 $question_data = $rs->FetchRow($rs);
+                $question_data['question'] = $this->safe_string($question_data['question'],SAFE_STRING_TEXT);
 
                 $key = array_search($question_data['orientation'],$this->CONF['orientation']);
-                $data['orientation']['selected'][$key] = ' selected';
+                if($key !== FALSE)
+                { $data['orientation']['selected'][$key] = ' selected'; }
 
                 $num_answers = array("1","2","3","4","5");
                 $num_answers_selected = array_fill(0,5,"");
@@ -2831,6 +3084,7 @@ class Survey
                 {
                     if($r['aid'] == $question_data['aid'])
                     { $r['selected'] = ' selected'; }
+                    $r['name'] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
                     $answer[] = $r;
                 }
 
@@ -2889,13 +3143,16 @@ class Survey
                 $dependencies = array();
                 $query = "SELECT d.dep_id, d.dep_qid, d.dep_option, av.value FROM {$this->CONF['db_tbl_prefix']}dependencies d,
                           {$this->CONF['db_tbl_prefix']}answer_values av WHERE d.dep_aid = av.avid AND d.qid = $qid";
-                $result = mysql_query($query) or die('Unable to retrieve existing dependencies: ' . mysql_error());
-                while($r = mysql_fetch_assoc($result))
+                $rs = $this->db->Execute($query);
+                if($rs === FALSE)
+                { $this->error('Unable to retrieve existing dependencies: ' . $this->db->ErrorMsg()); return; }
+
+                while($r = $rs->FetchRow($rs))
                 {
                     $data['edep']['dep_id'][] = $r['dep_id'];
                     $data['edep']['option'][] = $r['dep_option'];
                     $data['edep']['qnum'][] = $data['qnum'][$r['dep_qid']];
-                    $data['edep']['value'][] = $r['value'];
+                    $data['edep']['value'][] = $this->safe_string($r['value'],$question_data['survey_text_mode']);
                 }
 
                 if(!empty($data))
@@ -2911,16 +3168,24 @@ class Survey
                 $this->smarty->assign('property',array('sid'=>$sid));
             break;
 
+            ////////////
+            // DELETE //
+            ////////////
             case "delete":
                 //Don't show anything if survey was deleted
                 //other than notice message.
             break;
 
+            ////////////////
+            // PROPERTIES //
+            ////////////////
             default: //properties
                 $mode = 'properties';
 
                 //load survey properties
-                $query = "SELECT * FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $sid";
+                $query = "SELECT sid, name, start_date, end_date, active, survey_access, survey_password, results_access,
+                          results_password, edit_password, template, redirect_page, survey_text_mode, user_text_mode, created, date_format, time_limit FROM
+                          {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $sid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->error("Error loading Survey #$sid" . $this->db->ErrorMsg()); return;}
@@ -2931,36 +3196,71 @@ class Survey
                 {
                     $content = 'properties';
 
-                    $r['survey_password'] = $this->safe_string($r['survey_password']);
-                    $r['edit_password'] = $this->safe_string($r['edit_password']);
-                    $r['results_password'] = $this->safe_string($r['results_password']);
+                    $r['name'] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
+
+                    $r['survey_password'] = $this->safe_string($r['survey_password'],SAFE_STRING_TEXT);
+                    $r['edit_password'] = $this->safe_string($r['edit_password'],SAFE_STRING_TEXT);
+                    $r['results_password'] = $this->safe_string($r['results_password'],SAFE_STRING_TEXT);
+                    $r['date_format'] = $this->safe_string($r['date_format'],SAFE_STRING_TEXT);
+                    $r['created'] = $this->safe_string(date($this->CONF['date_format'],$r['created']),SAFE_STRING_TEXT);
+                    $r['time_limit'] = $this->safe_string($r['time_limit'],SAFE_STRING_TEXT);
 
                     if($r['active'] == 1)
-                    { $r['active_selected'] = " CHECKED"; }
+                    { $r['active_selected'] = " checked"; }
                     else
-                    { $r['inactive_selected'] = " CHECKED"; }
+                    { $r['inactive_selected'] = " checked"; }
 
-                    if($r['start'] == 0)
-                    { $r['start'] = ''; }
+                    if($r['start_date'] == 0)
+                    { $r['start_date'] = ''; }
                     else
-                    { $r['start'] = strtoupper(date('dMy',$r['start'])); }
+                    { $r['start_date'] = strtoupper(date('Y-m-d',$r['start_date'])); }
 
-                    if($r['end'] == 0)
-                    { $r['end'] = ''; }
+                    if($r['end_date'] == 0)
+                    { $r['end_date'] = ''; }
                     else
-                    { $r['end'] = strtoupper(date('dMy',$r['end'])); }
+                    { $r['end_date'] = strtoupper(date('Y-m-d',$r['end_date'])); }
 
                     $t1 = "survey_" . $r['survey_access'];
-                    $r[$t1] = " CHECKED";
+                    $r[$t1] = " checked";
                     $t2 = "results_" . $r['results_access'];
-                    $r[$t2] = " CHECKED";
+                    $r[$t2] = " checked";
+
+                    switch($r['redirect_page'])
+                    {
+                        case 'index':
+                        case '':
+                            $r['redirect_index'] = ' checked';
+                        break;
+                        case 'results':
+                            $r['redirect_results'] = ' checked';
+                        break;
+                        default:
+                            $r['redirect_custom'] = ' checked';
+                            $r['redirect_page_text'] = $this->safe_string($r['redirect_page'],SAFE_STRING_TEXT);
+                        break;
+                    }
+
+                    //Set arrays for holding text mode values, options, and selected element to
+                    //create drop down boxes
+                    $survey_text_mode = array_slice($this->CONF['text_modes'],0,$this->CONF['survey_text_mode']+1);
+                    $r['survey_text_mode_values'] = array_values($survey_text_mode);
+                    $r['survey_text_mode_options'] = array_keys($survey_text_mode);
+                    $r['survey_text_mode_selected'][$r['survey_text_mode']] = ' selected';
+
+                    $user_text_mode = array_slice($this->CONF['text_modes'],0,$this->CONF['user_text_mode']+1);
+                    $r['user_text_mode_values'] = array_values($user_text_mode);
+                    $r['user_text_mode_options'] = array_keys($user_text_mode);
+                    $r['user_text_mode_selected'][$r['user_text_mode']] = ' selected';
+
+                    if(in_array(2,$r['survey_text_mode_options']) || in_array(2,$r['user_text_mode_options']))
+                    { $show['fullhtmlwarning'] = TRUE; }
 
                     $dh = opendir($this->CONF['path'] . '/templates');
                     while($file = readdir($dh))
                     {
                         if($file != '.' && $file != '..')
                         {
-                            $r['templates'][] = $file;
+                            $r['templates'][] = $this->safe_string($file,SAFE_STRING_TEXT);
                             if($r['template'] == $file)
                             { $r['selected_template'][] = ' selected'; }
                             else
@@ -2977,7 +3277,7 @@ class Survey
             break;
         }
 
-        $show['links'] = ($show['links']) ? $this->smarty->Fetch('edit_survey_links.tpl') : '';
+        $show['links'] = ($show['links']) ? $this->smarty->Fetch($this->template.'/edit_survey_links.tpl') : '';
 
         if(isset($notice))
         { $show['notice'] = $notice; }
@@ -2990,25 +3290,24 @@ class Survey
         $this->smarty->assign_by_ref('show',$show);
 
         if(isset($content))
-        { $show['content'] = $this->smarty->Fetch('edit_survey_' . $content . '.tpl'); }
+        { $show['content'] = $this->smarty->Fetch($this->template.'/edit_survey_' . $content . '.tpl'); }
 
-        $retval = $this->smarty->Fetch('edit_survey.tpl');
+        $retval = $this->smarty->Fetch($this->template.'/edit_survey.tpl');
         return $retval;
     }
 
     /*******************
     * EDIT ANSWER TYPE *
     *******************/
-    function edit_answer()
+    function edit_answer($sid,$aid)
     {
-        if(!$this->check_login($_REQUEST['sid']))
+        if(!$this->check_login($sid))
         { return(FALSE); }
 
-        $sid = (int)$_REQUEST['sid'];
+        $sid = (int)$sid;
+        $aid = (int)$aid;
 
-        if(isset($_REQUEST['aid']))
-        { $aid = (int)$_REQUEST['aid']; }
-        else
+        if(empty($aid))
         { return $this->edit_answer_type_choose($sid); }
 
         $error = '';
@@ -3082,11 +3381,11 @@ class Survey
             $load_answer = FALSE;
 
             if(strlen($_REQUEST['name']) > 0)
-            { $input['name'] = $this->safe_string($_REQUEST['name']); }
+            { $input['name'] = $this->safe_string($_REQUEST['name'],SAFE_STRING_DB); }
             else
             { $error .= "Please enter a name. "; }
 
-            $input['label'] = $this->safe_string($_REQUEST['label']);
+            $input['label'] = $this->safe_string($_REQUEST['label'],SAFE_STRING_DB);
 
             $input['aid'] = (int)$_REQUEST['aid'];
 
@@ -3142,15 +3441,15 @@ class Survey
                                 else
                                 { $input['avid'][] = $avid; }
 
-                                $input['value'][] = $this->safe_string($value);
+                                $input['value'][] = $this->safe_string($value,SAFE_STRING_DB);
 
-                                $user_image = $this->safe_string($_REQUEST['image'][$avid]);
+                                $user_image = $_REQUEST['image'][$avid];
                                 $image_key = array_search($user_image,$input['allowable_images']);
                                 if($image_key === FALSE)
                                 { $input['image'][] = ''; }
                                 else
                                 {
-                                    $input['image'][] = $user_image;
+                                    $input['image'][] = $this->safe_string($user_image,SAFE_STRING_DB);
                                     $input['image_selected'][] = array($image_key => ' selected');
                                 }
 
@@ -3258,7 +3557,10 @@ class Survey
                                 if(isset($input['value'][$x]))
                                 {
                                     if(substr($input['avid'][$x],0,1) == 'x')
-                                    { $insert[] = "($aid,'{$input['value'][$x]}',{$input['group_id'][$x]},'{$input['image'][$x]}')"; }
+                                    {
+                                        $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
+                                        $insert[] = "($avid, $aid,'{$input['value'][$x]}',{$input['group_id'][$x]},'{$input['image'][$x]}')";
+                                    }
                                     else
                                     {
                                         $sql_value .= "WHEN avid = {$input['avid'][$x]} THEN '{$input['value'][$x]}' ";
@@ -3276,7 +3578,7 @@ class Survey
                             }
 
                             if(count($insert))
-                            { $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (aid,value,group_id,image) VALUES " . implode(',',$insert); }
+                            { $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,group_id,image) VALUES " . implode(',',$insert); }
 
 
                             if(count($input['delete_avid']))
@@ -3309,6 +3611,8 @@ class Survey
             {
                 $answer = array();
                 $answer = $r;
+                $answer['name'] = $this->safe_string($answer['name'],SAFE_STRING_TEXT);
+                $answer['label'] = $this->safe_string($answer['label'],SAFE_STRING_TEXT);
                 $answer['selected'][$r['type']] = ' selected';
                 $answer['allowable_images'] = $input['allowable_images'];
 
@@ -3320,7 +3624,7 @@ class Survey
                 {
                     do{
                         $answer['avid'][] = $r['avid'];
-                        $answer['value'][] = $r['value'];
+                        $answer['value'][] = $this->safe_string($r['value'],SAFE_STRING_TEXT);
                         $answer['group_id'][] = $r['group_id'];
                         $key = array_search($r['image'],$answer['allowable_images']);
                         $answer['image_selected'][] = array($key => ' selected');
@@ -3344,18 +3648,25 @@ class Survey
             else
             { $error = "Invalid answer type"; }
         }
+        else
+        {
+            $input['name'] = $this->safe_string($input['name'],SAFE_STRING_TEXT,1);
+            $input['label'] = $this->safe_string($input['label'],SAFE_STRING_TEXT,1);
+            foreach($input['value'] as $key=>$value)
+            { $input['value'][$key] = $this->safe_string($value,SAFE_STRING_TEXT,1); }
+        }
 
         if(isset($error))
         { $show['error'] = $error; }
 
         $this->smarty->assign('property',array('sid'=>$input['sid']));
-        $show['links'] = $this->smarty->Fetch('edit_survey_links.tpl');
+        $show['links'] = $this->smarty->Fetch($this->template.'/edit_survey_links.tpl');
 
         $this->smarty->assign_by_ref('show',$show);
 
-        $show['content'] = $this->smarty->Fetch('edit_survey_edit_answer_type.tpl');
+        $show['content'] = $this->smarty->Fetch($this->template.'/edit_survey_edit_at.tpl');
 
-        $retval = $this->smarty->Fetch('edit_survey.tpl');
+        $retval = $this->smarty->Fetch($this->template.'/edit_survey.tpl');
 
         return $retval;
     }
@@ -3375,18 +3686,18 @@ class Survey
         while($r = $rs->FetchRow())
         {
             $answer['aid'][] = $r['aid'];
-            $answer['name'][] = $r['name'];
+            $answer['name'][] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
         }
         $this->smarty->assign('answer',$answer);
 
         $this->smarty->assign('property',array('sid'=>$sid));
-        $show['links'] = $this->smarty->Fetch('edit_survey_links.tpl');
+        $show['links'] = $this->smarty->Fetch($this->template.'/edit_survey_links.tpl');
 
-        $show['content'] = $this->smarty->Fetch('edit_survey_edit_answer_type_choose.tpl');
+        $show['content'] = $this->smarty->Fetch($this->template.'/edit_survey_edit_atc.tpl');
 
         $this->smarty->assign_by_ref('show',$show);
 
-        $retval = $this->smarty->Fetch('edit_survey.tpl');
+        $retval = $this->smarty->Fetch($this->template.'/edit_survey.tpl');
 
         return $retval;
     }
@@ -3401,10 +3712,37 @@ class Survey
         if(is_object($this->smarty))
         {
             $this->smarty->assign("error",$msg);
-            echo $this->smarty->fetch('error.tpl');
+            echo $this->smarty->fetch($this->template.'/error.tpl');
         }
         else
         { echo "Error: $msg"; exit(); }
+    }
+
+    /**************
+    * SET MESSAGE *
+    **************/
+    function setmessage($title,$text)
+    {
+        if(!empty($title) && !empty($text))
+        {
+            $_SESSION['message']['title'] = $title;
+            $_SESSION['message']['text'] = $text;
+        }
+    }
+
+    /***************
+    * SHOW MESSAGE *
+    ***************/
+    function showmessage()
+    {
+        $retval = '';
+        if(!empty($_SESSION['message']['title']) && !empty($_SESSION['message']['text']))
+        {
+            $this->smarty->assign_by_ref('message',$_SESSION['message']);
+            $retval = $this->smarty->fetch($this->template.'/message.tpl');
+            unset($_SESSION['message']);
+        }
+        return $retval;
     }
 
     /*************
@@ -3417,7 +3755,7 @@ class Survey
             if($_REQUEST['admin_password'] == $this->CONF['admin_password'])
             {
                 $_SESSION['admin_logged_in'] = 1;
-                header("Location: {$this->CONF['current_page']}");
+                header("Location: {$this->CONF['html']}/admin.php");
                 exit();
             }
             else
@@ -3425,7 +3763,7 @@ class Survey
         }
 
         if(!isset($_SESSION['admin_logged_in']))
-        { $retval = $this->smarty->Fetch('admin_login.tpl'); }
+        { $retval = $this->smarty->Fetch($this->template.'/admin_login.tpl'); }
         else
         {
             $survey = array();
@@ -3437,7 +3775,7 @@ class Survey
             while($r = $rs->FetchRow())
             {
                 $survey['sid'][] = $r['sid'];
-                $survey['name'][] = $r['name'];
+                $survey['name'][] = $this->safe_string($r['name'],SAFE_STRING_TEXT);
             }
 
             $this->smarty->assign('survey',$survey);
@@ -3453,7 +3791,7 @@ class Survey
             if(isset($priv_results))
             { $this->smarty->assign_by_ref('priv_results',$priv_results); }
 
-            $retval = $this->smarty->Fetch('admin.tpl');
+            $retval = $this->smarty->Fetch($this->template.'/admin.tpl');
         }
 
         return $retval;
@@ -3480,15 +3818,87 @@ class Survey
     **************/
     //Converts all special characters, including single
     //and double quotes, to HTML entities. Returned string
-    //is safe to insert into databases as it will
-    //not contain any quotes.
-    function safe_string($str)
+    //is safe to insert into databases or display to user
+    function safe_string($str,$mode=SAFE_STRING_TEXT,$unescape=0)
     {
-        if(get_magic_quotes_gpc())
-        { $str = stripslashes($str); }
-        $str = htmlentities($str,ENT_QUOTES);
+        if(is_array($str))
+        {
+            foreach($str as $key => $value)
+            { $str[$key] = $this->safe_string($value,$mode,$unescape); }
+        }
+        else
+        {
+            $magic_quotes = get_magic_quotes_gpc();
+
+            if($unescape && $magic_quotes)
+            { $str = stripslashes($str); }
+
+            switch($mode)
+            {
+                case SAFE_STRING_DB:
+                    if(!$magic_quotes)
+                    { $str = addslashes($str); }
+                break;
+
+                case SAFE_STRING_ESC:
+                    $str = addslashes($str);
+                break;
+
+                case SAFE_STRING_LIMHTML:
+                    $str = str_replace(array('{$images_html}','{$html}'),array($this->CONF['images_html'],$this->CONF['html']),$str);
+                    $str = htmlentities($str,ENT_QUOTES);
+                    $str = preg_replace('#&lt;b&gt;(.*?)&lt;/b&gt;#i','<b>\1</b>',$str);
+                    $str = preg_replace('#&lt;i&gt;(.*?)&lt;/i&gt;#i','<i>\1</i>',$str);
+                    $str = preg_replace('#&lt;u&gt;(.*?)&lt;/u&gt;#i','<u>\1</u>',$str);
+                    $str = preg_replace_callback('#&lt;(div)(.*?)&gt;(.*?)&lt;/div&gt;#i',array(&$this,'safe_string_callback'),$str);
+                    $str = preg_replace_callback('#&lt;(span)(.*?)&gt;(.*?)&lt;/span&gt;#i',array(&$this,'safe_string_callback'),$str);
+                    $str = preg_replace_callback('#&lt;(a)(.*?)&gt;(.*?)&lt;/a&gt;#i',array(&$this,'safe_string_callback'),$str);
+                    $str = preg_replace_callback('#&lt;(img)(.*?)&gt;#i',array(&$this,'safe_string_callback'),$str);
+                break;
+
+                case SAFE_STRING_FULLHTML:
+                    $str = str_replace(array('{$images_html}','{$html}'),array($this->CONF['images_html'],$this->CONF['html']),$str);
+                break;
+
+                case SAFE_STRING_TEXT:
+                default:
+                    $str = htmlentities($str,ENT_QUOTES);
+                break;
+            }
+        }
 
         return $str;
+    }
+
+    //Function to validate/sanitize limited HTML strings
+    function safe_string_callback($matches)
+    {
+        $attrib = array('div' => 'class,style,id',
+                   'span' => 'class,style,id',
+                   'img' => 'border,id,class,style,src,height,width,alt',
+                   'a' => 'id,class,style,href,target');
+
+        //print_r($matches);
+        if(isset($matches[2]) && !empty($matches[2]))
+        {
+            $allowed_attrib = str_replace(array(',',' '),array('|',''),$attrib[$matches[1]]);
+            $matches[2] = str_replace('=','&#61;',$matches[2]);
+            $pattern = "/({$allowed_attrib})&#61;(&quot;|&#039;)(.*)(&quot;|&#039;)/iU";
+            $matches[2] = preg_replace($pattern,'\1="\3"',$matches[2]);
+        }
+
+        switch($matches[1])
+        {
+            case 'img':
+                $retval = "<{$matches[1]}{$matches[2]}>";
+            break;
+
+            default:
+                $retval = "<{$matches[1]}{$matches[2]}>{$matches[3]}</{$matches[1]}>";
+            break;
+        }
+
+        return $retval;
     }
 
     /**************
@@ -3535,6 +3945,14 @@ class Survey
         }
 
         return(TRUE);
+    }
+
+    function check_access($sid)
+    {
+        if(isset($_SESSION['admin_logged_in']) || isset($_SESSION['edit_survey'][$sid]))
+        { return TRUE; }
+        else
+        { return FALSE; }
     }
 }
 

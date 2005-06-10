@@ -1,6 +1,6 @@
 <?php
 /**
- * @version V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+ * @version V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
  * Released under both BSD license and Lesser GPL library license.
  * Whenever there is any discrepancy between the two licenses,
  * the BSD license will take precedence.
@@ -24,7 +24,8 @@ define('ADODB_ERROR_HANDLER','ADODB_Error_Handler');
 * @param $errno		the native error number from the database
 * @param $errmsg	the native error msg from the database
 * @param $p1		$fn specific parameter - see below
-* @param $P2		$fn specific parameter - see below
+* @param $p2		$fn specific parameter - see below
+* @param $thisConn	$current connection object - can be false if no connection object created
 */
 function ADODB_Error_Handler($dbms, $fn, $errno, $errmsg, $p1, $p2, &$thisConnection)
 {

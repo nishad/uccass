@@ -1,7 +1,7 @@
 <?php
   
 /*
-V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
   Released under both BSD license and Lesser GPL library license. 
   Whenever there is any discrepancy between the two licenses, 
   the BSD license will take precedence.
@@ -142,7 +142,7 @@ if (!empty($testmysql)) { // MYSQL
 
 	$db = &ADONewConnection('mysql');
 	print "<h1>Connecting $db->databaseType...</h1>";
-	if ($HTTP_SERVER_VARS['HTTP_HOST'] == 'localhost') $server = 'localhost';
+	if (PHP_VERSION >= 5 || $HTTP_SERVER_VARS['HTTP_HOST'] == 'localhost') $server = 'localhost';
 	else $server = "mangrove";
 	if ($db->PConnect($server, "root", "", "northwind")) {
 		//$db->debug=1;$db->Execute('drop table ADOXYZ');
@@ -212,8 +212,7 @@ if (!empty($testdb2)) {
 }
 
 
-
-ADOLoadCode("odbc_mssql");
+ADOLoadCode('odbc_mssql');
 if (!empty($testmssql)) { // MS SQL Server via ODBC
 	$db = ADONewConnection();
 	
@@ -250,7 +249,7 @@ if (!empty($testmssql) && !empty($testado) ) { // ADO ACCESS MSSQL -- thru ODBC 
 
 ADOLoadCode("mssqlpo");
 if (!empty($testmssql)) { // MS SQL Server -- the extension is buggy -- probably better to use ODBC
-	$db = ADONewConnection();
+	$db = ADONewConnection("mssqlpo");
 	//$db->debug=1;
 	print "<h1>Connecting $db->databaseType...</h1>";
 	

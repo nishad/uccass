@@ -46,6 +46,7 @@
           <li>S: Sentence (255 characters max)</li>
           <li>MM: Multiple Choice (more than one answer allowed)</li>
           <li>MS: Multiple Choice (only one answer allowed)</li>
+          <li>N: No answer (label)</li>
         </ul>
       </td>
     </tr>

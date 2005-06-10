@@ -1,4 +1,4 @@
-<form method="GET" action="{$conf.current_page}">
+<form method="GET" action="new_survey.php">
 
 <table width="70%" align="center" cellpadding="0" cellspacing="0">
   <tr class="grayboxheader">

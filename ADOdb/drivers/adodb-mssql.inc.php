@@ -1,6 +1,6 @@
 <?php
 /* 
-V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
   Released under both BSD license and Lesser GPL library license. 
   Whenever there is any discrepancy between the two licenses, 
   the BSD license will take precedence. 
@@ -75,6 +75,7 @@ class ADODB_mssql extends ADOConnection {
 	var $fmtTimeStamp = "'Y-m-d h:i:sA'";
 	var $hasInsertID = true;
 	var $substr = "substring";
+	var $length = 'len';
 	var $upperCase = 'upper';
 	var $hasAffectedRows = true;
 	var $metaDatabasesSQL = "select name from sysdatabases where name <> 'master'";
@@ -99,6 +100,7 @@ class ADODB_mssql extends ADOConnection {
 	var $identitySQL = 'select @@IDENTITY'; // 'select SCOPE_IDENTITY'; # for mssql 2000
 	var $uniqueOrderBy = true;
 	var $_bindInputArray = true;
+	
 	
 	function ADODB_mssql() 
 	{		
@@ -433,6 +435,7 @@ order by constraint_name, referenced_table_name, keyno";
 	// returns true or false
 	function _connect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
+		if (!function_exists('mssql_pconnect')) return false;
 		$this->_connectionID = mssql_connect($argHostname,$argUsername,$argPassword);
 		if ($this->_connectionID === false) return false;
 		if ($argDatabasename) return $this->SelectDB($argDatabasename);
@@ -443,6 +446,7 @@ order by constraint_name, referenced_table_name, keyno";
 	// returns true or false
 	function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
+		if (!function_exists('mssql_pconnect')) return false;
 		$this->_connectionID = mssql_pconnect($argHostname,$argUsername,$argPassword);
 		if ($this->_connectionID === false) return false;
 		
@@ -514,7 +518,9 @@ order by constraint_name, referenced_table_name, keyno";
 			}
 		
 		if  ($this->debug) {
-			ADOConnection::outp( "Parameter(\$stmt, \$php_var='$var', \$name='$name'); (type=$type)");
+			$prefix = ($isOutput) ? 'Out' : 'In';
+			$ztype = (empty($type)) ? 'false' : $type;
+			ADOConnection::outp( "{$prefix}Parameter(\$stmt, \$php_var='$var', \$name='$name', \$maxLen=$maxLen, \$type=$ztype);");
 		}
 		/*
 			See http://phplens.com/lens/lensforum/msgs.php?id=7231
@@ -568,7 +574,14 @@ order by constraint_name, referenced_table_name, keyno";
 				if (is_string($v)) {
 					$len = strlen($v);
 					if ($len == 0) $len = 1;
-					$decl .= "@P$i NVARCHAR($len)";
+					
+					if ($len > 4000 ) {
+						// NVARCHAR is max 4000 chars. Let's use NTEXT
+						$decl .= "@P$i NTEXT";
+					} else {
+						$decl .= "@P$i NVARCHAR($len)";
+					}
+
 					$params .= "@P$i=N". (strncmp($v,"'",1)==0? $v : $this->qstr($v));
 				} else if (is_integer($v)) {
 					$decl .= "@P$i INT";

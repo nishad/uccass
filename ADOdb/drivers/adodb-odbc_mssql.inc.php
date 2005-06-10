@@ -1,6 +1,6 @@
 <?php
 /* 
-V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
   Released under both BSD license and Lesser GPL library license. 
   Whenever there is any discrepancy between the two licenses, 
   the BSD license will take precedence. 
@@ -31,6 +31,7 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 	var $rightOuter = '=*';
 	var $upperCase = 'upper';
 	var $substr = 'substring';
+	var $length = 'len';
 	var $ansiOuter = true; // for mssql7 or later
 	var $identitySQL = 'select @@IDENTITY'; // 'select SCOPE_IDENTITY'; # for mssql 2000
 	var $hasInsertID = true;

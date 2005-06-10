@@ -1,4 +1,4 @@
-<form method="POST" action="{$conf.current_page}">
+<form method="POST" action="survey.php">
   <input type="hidden" name="sid" value="{$survey.sid}">
 
   <table width="70%" align="center" cellpadding="0" cellspacing="0">
@@ -30,6 +30,13 @@
           </div>
         {/section}
 
+        {*TIME LIMIT*}
+        {section name="time_limit" loop=1 show=$survey.time_limit}
+          <div>
+            Time Limit: {$survey.time_limit} minutes. Approximate Elapsed Time: {$survey.elapsed_minutes}:{$survey.elapsed_seconds}
+          </div>
+        {/section}
+
         <br />
 
         {*WELCOME MESSAGE*}
@@ -58,7 +65,7 @@
         {section name="main_url" loop=1 show=$show.main_url|default:FALSE}
           <div style="text-align:center">
             <br />
-            [ <a href="{$conf.html}">Return to Main Menu</a> ]
+            [ <a href="{$conf.html}/index.php">Return to Main Menu</a> ]
           </div>
         {/section}
 

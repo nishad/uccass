@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version V4.04 13 Nov 2003  (c) 2000-2003 John Lim (jlim@natsoft.com.my). All rights reserved.
+ * @version V4.22 15 Apr 2004  (c) 2000-2004 John Lim (jlim@natsoft.com.my). All rights reserved.
  * Released under both BSD license and Lesser GPL library license.
  * Whenever there is any discrepancy between the two licenses,
  * the BSD license will take precedence.
@@ -23,7 +23,7 @@ var $sql = '';
 var $params = '';
 var $host = '';
 var $database = '';
-
+	
 	function __construct($dbms, $fn, $errno, $errmsg, $p1, $p2, $thisConnection)
 	{
 		switch($fn) {
@@ -49,6 +49,7 @@ var $database = '';
 		$this->fn = $fn;
 		$this->msg = $errmsg;
 				
+		if (!is_numeric($errno)) $errno = -1;
 		parent::__construct($s,$errno);
 	}
 }
@@ -73,35 +74,5 @@ global $ADODB_EXCEPTION;
 	throw new $errfn($dbms, $fn, $errno, $errmsg, $p1, $p2, $thisConnection);
 }
 
-
-class RecordSetIterator implements Iterator {
-
-    private $rs;
-
-    function __construct($rs) {
-        $this->rs = $rs;
-    }
-    function rewind() {
-        $this->rs->MoveFirst();
-    }
-    function hasMore() {
-        return !$this->rs->EOF;
-    }
-    function key() {
-        return $this->rs->_currentRow;
-    }
-    function current() {
-        return $this->rs->fields;
-    }
-    function next() {
-        $this->rs->MoveNext();
-    }
-}
-
-class ADODB_RS implements IteratorAggregate {
-    function getIterator() {
-        return new RecordSetIterator($this);
-    }
-} 
 
 ?>

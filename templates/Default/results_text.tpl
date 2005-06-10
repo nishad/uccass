@@ -15,7 +15,9 @@
       <td>
 
         <div style="text-align:center">
-          [ <a href="{$conf.html}/results.php?sid={$sid}">All Results</a> ]
+          [ <a href="{$conf.html}/results.php?sid={$sid}">All Results</a>
+            &nbsp;|&nbsp;
+            <a href="{$conf.html}/index.php">Main</a> ]
         </div>
 
         <div class="whitebox">
@@ -44,12 +46,19 @@
 
         {section name="a" loop=$answer.text}
           <div class="indented_cell">
+            {section name="del" loop=1 show=$answer.delete_access}
+              <input type="checkbox" name="delete_rid[]" value="{$answer.rid[a]}">
+            {/section}
             <strong>{$answer.num[a]}.</strong> {$answer.text[a]}
           </div>
         {sectionelse}
           <div style="text-align:center">
             <strong>No more answers to this question.</strong>
           </div>
+        {/section}
+
+        {section name="del2" loop=1 show=$answer.delete_access}
+          <input type="submit" name="delete" value="Delete Checked Answers">
         {/section}
 
         {section name="clear_search" loop=1 show=$button.clear}
@@ -65,7 +74,9 @@
         {/section}
 
         <div style="text-align:center">
-          [ <a href="{$conf.html}/results.php?sid={$sid}">All results</a> ]
+          [ <a href="{$conf.html}/results.php?sid={$sid}">All Results</a>
+            &nbsp;|&nbsp;
+            <a href="{$conf.html}/index.php">Main</a> ]
         </div>
       </td>
     </tr>

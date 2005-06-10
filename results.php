@@ -6,7 +6,7 @@ $survey = new Survey;
 
 $output = $survey->com_header("Survey Results");
 
-$output .= $survey->survey_results();
+$output .= $survey->survey_results(@$_REQUEST['sid']);
 
 $output .= $survey->com_footer();
 

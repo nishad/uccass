@@ -14,6 +14,6 @@
   {/section}
 
   {section name="na" loop=$q.num_answers show=TRUE}
-    <input type="text" name="answer[{$q.qid}][{$smarty.section.na.index}]" size="50" value="{$q.answer[na]}">
+    <p><input type="text" name="answer[{$q.qid}][{$smarty.section.na.index}]" size="50" value="{$q.answer[na]}"></p>
   {/section}
 </div>

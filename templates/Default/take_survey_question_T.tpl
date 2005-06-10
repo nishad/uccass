@@ -14,6 +14,6 @@
   {/section}
 
   {section name="na" loop=$q.num_answers show=TRUE}
-    <textarea name="answer[{$q.qid}][{$smarty.section.na.index}]" cols="40" rows="5">{$q.answer[na]}</textarea>
+    <p><textarea name="answer[{$q.qid}][{$smarty.section.na.index}]" cols="40" rows="5">{$q.answer[na]}</textarea></p>
   {/section}
 </div>

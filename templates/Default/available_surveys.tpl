@@ -93,6 +93,10 @@
       &nbsp;|&nbsp;
       <a href="{$conf.html}/admin.php">Admin</a>
       &nbsp;|&nbsp;
+      {section name="logout" loop=1 show=$show.logout}
+        <a href="{$conf.html}/index.php?action=logout">Logout</a>
+        &nbsp;|&nbsp;
+      {/section}
       <a href="{$conf.html}/docs/index.html">Documentation</a> ]
     </td>
   </tr>

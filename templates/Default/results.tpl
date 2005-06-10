@@ -11,13 +11,19 @@
 
       <div style="text-align:center">
         [ <a href="{$conf.html}/index.php">Main</a> ]
+        &nbsp;&nbsp;
+        [ <a href="{$conf.html}/results_table.php?sid={$survey.sid}">Results as Table</a>
+           <a href="{$conf.html}/docs/index.html#table_results">[?]</a> ]
+        &nbsp;&nbsp;
+        [ <a href="{$conf.html}/results_csv.php?sid={$survey.sid}">Export Results to CSV</a>
+           <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
       </div>
 
       <div class="whitebox">
         Results for Survey #{$survey.sid}: {$survey.name}
       </div>
 
-      <form method="GET" action="{$conf.current_page}">
+      <form method="GET" action="results.php">
         <input type="hidden" name="sid" value="{$survey.sid}">
 
         <span class="example">
@@ -58,9 +64,20 @@
             {/section}
           </select>
           <input type="submit" name="results_action" value="Go">
+          <a href="{$conf.html}/docs/index.html#filter_results">[?]</a>
         </div>
 
         <br />
+
+        <div class="whitebox">
+          Survey Time Stats
+        </div>
+        <div class="indented_cell">
+          Average Completion Time: {$survey.avgtime.minutes}min {$survey.avgtime.seconds}sec
+          (Min: {$survey.mintime.minutes}min {$survey.mintime.seconds}sec, Max: {$survey.maxtime.minutes}min {$survey.maxtime.seconds}sec)
+          <br />
+          Average Time before Quit: {$survey.quittime.minutes}min {$survey.quittime.seconds}sec
+        </div>
 
         {section name="qid" loop=$qid}
           <div class="whitebox">
@@ -106,11 +123,15 @@
                   </td>
                 </tr>
               {/section}
-              <tr>
-                <td><strong>Total Answers</strong></td>
-                <td> - </td>
-                <td colspan="2"><strong>{$num_answers[qid]}</strong></td>
-              </tr>
+
+              {section name="totans" loop=1 show=$show.numanswers[qid]}
+                <tr>
+                  <td><strong>Total Answers</strong></td>
+                  <td> - </td>
+                  <td colspan="2"><strong>{$num_answers[qid]}</strong></td>
+                </tr>
+              {/section}
+
               {section name="t" loop=1 show=$text[qid]}
                 <tr>
                   <td colspan="4">

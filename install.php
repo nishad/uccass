@@ -18,28 +18,25 @@ if(count($_POST) > 0)
 
         if(!isset($survey->error_occurred))
         {
-            $sql_file = 'survey.sql';
-            $file = file($sql_file);
-            foreach($file as $line)
+            switch($_REQUEST['installation_type'])
             {
-                if($line{0} != '#' && strlen($line) > 0)
-                {
-                    $query .= trim($line);
-                    if(substr($query,-1) == ";")
-                    {
-                        $query = preg_replace('/^CREATE TABLE (`?)/','CREATE TABLE \\1' . $survey->CONF['db_tbl_prefix'],$query);
-                        $query = preg_replace('/^INSERT INTO (`?)/','INSERT INTO \\1' . $survey->CONF['db_tbl_prefix'],$query);
-                        $query = substr($query,0,-1);
+                case 'upgrade_104':
+                    include('upgrades/upgrade_104_105.php');
+                    $sql_error = $c->load_sql_file('upgrades/upgrade_104_105.sql',TRUE);
+                    $error = !$upgrade_104_105 | $sql_error;
+                break;
 
-                        $rs = $survey->db->Execute($query);
-                        if($rs === FALSE)
-                        {
-                            $error = TRUE;
-                            echo '<br><br>' . $query . $survey->db->ErrorMsg();
-                        }
-                        $query = '';
-                    }
-                }
+                case 'newinstallation':
+                    $sql_file = 'survey.sql';
+                    $error = $c->load_sql_file($sql_file);
+                break;
+
+                case 'updateconfigonly':
+                break;
+
+                default:
+                    $error = TRUE;
+                    echo 'You did not choose an installation type. Please go back to the installation page and choose an installation type at the top of the page.';
             }
 
             if($error)
@@ -57,6 +54,18 @@ if(count($_POST) > 0)
     }
 }
 else
-{ echo $c->form; }
+{
+    $form = $c->show_form();
+
+    //Have PHP detect file and html paths and provide them
+    //if the values are empty in ini file.
+    include('pathdetect.class.php');
+    $pd = new PathDetect;
+
+    $form = str_replace('name="path" value=""','name="path" value="' . $pd->path() . '"',$form);
+    $form = str_replace('name="html" value=""','name="html" value="' . $pd->html() . '"',$form);
+
+    echo $form;
+}
 
 ?>
