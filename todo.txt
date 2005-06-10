@@ -1,6 +1,6 @@
 TODO:
 
-CVS Test
+My test
 
   2004-07-07
 
