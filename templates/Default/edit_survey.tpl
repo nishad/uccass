@@ -7,27 +7,11 @@
 </table>
 <table width="70%" align="center" class="bordered_table">
 
-{$show.links}
-
-{* ERROR MESSAGE *}
-  {section name="error" loop=1 show=$show.error}
-  <tr>
-    <td class="error">Error: {$show.error}</td>
-  </tr>
-  {/section}
-{* / ERROR MESSAGE *}
-
-{* NOTICE MESSAGE *}
-  {section name="notice" loop=1 show=$show.notice}
-  <tr>
-    <td class="message">{$show.notice}</td>
-  </tr>
-  {/section}
-{* / NOTICE MESSAGE *}
+{$data.links}
 
   <tr>
     <td>
-      {$show.content}
+      {$data.content}
     </td>
   </tr>
 

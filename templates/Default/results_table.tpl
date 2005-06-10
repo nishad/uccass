@@ -14,7 +14,8 @@
         &nbsp;&nbsp;
         [ <a href="{$conf.html}/results.php?sid={$survey.sid}">Graphic Results</a> ]
         &nbsp;&nbsp;
-        [ <a href="{$conf.html}/results_csv.php?sid={$survey.sid}">Export Results to CSV</a> ]
+        [ <a href="{$conf.html}/results_csv.php?sid={$survey.sid}">Export Results to CSV</a>
+          <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
       </div>
 
       <div class="whitebox">
@@ -39,7 +40,6 @@
               {section name=a loop=$data.answers[x] show=TRUE}
                 <td>{$data.answers[x][a]}</td>
               {/section}
-              <td>{$data.answers[x].date}</td>
             </tr>
           {/section}
         </table>

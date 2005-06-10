@@ -1,7 +1,7 @@
   <form method="POST" action="{$conf.html}/edit_survey.php" name="qform">
-    <input type="hidden" name="mode" value="{$mode}">
-    <input type="hidden" name="sid" value="{$property.sid}">
-    <input type="hidden" name="qid" value="{$qid}">
+    <input type="hidden" name="mode" value="{$data.mode}">
+    <input type="hidden" name="sid" value="{$data.sid}">
+    <input type="hidden" name="qid" value="{$data.qid}">
 
     <div class="whitebox">
       Question Text
@@ -11,7 +11,7 @@
       Enter Text of Question. Use the new question form to add page breaks into your form.
       Questions can not be edited into a page break.
       <br />
-      <textarea name="question" wrap="physical" cols="50" rows="6">{$question}</textarea>
+      <textarea name="question" wrap="physical" cols="50" rows="6">{$data.question_data.question}</textarea>
     </div>
 
     <div class="whitebox">
@@ -20,14 +20,12 @@
 
     <div class="indented_cell">
       <select name="answer" size="1">
-        {section name="answer" loop=$answer show=TRUE}
-          <option value="{$answer[answer].aid}"{$answer[answer].selected}>{$answer[answer].name}</option>
+        {section name="answer" loop=$data.answer show=TRUE}
+          <option value="{$data.answer[answer].aid}"{$data.answer[answer].selected}>{$data.answer[answer].name}</option>
         {/section}
       </select>
       &nbsp;
-      <a href="#show_answers" onclick="window.open('display_answers.php?sid={$property.sid}','mywindow','toolbar=no,location=no,directories=no,status=yes,menubar=yes,scrollbars=yes,resizable=yes,width=640,height=480,left=30,top=30');">
-        [ Values ]
-      </a>
+      [ <a href="#show_answers" onclick="window.open('display_answers.php?sid={$data.sid}','mywindow','toolbar=no,location=no,directories=no,status=yes,menubar=yes,scrollbars=yes,resizable=yes,width=640,height=480,left=30,top=30');"> Values </a> ]
     </div>
 
     <div class="whitebox">
@@ -36,8 +34,8 @@
 
     <div class="indented_cell">
       <select name="num_answers" size="1">
-        {section name="num_answers" loop=$num_answers show=TRUE}
-          <option value="{$num_answers[num_answers]}"{$num_answers_selected[num_answers]}>{$num_answers[num_answers]}</option>
+        {section name="num_answers" loop=$data.num_answers show=TRUE}
+          <option value="{$data.num_answers[num_answers]}"{$data.num_answers_selected[num_answers]}>{$data.num_answers[num_answers]}</option>
         {/section}
       </select>
     </div>
@@ -48,8 +46,8 @@
 
     <div class="indented_cell">
       <select name="num_required" size="1">
-        {section name="num_required" loop=$num_required show=TRUE}
-          <option value="{$num_required[num_required]}"{$num_required_selected[num_required]}>{$num_required[num_required]}</option>
+        {section name="num_required" loop=$data.num_required show=TRUE}
+          <option value="{$data.num_required[num_required]}"{$data.num_required_selected[num_required]}>{$data.num_required[num_required]}</option>
         {/section}
       </select>
     </div>

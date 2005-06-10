@@ -13,7 +13,7 @@
   <tr>
     <td align="center">
       [ <a href="{$conf.html}/index.php">Main</a>
-      {section name="admin" loop=1 show=$smarty.session.admin_logged_in}
+      {section name="admin" loop=1 show=$smarty.session.priv[0][0]}
         &nbsp;|&nbsp;<a href="{$conf.html}/admin.php">Admin</a>
       {/section} ]
     </td>

@@ -4,13 +4,7 @@ TODO:
 
     Add JavaScript elapsed time clock to surveys with time limit
 
-    Keep track of total time to take survey on individual basis
-    to calcualate average, max and min times to complete the survey
-
     Add Numeric and Date answer types with ranges
-
-    Add ability to delete individual text results if
-    logged in as survey editor and/or administrator
 
     Add Access Control including allowing a certain number of
     accesses within a certain time period

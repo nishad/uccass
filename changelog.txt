@@ -1,19 +1,133 @@
+Version 1.8
+
+  2004-08-22
+
+    Updated ADOdb website listed in documentation
+
+    Added upgrade from v1.06 to 1.8 option during installation
+
+    Removed "administrator password" setting from survey.ini.php
+    file. Default administrator user will now be created during
+    the install process and added features allow other to be created.
+
+    Added feature to reset completed survey records. This
+    will not delete any provided answers, but resets the
+    system to think users have not completed the surveys
+    at all. Only applies to IP, UsernamePassword and
+    Invitation Only access control types.
+
+  2004-08-17
+
+    Added access control setup to editsurvey.class.php.
+    Access controls include None, IP, Cookie, Username
+    and Password or Invitation Only.
+
+    Added feature for surveys to be flagged as hidden. Hidden
+    surveys will not show on main page at all and must
+    be accessed directly by their URLs
+
+    Added feature for results to be marked as public
+    or private. If private, "View Results" columns
+    appear on the User and Invitee list.
+
+    Added feature for invite codes to be alphanumeric
+    codes of a user-set length, i.e. "ab35swq4ST" or
+    have the codes be two english words where each word
+    is between 4 - 12 characters, i.e. "cilantro-randomly"
+    or "windrowing-apprenticed". List of around 113,000
+    words available for choosing is contained in utils/words.txt
+    and was compiled from the Moby Word List by Grady Ward
+    (http://www.gutenberg.net/etext/3201).
+
+    Added feature to send Username and Password reminder by
+    email to users and to send Invitation Notice to invitees.
+    Email templates added to Default template
+
+    Added ability to move users between the User list and Invitee
+    list when using Invitation Only access control
+
+    Added ability to set how often users are allowed to take
+    surveys if using an access control other than None.
+
+    Added features to show the date users were sent Username and Password
+    or Invitation information and the last date they completed the
+    survey along with the total number of times they completed the survey.
+
+    Changed new survey procedure to prompt for a default username
+    and password for a user that'll be given edit privileges
+
+  2004-07-28
+
+    Fixed bug that prevented Matrix questions from being
+    closed correctly when followed by an N, S or T answer type
+
+    Rewrote editsurvey.class.php to separate the logic
+    into individual methods instead of one huge function
+    and complex switches
+
+  2004-07-23
+
+    Divided survey.class.php into individual classes
+    to handle general actions of the survey system.
+    Most classes inherit general functions from the Main
+    class in main.class.php. Moved all class files to
+    classes/ folder
+
+    Separated "safe string" methods into a standalone
+    class in safestring.class.php
+
+    Added ability to create administrator users and users who
+    have permission to create surveys from the Admin page.
+    Name, email, username and password fields are available
+    for each user. Users can be deleted from the same interface.
+
+    Creating a new survey now presents a login form if
+    create access is set to 'private' in survey.ini.php
+
+    Removed private survey and private results drop downs
+    from main survey page. All surveys (unless hidden) will
+    be shown and users will be prompted for username/password
+    or invitation code upon entering the survey or requesting
+    the results.
+
+    Removed survey access, results access and edit password
+    settings from edit survey properties
+
+  2004-07-15
+
+    DB: Added "users" "users_sequence" and
+        "taken_surveys" tables to database
+        to keep track of users for access
+        control and to track what and when
+        surveys were taken by individual users
+
+    DB: Added "hidden" column to "surveys" table
+
+    Added "creation_access" setting to survey.ini.php
+    file to control whether access to create new surveys
+    is open to the public or restricted to administrators
+    and the users they create and designate.
+
+    Changed to use of ADOdb Quote() method instead
+    of addslashes() for escaping text to be inserted
+    into the database. Required changes in many queries
+    to remove quotes around variables since Quote()
+    supplies them automatically.
+
 Version 1.06
 
-  2004-07-20
+  2004-07-18
 
-    Fixed bug that that caused page breaks to be
-    added to multiple surveys when adding to one
-    survey
+    Fixed bug that added page breaks to surveys
+    other than the one being edited when inserting
+    new page breaks.
 
-    Fixed bug that did not clear timing data
-    when clearing the results of the survey
+    Fixed bug that did not remove timing data
+    when clearing the results of a survey
 
-    Fixed bug on incorrect formed HTML labels
-    on MM and MS (Vertical and Horizontal)
-    answer types so clicking on the answer
-    values will select the appropriate radio
-    or checkbox button
+    Fixed bug for HTML labels on answer values to
+    make them unique for each question based upon
+    the question ID and the answer value ID
 
 Version 1.05
 

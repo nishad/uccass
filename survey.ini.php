@@ -57,11 +57,6 @@ site_name = "Unit Command Climate Assessment and Survey System (UCCASS)"
 ; the templates/ folder.
 default_template = Default
 
-; Administrator Password
-;
-; Used to log into Admin area
-admin_password = "Pass!word"
-
 ; Page Break Text
 ;
 ; This is the text the users will enter
@@ -171,7 +166,21 @@ user_text_mode = 0
 ; This format is also used to report the Survey
 ; creation date on the Edit Properties page.
 ;
-date_format = "Y-m-d H:i:s"
+date_format = "Y-m-d H:i"
+
+; Survey Creation Access
+;
+; This setting will control whether the
+; creation of surveys on the site is open
+; to the public or restricted to administrators
+; and the users they create and designate
+;
+; Options:
+; public  - Anyone having access to the
+;           site can create a survey
+; private - Only administrators and designated
+;           users can create surveys
+create_access = private
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Database Configuration ;

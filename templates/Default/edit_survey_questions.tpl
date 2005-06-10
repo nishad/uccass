@@ -14,39 +14,39 @@
             <td width="15%">Move</td>
           </tr>
 
-          {section name="p" loop=$property.qid}
+          {section name="p" loop=$data.qid}
             <form method="GET" action="{$conf.html}/edit_survey.php">
-            <input type="hidden" name="mode" value="{$mode.questions}">
-            <input type="hidden" name="sid" value="{$property.sid}">
+            <input type="hidden" name="mode" value="{$data.mode_edit_question}">
+            <input type="hidden" name="sid" value="{$data.sid}">
             <tr bgcolor="{cycle values="#F9F9F9,#FFFFFF"}">
               <td style="text-align:center;">
-                {$property.qnum[p]}
-                <input type="hidden" name="qid" value="{$property.qid[p]}">
+                {$data.qnum[p]}
+                <input type="hidden" name="qid" value="{$data.qid[p]}">
               </td>
               <td>
                 <div class="indented_cell">
-                  {$property.question[p]}
+                  {$data.question[p]}
                 </div>
 
-                {section name="show_edep" loop=1 show=$property.show_edep[p]}
+                {section name="show_edep" loop=1 show=$data.show_edep[p]}
                   <br />
                   <div class="indented_cell"><strong>Dependencies:</strong></div>
-                  {section name="dep" loop=$property.edep_option[p] show=$property.edep_option[p]}
+                  {section name="dep" loop=$data.edep_option[p] show=$data.edep_option[p]}
                     <div style="margin-left:5%;">
-                      &bull; {$property.edep_option[p][dep]} if question {$property.edep_qnum[p][dep]}
-                      is: {$property.edep_value[p][dep]}
+                      &bull; {$data.edep_option[p][dep]} if question {$data.edep_qnum[p][dep]}
+                      is: {$data.edep_value[p][dep]}
                     </div>
                   {/section}
                 {/section}
               </td>
-                {section name="options" loop=1 show=$property.page_break[p]}
+                {section name="options" loop=1 show=$data.page_break[p]}
                   <td style="text-align:center;" colspan="3">
                     <input type="hidden" name="page_break" value="1">
                     <input type="submit" name="delete_question" value="Delete">
                   </td>
                 {sectionelse}
                   <td style="text-align:center;" width="15%">
-                    <input type="checkbox" name="del_qid" value="{$property.qid[p]}">
+                    <input type="checkbox" name="del_qid" value="{$data.qid[p]}">
                     <input type="submit" name="delete_question" value="Delete">
                   </td>
                   <td style="text-align:center;" width="10%">
@@ -68,8 +68,8 @@
 
         <br>
         <form method="POST" action="{$conf.html}/edit_survey.php" name="qform">
-        <input type="hidden" name="mode" value="{$mode.new_question}">
-        <input type="hidden" name="sid" value="{$property.sid}">
+        <input type="hidden" name="mode" value="{$data.mode_new_question}">
+        <input type="hidden" name="sid" value="{$data.sid}">
 
         <div class="whitebox">
           Add A New Question  <a href="{$conf.html}/docs/index.html#new_question">[?]</a>
@@ -93,14 +93,12 @@
 
         <div class="indented_cell">
           <select name="answer" size="1">
-            {section name="answer" loop=$answer show=TRUE}
-              <option value="{$answer[answer].aid}"{$answer[answer].selected}>{$answer[answer].name}</option>
+            {section name="answer" loop=$data.answer show=TRUE}
+              <option value="{$data.answer[answer].aid}"{$data.answer[answer].selected}>{$data.answer[answer].name}</option>
             {/section}
           </select>
           &nbsp;
-          <a href="#show_answers" onclick="window.open('display_answers.php?sid={$property.sid}','mywindow','toolbar=no,location=no,directories=no,status=yes,menubar=yes,scrollbars=yes,resizable=yes,width=640,height=480,left=30,top=30');">
-            [ Values ]
-          </a>
+          [ <a href="#show_answers" onclick="window.open('display_answers.php?sid={$data.sid}','mywindow','toolbar=no,location=no,directories=no,status=yes,menubar=yes,scrollbars=yes,resizable=yes,width=640,height=480,left=30,top=30');">Values</a> ]
         </div>
 
         <div class="whitebox">
@@ -109,8 +107,8 @@
 
         <div class="indented_cell">
           <select name="num_answers" size="1">
-            {section name="num_answers" loop=$num_answers show=TRUE}
-              <option value="{$num_answers[num_answers]}"{$num_answers_selected[num_answers]}>{$num_answers[num_answers]}</option>
+            {section name="num_answers" loop=$data.num_answers show=TRUE}
+              <option value="{$data.num_answers[num_answers]}"{$data.num_answers_selected[num_answers]}>{$data.num_answers[num_answers]}</option>
             {/section}
           </select>
         </div>
@@ -121,8 +119,8 @@
 
         <div class="indented_cell">
           <select name="num_required" size="1">
-            {section name="num_required" loop=$num_required show=TRUE}
-              <option value="{$num_required[num_required]}"{$num_required_selected[num_required]}>{$num_required[num_required]}</option>
+            {section name="num_required" loop=$data.num_required show=TRUE}
+              <option value="{$data.num_required[num_required]}"{$data.num_required_selected[num_required]}>{$data.num_required[num_required]}</option>
             {/section}
           </select>
         </div>
@@ -134,8 +132,8 @@
         <div class="indented_cell">
           <select name="insert_after" size="1">
             <option value="0-0">First</option>
-            {section name="qnum" loop=$property.qnum2 show=TRUE}
-              <option value="{$property.page_oid[qnum]}"{$property.qnum2_selected[qnum]}>{$property.qnum2[qnum]}</option>
+            {section name="qnum" loop=$data.qnum2 show=TRUE}
+              <option value="{$data.page_oid[qnum]}"{$data.qnum2_selected[qnum]}>{$data.qnum2[qnum]}</option>
             {/section}
           </select>
         </div>
@@ -147,12 +145,12 @@
         <div class="indented_cell">
           <select name="orientation" size="1">
             {section name="orient" loop=$conf.orientation show=TRUE}
-              <option value="{$conf.orientation[orient]}"{$property.orientation.selected[orient]}>{$conf.orientation[orient]}</option>
+              <option value="{$conf.orientation[orient]}"{$data.orientation.selected[orient]}>{$conf.orientation[orient]}</option>
             {/section}
           </select>
         </div>
 
-        {section name="dependencies" loop=1 show=$show.dep}
+        {section name="dependencies" loop=1 show=$data.show.dep}
 
           <div class="whitebox">
            Dependencies <a href="{$conf.html}/docs/index.html#dependencies">[?]</a>
@@ -182,8 +180,8 @@
               if question
               <select name="dep_qid[{$smarty.section.dep.iteration}]" onchange="populate({$smarty.section.dep.iteration});">
                 <option value=""></option>
-                {section name="dep_qid" loop=$property.dep_qid show=TRUE}
-                  <option value="{$property.dep_qid[dep_qid]}">{$property.dep_qnum[dep_qid]}</option>
+                {section name="dep_qid" loop=$data.dep_qid show=TRUE}
+                  <option value="{$data.dep_qid[dep_qid]}">{$data.dep_qnum[dep_qid]}</option>
                 {/section}
               </select>
               is answered with
@@ -191,34 +189,37 @@
                 <option value="">>>Choose question number to view answers<<</option>
               </select>
               <br />
-              <script language="javascript">
-
-                Answers = new Array;
-                Values = new Array;
-                Num_Answers = new Array;
-                var Original_Length = 1;
-
-                //Javascript from survey.class.php
-                {$property.js}
-
-                var num = 0;
-
-                function populate(num)
-                {ldelim}
-                    for(x=0;x<Original_Length;x++)
-                    {ldelim} document.qform['dep_aid['+num+'][]'].options[0] = null; {rdelim}
-
-                    qid = document.qform['dep_qid['+num+']'].value;
-
-                    for(x=0;x<Num_Answers[qid];x++)
-                    {ldelim} document.qform['dep_aid['+num+'][]'].options[x] = new Option(Values[qid+','+x],Answers[qid+','+x]); {rdelim}
-
-                    Original_Length = Num_Answers[qid];
-                {rdelim}
-              </script>
             {/section}
           </div>
         {/section}
+
+        <script language="javascript">
+
+        Answers = new Array;
+        Values = new Array;
+        Num_Answers = new Array;
+        var Original_Length = 1;
+
+        //Javascript from survey.class.php
+        {$data.js}
+
+        var num = 0;
+
+        function populate(num)
+        {ldelim}
+            for(x=0;x<Original_Length;x++)
+            {ldelim} document.qform['dep_aid['+num+'][]'].options[0] = null; {rdelim}
+
+            qid = document.qform['dep_qid['+num+']'].value;
+
+            for(x=0;x<Num_Answers[qid];x++)
+            {ldelim} document.qform['dep_aid['+num+'][]'].options[x] = new Option(Values[qid+','+x],Answers[qid+','+x]); {rdelim}
+
+            Original_Length = Num_Answers[qid];
+        {rdelim}
+
+      </script>
+
 
         <br />
 

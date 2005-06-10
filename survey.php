@@ -1,8 +1,9 @@
 <?php
 
-include("survey.class.php");
+include('classes/main.class.php');
+include('classes/survey.class.php');
 
-$survey = new Survey;
+$survey = new UCCASS_Survey;
 
 $body = $survey->take_survey($_REQUEST['sid']);
 

@@ -1,13 +1,14 @@
 <?php
 
-include("survey.class.php");
+include('classes/main.class.php');
+include('classes/editsurvey.class.php');
 
-$survey = new Survey;
+$editSurvey = new UCCASS_EditSurvey;
 
-echo $survey->com_header();
+$body = $editSurvey->show(@$_REQUEST['sid']);
 
-echo $survey->edit_survey(@$_REQUEST['sid']);
-
-echo $survey->com_footer();
+echo $editSurvey->com_header();
+echo $body;
+echo $editSurvey->com_footer();
 
 ?>

@@ -4,6 +4,10 @@
         {/section}
       {* / SUCCESS MESSAGE *}
 
+      {section name="error" loop=1 show=$show.error}
+        <div class="error">{$show.error}</div>
+      {/section}
+
       <form method="POST" action="{$conf.html}/new_answer_type.php">
 
         <input type="hidden" name="sid" value="{$input.sid}">

@@ -131,7 +131,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>* Web-based Installation</p>
 <p>* Template based presentation using the <a href="http://smarty.php.net">Smarty
   Template Engine</a></p>
-<p>* Database abstraction layer using <a href="http://php.weblogs.com/ADODB">ADOdb</a>,
+<p>* Database abstraction layer using <a href="http://adodb.sourceforge.net">ADOdb</a>,
   enabling the Survey System to be used with multiple databases (Survey System
   is only tested with MySQL at this time, though)</p>
 <p>* Unlimited surveys, unlimited questions per survey and unlimited answer types.
@@ -958,8 +958,11 @@ ability to use them. </p>
   Any filters applied to the results will also be applied to this export.
   If you have many results to a survey, this file can be VERY large and take a while to export. The script allows
   2 minutes to complete the export, so wait at least that long for the export to complete before troubleshooting.</p>
-<p>The date and time field for the CSV file may show up in scientific notation, such as 2.003E13. To fix the number, highlight
-  the column and format it as a number with zero decimal points. </p>
+<p>The date and time field for the CSV file may show up in scientific notation, such as 2.003E13, depending upon the
+  program that you view this CSV file in. This can generally be fixed by formatting the column as a number with zero
+  decimal points or even as text, but it will depend upon your program. Other columns may appear with leading zeros stripped,
+  also, but this is again because of the formatting of your CSV viewer. UCCASS will export the results exactly as you
+  see in the Table View.</p>
   <!-- End Using UCCASS -->
   <!-- Administration -->
 <hr>

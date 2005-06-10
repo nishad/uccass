@@ -1,8 +1,9 @@
 <?php
 
-include('survey.class.php');
+include('classes/main.class.php');
+//include('classes/survey.class.php');
 
-$survey = new Survey;
+$survey = new UCCASS_Main;
 
 echo $survey->display_answers($_REQUEST['sid']);
 

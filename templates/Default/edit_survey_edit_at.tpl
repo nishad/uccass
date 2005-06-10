@@ -10,6 +10,10 @@
           {/section}
         {* / SUCCESS MESSAGE *}
 
+        {section name="error" loop=1 show=$show.error}
+          <div class="error">{$show.error}</div>
+        {/section}
+
 
         {* WARNING MESSAGE *}
           {section name="warning" loop=1 show=$show.warning}

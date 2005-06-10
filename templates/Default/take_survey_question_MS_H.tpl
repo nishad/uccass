@@ -15,8 +15,8 @@
 
   {section name="na" loop=$q.num_answers show=TRUE}
     {section name="ms" loop=$q.num_values show=TRUE}
-      <input type="radio" name="answer[{$q.qid}][{$smarty.section.na.index}]" value="{$q.avid[ms]}" id="{$q.qid}-{$q.avid[ms]}"{$q.selected[na][ms]}>
-      <label for="{$q.qid}-{$q.avid[ms]}"> {$q.value[ms]}</label>
+      <input type="radio" name="answer[{$q.qid}][{$smarty.section.na.index}]" value="{$q.avid[ms]}" id="{$q.avid[ms]}"{$q.selected[na][ms]}>
+      <label for="{$q.avid[ms]}"> {$q.value[ms]}</label>
     {/section}
     <br />
   {/section}

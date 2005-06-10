@@ -1,8 +1,9 @@
 <?php
 
-include("survey.class.php");
+include('classes/main.class.php');
+include('classes/surveyadmin.class.php');
 
-$survey = new Survey;
+$survey = new UCCASS_SurveyAdmin;
 
 $output = $survey->com_header();
 

@@ -1,8 +1,9 @@
 <?php
 
-include("survey.class.php");
+include('classes/main.class.php');
+include('classes/results.class.php');
 
-$survey = new Survey;
+$survey = new UCCASS_Results;
 
 echo $survey->com_header("Filter Survey Results");
 

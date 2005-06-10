@@ -135,9 +135,7 @@
               {section name="t" loop=1 show=$text[qid]}
                 <tr>
                   <td colspan="4">
-                    <a href="{$conf.html}/results.php?sid={$survey.sid}&qid={$qid[qid]}&qnum={$question_num[qid]}">
-                      [ View Answers ]
-                    </a>
+                    [ <a href="{$conf.html}/results.php?sid={$survey.sid}&qid={$qid[qid]}&qnum={$question_num[qid]}">View Answers</a> ]
                   </td>
                 </tr>
               {/section}

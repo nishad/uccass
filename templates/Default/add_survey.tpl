@@ -1,4 +1,4 @@
-<form method="GET" action="new_survey.php">
+<form method="GET" action="{$conf.html}/new_survey.php">
 
 <table width="70%" align="center" cellpadding="0" cellspacing="0">
   <tr class="grayboxheader">
@@ -35,15 +35,15 @@
     </td>
   </tr>
   <tr>
-    <td class="whitebox">Survey Password</td>
+    <td class="whitebox">Default Username and Password</td>
   </tr>
   <tr>
     <td>
       <div class="indented_cell">
-        Enter a password that will be required to edit this survey in the future. This will be required
-        to add or delete questions from the survey or to activate or deactivate the survey, for example.
-        <br>
-        <input type="text" name="edit_password" value="{$value.edit_password}">
+        You must create a default user that will have permissions to edit the survey you're creating. You
+        can later edit this user or add others from the Access Control portion of the Edit Survey pages.
+        <p>Username: <input type="text" name="username" value="{$value.username}"></p>
+        <p>Password: <input type="text" name="password" value="{$value.password}"><p>
       </div>
     </td>
   </tr>

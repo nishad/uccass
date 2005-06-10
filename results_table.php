@@ -1,13 +1,14 @@
 <?php
 
-include('special_results.class.php');
+include('classes/main.class.php');
+include('classes/special_results.class.php');
 
-$survey = new Special_Results;
+$survey = new UCCASS_Special_Results;
 
-echo $survey->com_header("Survey Results");
+$output = $survey->com_header("Survey Results");
 
-echo $survey->results_table(@$_REQUEST['sid']);
+$output .= $survey->results_table(@$_REQUEST['sid']);
 
-echo $survey->com_footer();
+echo $output . $survey->com_footer();
 
 ?>
