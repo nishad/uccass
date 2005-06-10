@@ -1,23 +1,23 @@
 TODO:
-
+2005-06-10: CVS Test
   2004-01-09
-  
+
     Add ability to list text answers from newest -> latest
-    and latest -> newest. 
+    and latest -> newest.
 
   2003-12-02
 
     Allow bbcode or HTML for welcome text, thank you text,
-    questions, answers, and answer values upon an 
+    questions, answers, and answer values upon an
     admin configuration variable (or possibly per survey)
 
   2003-11-04
-  
+
     Fix concurrency issues. If a lot of people move questions
     around in the same survey at the same time, it could
     cause trouble.
-    
+
   2003-10-01
-  
+
     Add more graphical representations of the answers
     to questions, such as pie graph, etc
