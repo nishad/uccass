@@ -36,7 +36,7 @@ table, tr, td, th {
   font-size: small;
   font-weight: bold;
   color: #000000;
-  background-color: #FFFFFF;  
+  background-color: #FFFFFF;
 }
 
 .indented_cell {
@@ -53,10 +53,17 @@ table, tr, td, th {
   text-align: center;
 }
 
-.example {font-size:smaller; font-style:italic; font-weight:normal;}
-.message {color:blue; font-weight:bold; text-align:center}
-//.error {color:red; font-weight:bold; text-align:center}
+.example {
+  font-size:smaller;
+  font-style:italic;
+  font-weight:normal;
+}
 
+.message {
+  color:blue;
+  font-weight:bold;
+  text-align:center
+}
 
 .grayboxfont {
   font-family: Verdana, Arial, Helvetica, sans-serif;

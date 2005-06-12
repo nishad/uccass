@@ -1,3 +1,30 @@
+Version 1.8.2
+
+  2005-05-01
+
+    Added code to create custom reports. Users can choose
+    multiple questions, layout type (bar graph, numeric only
+    or crosstab) and display type (percentage, total, average)
+
+    DB: Added reports, reports_sequence, report_questions
+    and report_questions_sequence tables
+
+    Rewrote results.class.php to handle seperate templates
+    for each display piece of results
+
+  2005-03-01
+
+    Added language.default.php and language.tpl
+    files to handle all output strings.
+
+    Removed hardcoded output strings from main.class.php
+    and put them in language.default.php or langauge.tpl
+
+    Added code to check/uncheck all user/invitee checkboxes
+    on access control page. Thanks to "ChiefWigs1982" for
+    showing me the code here:
+    http://forums.devshed.com/showthread.php?p=1004233
+
 Version 1.8.1
 
   2005-05-31

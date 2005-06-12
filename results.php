@@ -5,7 +5,7 @@ include('classes/results.class.php');
 
 $survey = new UCCASS_Results;
 
-$output = $survey->com_header("Survey Results");
+$output = $survey->com_header($survey->lang('title_survey_results'));
 
 $output .= $survey->survey_results(@$_REQUEST['sid']);
 

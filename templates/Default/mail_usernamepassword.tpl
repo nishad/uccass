@@ -4,7 +4,7 @@ Subject: Login information for survey
 Hello {$user.name}. This email will provide you with the username
 and password required to access a survey on our site.
 
-Survey: {$survey.name}
+Survey: {$conf.survey_name}
   Username: {$user.username}
   Password: {$user.password}
 

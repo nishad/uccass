@@ -19,7 +19,7 @@
       </div>
 
       <div class="whitebox">
-        Results for Survey #{$survey.sid}: {$survey.name}
+        Results for Survey #{$conf.sid}: {$conf.survey_name}
       </div>
 
       {section name="filter_text" loop=1 show=$filter_text}

@@ -5,7 +5,7 @@ Hello {$user.name}. You have been selected to participate in
 a survey at the following site. You will need the invitation
 code listed in order to access the survey.
 
-Survey: {$survey.name}
+Survey: {$conf.survey_name}
 Invitation Code: {$user.code}
 
 The following URL already contains your Invitation Code, so

@@ -7,7 +7,7 @@ $survey = new UCCASS_Survey;
 
 $body = $survey->take_survey($_REQUEST['sid']);
 
-$header = $survey->com_header("Survey #{$_REQUEST['sid']}: {$survey->survey_name}");
+$header = $survey->com_header($survey->lang('title_take_survey'));
 
 echo $header;
 echo $body;

@@ -1,23 +1,125 @@
 TODO:
 
-  2004-07-07
+    1. Regarding Survey Properties:
+        + (bug?) Is there an issue with copying dependencies when creating a (copied) survey? (working on)
 
-    Add JavaScript elapsed time clock to surveys with time limit
+        + Add ability to send invitation to: (working on)
+          * All invitees
+          * All uninvited invitees
+          * All invitees who have not participated
 
-    Add Numeric and Date answer types with ranges
+        + Allow relative paths in "Completion Redirect Page URL" (working on)
 
-  2004-01-09
+        + Enable save/continue/edit feature controlled by admin option:
+          ( ) Do not allow users to save/continue survey (no save feature)
+          ( ) Allow users to continue/edit last saved/completed survey within [__] [minutes/hours/days]
+          ( ) Allow users to continue/edit any saved/completed survey (choose which by date/time stamp)
+              within [__] [minutes/hours/days]
 
-    Add ability to list text answers from newest -> latest
-    and latest -> newest.
+        + Import/export users and surveys from CSV file
 
-  2003-11-04
+        + Authentication API (allow dropin file to authenticate to vBulletin, phpBB, etc)
 
-    Fix concurrency issues. If a lot of people move questions
-    around in the same survey at the same time, it could
-    cause trouble.
+        + Delete/move multiple questions at a time
 
-  2003-10-01
+        + Ability to hide the question list or just show last entered question when creating survey questions
 
-    Add more graphical representations of the answers
-    to questions, such as pie graph, etc
+        + Set minimum time to complete surveys so that Admin can exclude these from results (optionally)
+
+        + Password encryption/hash controlled by a configuration setting
+
+        + Send custom email upon completion of survey (either to designated address,
+          user who completed survey (requires email address in access control or email question),
+          or both)
+
+    2. Regarding Survey Results:
+        + (bug?) Changing answer type from text to MM/MS results in no results showing up (working on)
+
+        + Add custom reports feature to include custom result layouts (working on)
+          * Average
+          * Numeric total
+          * Crosstab
+          * etc.
+
+        + Filter based on text fields (matching search, for example)
+
+        + Add ability to list text answers from newest -> latest
+          and latest -> newest.
+
+        + Add more graphical representations of the answers
+          to questions, such as pie graph, etc
+
+    3. Regarding questions/answers:
+        + (bug?) Are lookbacks copied when new surveys are created? (working on)
+
+        + Add alternate input types (working on)
+          * Date w/range
+          * Numeric w/range
+          * MM or Text type and require X out of Y answers (choose 3 out of 5)
+          * Email
+
+        + Add ability to add questions to blocks/groups along with:
+          * assign dependencies per block
+          * ability to randomize question order per block
+          * display only a set number of questions out of total in block
+            (have bank of twenty questions and randomly choose 5)
+          * allow nested blocks
+          * ability to treat questions within block as "one question"
+            (example: could ask one question with language oriented towards children with answer
+            values of boy/girl and another question oriented towards adults with answer values
+            of male/female and have results be counted towards the same question)
+          * ability to enforce unique answers per block
+            (example: have 5 questions where user must rate something from 1 - 5 and enforce
+            that within the block, each number is only chosen once)
+
+        + Add ability to randomize answer values on a per question basis
+
+        + Add ability to include "other" block on a per question basis
+
+        + Add ability to include dropdown/text type answers in a matrix layout
+
+        + Ability to assign default answer to questions (with appropriate warning that it will probably skew results)
+
+        + Add ability to add/edit from default answer set
+
+        + Ability to create dependencies based upon whether text field was empty or not
+
+        + Ability to import question/answer set from other surveys
+
+        + Incorporate features that'll make a "test engine"
+          * Flag answer value(s) as "correct"
+          * Assign weight to questions and answers
+          * Show grade/score on Access Control page
+          * Admin option to show correct answer or not
+
+        + Match S or T answer types to regular expression (advanced)
+
+    4. Regarding taking Surveys:
+        + Remove "previous page" from first page of surveys (working on)
+
+        + Print version of survey (but how to handle dependencies?)
+
+        + Ability to choose between "page x of y" or "%x complete" (or provide the relevant variables
+          (so users can adjust the templates)
+
+        + Add JavaScript elapsed time clock to surveys with time limit
+
+        + Add "notice" label when taking a survey as Admin (because access-controls are
+          bypassed and completed-surveys are not incremented)
+
+    5. PHP related:
+        + Add language file and move any strings there (working on)
+
+        + Move any magic numbers/strings to constants (working on)
+
+        + Detect ability to create subdirectories (regarding Smarty) upon installation
+          and dynamically set $use_sub_dirs to FALSE is unable
+
+        + (Full) Support for alternate databases
+
+        + Fix concurrency issues. If a lot of people move questions
+          around in the same survey at the same time, it could
+          cause trouble.
+
+        + Include the (optional) use an an SMTP mailer class that'll handle authentication
+          for those users who require it

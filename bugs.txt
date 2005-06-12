@@ -1,5 +1,9 @@
 BUGS:
 
+    Fix issues concerning cookies named "sid" (remove usage of $_REQUEST?)
+
+    Average Completion Time: -18502301min -9sec (Min: -18502301min -42sec, Max: -18502300min -8sec)
+
   2004-06-22
 
     BUG #6: Surveys created with version 1.04

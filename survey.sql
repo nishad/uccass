@@ -1,6 +1,6 @@
 -- MySQL dump 9.11
 --
--- Host: localhost    Database: UCCASS
+-- Host: localhost    Database: uccass
 -- ------------------------------------------------------
 -- Server version	4.0.20a-nt
 
@@ -108,7 +108,7 @@ CREATE TABLE answer_types_sequence (
 -- Dumping data for table `answer_types_sequence`
 --
 
-INSERT INTO answer_types_sequence VALUES (876);
+INSERT INTO answer_types_sequence VALUES (1069);
 
 --
 -- Table structure for table `answer_values`
@@ -426,7 +426,7 @@ CREATE TABLE answer_values_sequence (
 -- Dumping data for table `answer_values_sequence`
 --
 
-INSERT INTO answer_values_sequence VALUES (3506);
+INSERT INTO answer_values_sequence VALUES (4325);
 
 --
 -- Table structure for table `completed_surveys`
@@ -446,6 +446,47 @@ CREATE TABLE completed_surveys (
 
 INSERT INTO completed_surveys VALUES (1,2,1098405480);
 INSERT INTO completed_surveys VALUES (1,2,1098406092);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
+INSERT INTO completed_surveys VALUES (46,5,1112912294);
 
 --
 -- Table structure for table `dependencies`
@@ -494,7 +535,7 @@ CREATE TABLE dependencies_sequence (
 -- Dumping data for table `dependencies_sequence`
 --
 
-INSERT INTO dependencies_sequence VALUES (155);
+INSERT INTO dependencies_sequence VALUES (159);
 
 --
 -- Table structure for table `ip_track`
@@ -551,40 +592,40 @@ INSERT INTO questions VALUES (35,'Why do you think food is bad at McDonalds?',2,
 INSERT INTO questions VALUES (36,'Why do you think food is bad at Burger King?',2,2,5,1,0,13,'Vertical');
 INSERT INTO questions VALUES (37,'Why do you think food is bad at KFC?',2,2,5,1,0,14,'Vertical');
 INSERT INTO questions VALUES (38,'Any other comments?',1,2,6,1,0,16,'Vertical');
-INSERT INTO questions VALUES (57,'Members in my unit work well together as a team.',154,5,3,1,0,11,'Matrix');
-INSERT INTO questions VALUES (56,'It is easy for Soldiers in this unit to see the 1SG about a problem.',154,5,3,1,0,10,'Matrix');
-INSERT INTO questions VALUES (55,'It is easy for Soldiers in this unit to see the CO about a problem.',154,5,3,1,0,9,'Matrix');
-INSERT INTO questions VALUES (54,'Junior enlisted members in this unit care about what happens to each other.',154,5,3,1,0,8,'Matrix');
-INSERT INTO questions VALUES (53,'NCOs in this unit care about what happens to their soldiers.',154,5,2,1,0,4,'Matrix');
+INSERT INTO questions VALUES (57,'Members in my unit work well together as a team.',154,5,2,1,0,18,'Matrix');
+INSERT INTO questions VALUES (56,'It is easy for Soldiers in this unit to see the 1SG about a problem.',154,5,2,1,0,17,'Matrix');
+INSERT INTO questions VALUES (55,'It is easy for Soldiers in this unit to see the CO about a problem.',154,5,2,1,0,16,'Matrix');
+INSERT INTO questions VALUES (54,'Junior enlisted members in this unit care about what happens to each other.',154,5,2,1,0,15,'Matrix');
+INSERT INTO questions VALUES (53,'NCOs in this unit care about what happens to their soldiers.',154,5,1,1,0,7,'Matrix');
 INSERT INTO questions VALUES (52,'Officers in this unit care about what happens to their soldiers.',154,5,1,1,0,3,'Matrix');
-INSERT INTO questions VALUES (51,'Do you agree or disagree with the following statements about you and your unit?',169,5,3,1,0,7,'Vertical');
-INSERT INTO questions VALUES (58,'In terms of work habits and on-the-job behavior, my immediate supervisor sets the right example by his/her actions.',154,5,3,1,0,12,'Matrix');
-INSERT INTO questions VALUES (59,'I receive the counseling and coaching needed to advance in my career.',154,5,3,1,0,13,'Matrix');
-INSERT INTO questions VALUES (60,'I receive the training needed to perform my job well.',154,5,3,1,0,14,'Matrix');
-INSERT INTO questions VALUES (61,'Are racist material(s) displayed by members of this unit?',155,5,3,1,0,15,'Vertical');
-INSERT INTO questions VALUES (62,'Are sexually offensive material(s) displayed by members of this unit?',155,5,3,1,0,16,'Vertical');
-INSERT INTO questions VALUES (63,'What level of conflict / stress are you experiencing in this unit?',156,5,3,1,0,17,'Vertical');
-INSERT INTO questions VALUES (64,'Usually, how far in advance do you know the unit training schedule; that is, where you will be and what you will be doing?',157,5,3,1,0,18,'Vertical');
-INSERT INTO questions VALUES (65,'During your last permanent change of station (PCS) move (to this unit), how helpful was this unit?',158,5,3,1,0,19,'Vertical');
-INSERT INTO questions VALUES (66,'To what extent do the persons in your chain of command treat you with respect?',159,5,3,1,0,20,'Vertical');
-INSERT INTO questions VALUES (67,'To what extent do the following apply to the leaders at your unit or place of duty?\r\n\r\nThe leaders in my unit / place of duty ...',169,5,3,1,0,21,'Vertical');
-INSERT INTO questions VALUES (68,'show a real interest in the welfare of families.',159,5,3,1,0,22,'Matrix');
-INSERT INTO questions VALUES (69,'show a real interest in the welfare of single Soldiers.',159,5,3,1,0,23,'Matrix');
-INSERT INTO questions VALUES (70,'Describe how well prepared this unit is to perform its wartime duties / mission.',160,5,3,1,0,24,'Vertical');
-INSERT INTO questions VALUES (71,'How would you rate your current level of morale?',161,5,3,1,0,25,'Vertical');
-INSERT INTO questions VALUES (72,'Sexual harassment is a form of gender discrimination that involves deliberate or repeated unwelcome sexual advances, requests for sexual favors, and verbal or physical conduct of a sexual nature (AR 600-20).',169,5,3,1,0,26,'Vertical');
-INSERT INTO questions VALUES (73,'During the last 12 months, have YOU been sexually harassed by someone in this unit?',162,5,3,1,0,27,'Vertical');
-INSERT INTO questions VALUES (74,'Equal Opportunity refers to the fair, just, and equitable treatment of all soldiers and family members, regardless of race, color, religion, gender (sex), or national origin \r\n(AR 600-20).',169,5,3,1,0,28,'Vertical');
-INSERT INTO questions VALUES (75,'During the last 12 months, have YOU been subjected to discrimination in this unit?\r\n(Check all that apply.)',163,5,3,1,0,29,'Vertical');
-INSERT INTO questions VALUES (76,'I would report an incident of sexual harassment or discrimination to my chain of command.',164,5,3,1,0,30,'Vertical');
-INSERT INTO questions VALUES (77,'Are you male or female?',165,5,3,1,1,31,'Vertical');
-INSERT INTO questions VALUES (78,'What is your racial / ethnic background?',166,5,3,1,1,32,'Vertical');
-INSERT INTO questions VALUES (79,'Please list three things that are going very well in this unit.',167,5,3,3,0,33,'Vertical');
-INSERT INTO questions VALUES (80,'Please list three things that most need improvement in this unit?',167,5,3,3,0,34,'Vertical');
+INSERT INTO questions VALUES (51,'Do you agree or disagree with the following statements about you and your unit?',169,5,2,1,0,14,'Vertical');
+INSERT INTO questions VALUES (58,'In terms of work habits and on-the-job behavior, my immediate supervisor sets the right example by his/her actions.',154,5,2,1,0,19,'Matrix');
+INSERT INTO questions VALUES (59,'I receive the counseling and coaching needed to advance in my career.',154,5,2,1,0,20,'Matrix');
+INSERT INTO questions VALUES (60,'I receive the training needed to perform my job well.',154,5,2,1,0,21,'Matrix');
+INSERT INTO questions VALUES (61,'Are racist material(s) displayed by members of this unit?',155,5,3,1,0,25,'Vertical');
+INSERT INTO questions VALUES (62,'Are sexually offensive material(s) displayed by members of this unit?',155,5,3,1,0,24,'Vertical');
+INSERT INTO questions VALUES (63,'What level of conflict / stress are you experiencing in this unit?',156,5,2,1,0,22,'Vertical');
+INSERT INTO questions VALUES (64,'Usually, how far in advance do you know the unit training schedule; that is, where you will be and what you will be doing?',157,5,2,1,0,23,'Vertical');
+INSERT INTO questions VALUES (65,'During your last permanent change of station (PCS) move (to this unit), how helpful was this unit?',158,5,3,1,0,26,'Vertical');
+INSERT INTO questions VALUES (66,'To what extent do the persons in your chain of command treat you with respect?',159,5,3,1,0,27,'Vertical');
+INSERT INTO questions VALUES (67,'To what extent do the following apply to the leaders at your unit or place of duty?\r\n\r\nThe leaders in my unit / place of duty ...',169,5,3,1,0,28,'Vertical');
+INSERT INTO questions VALUES (68,'show a real interest in the welfare of families.',159,5,3,1,0,29,'Matrix');
+INSERT INTO questions VALUES (69,'show a real interest in the welfare of single Soldiers.',159,5,3,1,0,30,'Matrix');
+INSERT INTO questions VALUES (70,'Describe how well prepared this unit is to perform its wartime duties / mission.',160,5,3,1,0,31,'Vertical');
+INSERT INTO questions VALUES (71,'How would you rate your current level of morale?',161,5,3,1,0,32,'Vertical');
+INSERT INTO questions VALUES (72,'Sexual harassment is a form of gender discrimination that involves deliberate or repeated unwelcome sexual advances, requests for sexual favors, and verbal or physical conduct of a sexual nature (AR 600-20).',169,5,3,1,0,33,'Vertical');
+INSERT INTO questions VALUES (73,'During the last 12 months, have YOU been sexually harassed by someone in this unit?',162,5,3,1,0,34,'Vertical');
+INSERT INTO questions VALUES (74,'Equal Opportunity refers to the fair, just, and equitable treatment of all soldiers and family members, regardless of race, color, religion, gender (sex), or national origin \r\n(AR 600-20).',169,5,3,1,0,35,'Vertical');
+INSERT INTO questions VALUES (75,'During the last 12 months, have YOU been subjected to discrimination in this unit?\r\n(Check all that apply.)',163,5,3,1,0,36,'Vertical');
+INSERT INTO questions VALUES (76,'I would report an incident of sexual harassment or discrimination to my chain of command.',164,5,3,1,0,37,'Vertical');
+INSERT INTO questions VALUES (77,'Are you male or female?',165,5,3,1,1,38,'Vertical');
+INSERT INTO questions VALUES (78,'What\'s your racial / ethnic background?',166,5,3,1,1,39,'Vertical');
+INSERT INTO questions VALUES (79,'Please list three things that are going very well in this unit.',167,5,3,3,0,40,'Vertical');
+INSERT INTO questions VALUES (80,'Please list three things that most need improvement in this unit?',167,5,3,3,0,41,'Vertical');
 INSERT INTO questions VALUES (94,'Thank you for taking the survey.',24,2,7,1,0,17,'Vertical');
 INSERT INTO questions VALUES (95,'Welcome to the example survey. Please click \"Next Page\" below to begin.',24,2,1,1,0,2,'Vertical');
 INSERT INTO questions VALUES (96,'YOUR OPEN, HONEST RESPONSES ARE NEEDED\r\nTO PROVIDE INFORMATION FOR DECISIONS\r\nAFFECTING YOUR UNIT.\r\n\r\n       • The survey is anonymous.\r\n       • Only group statistics will be reported.\r\n\r\nTHANK YOU FOR YOUR TIME AND COOPERATION!',169,5,1,1,0,1,'Vertical');
-INSERT INTO questions VALUES (97,'THANK YOU FOR COMPLETING THIS SURVEY.\r\n\r\nPlease click on \"Finish\" below to save your answers.',169,5,3,1,0,68,'Vertical');
+INSERT INTO questions VALUES (97,'THANK YOU FOR COMPLETING THIS SURVEY.\r\n\r\nPlease click on \"Finish\" below to save your answers.',169,5,3,1,0,75,'Vertical');
 
 --
 -- Table structure for table `questions_sequence`
@@ -600,7 +641,78 @@ CREATE TABLE questions_sequence (
 -- Dumping data for table `questions_sequence`
 --
 
-INSERT INTO questions_sequence VALUES (219);
+INSERT INTO questions_sequence VALUES (237);
+
+--
+-- Table structure for table `report_questions`
+--
+
+DROP TABLE IF EXISTS report_questions;
+CREATE TABLE report_questions (
+  rqid int(11) NOT NULL default '0',
+  report_id int(11) NOT NULL default '0',
+  qid int(11) NOT NULL default '0',
+  layout varchar(25) default NULL,
+  display varchar(25) default NULL,
+  crosstab_questions varchar(255) default NULL,
+  order_id int(11) NOT NULL default '0',
+  PRIMARY KEY  (rqid),
+  KEY qid (qid),
+  KEY report_id (report_id)
+) CHARACTER SET latin1
+TYPE=MyISAM;
+
+--
+-- Dumping data for table `report_questions`
+--
+
+--
+-- Table structure for table `report_questions_sequence`
+--
+
+DROP TABLE IF EXISTS report_questions_sequence;
+CREATE TABLE report_questions_sequence (
+  id int(11) NOT NULL default '0'
+) TYPE=MyISAM;
+
+--
+-- Dumping data for table `report_questions_sequence`
+--
+
+INSERT INTO report_questions_sequence VALUES (0);
+
+--
+-- Table structure for table `reports`
+--
+
+DROP TABLE IF EXISTS reports;
+CREATE TABLE reports (
+  report_id int(11) NOT NULL default '0',
+  report_name varchar(100) NOT NULL default '',
+  sid int(11) NOT NULL default '0',
+  PRIMARY KEY  (report_id)
+) CHARACTER SET latin1
+TYPE=MyISAM;
+
+--
+-- Dumping data for table `reports`
+--
+
+--
+-- Table structure for table `reports_sequence`
+--
+
+DROP TABLE IF EXISTS reports_sequence;
+CREATE TABLE reports_sequence (
+  id int(11) NOT NULL default '0',
+  PRIMARY KEY  (id)
+) TYPE=MyISAM;
+
+--
+-- Dumping data for table `reports_sequence`
+--
+
+INSERT INTO reports_sequence VALUES (0);
 
 --
 -- Table structure for table `results`
@@ -1184,6 +1296,33 @@ INSERT INTO results VALUES (1257,2,26,90,1098406092,366);
 INSERT INTO results VALUES (1258,2,32,177,1098406092,366);
 INSERT INTO results VALUES (1259,2,33,178,1098406092,366);
 INSERT INTO results VALUES (1260,2,34,179,1098406092,366);
+INSERT INTO results VALUES (1337,2,34,179,1111442837,449);
+INSERT INTO results VALUES (1336,2,33,178,1111442837,449);
+INSERT INTO results VALUES (1335,2,32,177,1111442837,449);
+INSERT INTO results VALUES (1334,2,26,91,1111442837,449);
+INSERT INTO results VALUES (1333,2,29,1,1111442837,449);
+INSERT INTO results VALUES (1332,2,34,178,1111442593,448);
+INSERT INTO results VALUES (1331,2,33,178,1111442593,448);
+INSERT INTO results VALUES (1330,2,32,178,1111442593,448);
+INSERT INTO results VALUES (1329,2,26,90,1111442593,448);
+INSERT INTO results VALUES (1328,2,28,1,1111442593,448);
+INSERT INTO results VALUES (1321,2,26,91,1111373424,439);
+INSERT INTO results VALUES (1347,2,28,1,1111443501,462);
+INSERT INTO results VALUES (1348,2,26,90,1111443501,462);
+INSERT INTO results VALUES (1349,2,32,179,1111443501,462);
+INSERT INTO results VALUES (1350,2,33,179,1111443501,462);
+INSERT INTO results VALUES (1351,2,34,178,1111443501,462);
+INSERT INTO results VALUES (1352,2,26,90,1111443539,463);
+INSERT INTO results VALUES (1353,2,26,90,1111443697,464);
+INSERT INTO results VALUES (1354,2,26,90,1111443788,465);
+INSERT INTO results VALUES (1355,2,26,90,1111443860,466);
+INSERT INTO results VALUES (1356,2,26,91,1111443968,467);
+INSERT INTO results VALUES (1357,2,34,179,1111443968,467);
+INSERT INTO results VALUES (1358,2,26,91,1111444650,468);
+INSERT INTO results VALUES (1359,2,32,177,1111444650,468);
+INSERT INTO results VALUES (1360,2,33,177,1111444650,468);
+INSERT INTO results VALUES (1361,2,34,177,1111444650,468);
+INSERT INTO results VALUES (1386,2,26,91,1113767759,482);
 
 --
 -- Table structure for table `results_sequence`
@@ -1199,7 +1338,7 @@ CREATE TABLE results_sequence (
 -- Dumping data for table `results_sequence`
 --
 
-INSERT INTO results_sequence VALUES (1284);
+INSERT INTO results_sequence VALUES (1386);
 
 --
 -- Table structure for table `results_text`
@@ -1294,6 +1433,15 @@ INSERT INTO results_text VALUES (171,2,38,'asfd',1098405480,363);
 INSERT INTO results_text VALUES (172,2,30,'asdfasdfasdf',1098406092,366);
 INSERT INTO results_text VALUES (173,2,37,'fat <img> fat',1098406092,366);
 INSERT INTO results_text VALUES (174,2,38,'no, no other comments at this time. ',1098406092,366);
+INSERT INTO results_text VALUES (181,2,30,'My hobby',1111442593,448);
+INSERT INTO results_text VALUES (183,2,30,'no others hobbies.',1111442837,449);
+INSERT INTO results_text VALUES (184,2,37,'not crunchy enough',1111442837,449);
+INSERT INTO results_text VALUES (186,2,30,'Something',1111443501,462);
+INSERT INTO results_text VALUES (187,2,35,'mcdonalds',1111443501,462);
+INSERT INTO results_text VALUES (188,2,36,'burger king',1111443501,462);
+INSERT INTO results_text VALUES (189,2,38,'no other comments.',1111443501,462);
+INSERT INTO results_text VALUES (190,2,38,'something.',1111443860,466);
+INSERT INTO results_text VALUES (191,2,37,'asdfasdfasdfas',1111443968,467);
 
 --
 -- Table structure for table `results_text_sequence`
@@ -1309,7 +1457,7 @@ CREATE TABLE results_text_sequence (
 -- Dumping data for table `results_text_sequence`
 --
 
-INSERT INTO results_text_sequence VALUES (177);
+INSERT INTO results_text_sequence VALUES (193);
 
 --
 -- Table structure for table `sequence`
@@ -1325,7 +1473,7 @@ CREATE TABLE sequence (
 -- Dumping data for table `sequence`
 --
 
-INSERT INTO sequence VALUES (400);
+INSERT INTO sequence VALUES (483);
 
 --
 -- Table structure for table `surveys`
@@ -1361,7 +1509,7 @@ TYPE=MyISAM;
 --
 
 INSERT INTO surveys VALUES (2,'Example Survey',0,0,1,'Default','index',0,0,'Y-m-d H:i',1089173049,0,0,1,0,2,1,3,0);
-INSERT INTO surveys VALUES (5,'Example Command Climate Assessment',0,0,1,'Default','index',0,0,'Y-m-d H:i:s',1089173049,0,0,1,0,2,1,3,0);
+INSERT INTO surveys VALUES (5,'Example Command Climate Assessment',0,0,1,'Default','index',0,0,'Y-m-d H:i:s',1089173049,0,0,0,3,2,1,3,0);
 
 --
 -- Table structure for table `surveys_sequence`
@@ -1377,7 +1525,7 @@ CREATE TABLE surveys_sequence (
 -- Dumping data for table `surveys_sequence`
 --
 
-INSERT INTO surveys_sequence VALUES (27);
+INSERT INTO surveys_sequence VALUES (34);
 
 --
 -- Table structure for table `time_limit`
@@ -1464,6 +1612,23 @@ INSERT INTO time_limit VALUES (363,2,81,0);
 INSERT INTO time_limit VALUES (364,2,4,1);
 INSERT INTO time_limit VALUES (365,2,44,1);
 INSERT INTO time_limit VALUES (366,2,80,0);
+INSERT INTO time_limit VALUES (449,2,47,0);
+INSERT INTO time_limit VALUES (448,2,30,0);
+INSERT INTO time_limit VALUES (405,2,13,1);
+INSERT INTO time_limit VALUES (407,5,50,1);
+INSERT INTO time_limit VALUES (408,5,13,1);
+INSERT INTO time_limit VALUES (409,5,173,1);
+INSERT INTO time_limit VALUES (439,2,30,0);
+INSERT INTO time_limit VALUES (462,2,39,0);
+INSERT INTO time_limit VALUES (463,2,8,0);
+INSERT INTO time_limit VALUES (464,2,8,0);
+INSERT INTO time_limit VALUES (465,2,10,0);
+INSERT INTO time_limit VALUES (466,2,12,0);
+INSERT INTO time_limit VALUES (467,2,14,0);
+INSERT INTO time_limit VALUES (468,2,9,0);
+INSERT INTO time_limit VALUES (474,2,4,1);
+INSERT INTO time_limit VALUES (483,5,7,1);
+INSERT INTO time_limit VALUES (482,2,10,0);
 
 --
 -- Table structure for table `users`
@@ -1489,14 +1654,17 @@ CREATE TABLE users (
 ) CHARACTER SET latin1
 TYPE=MyISAM;
 
-
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO users VALUES (1,0,'','','admin','password',1,1,0,0,0,0,0,NULL);
+INSERT INTO users VALUES (1,0,'John Holmes','holmes@example.org','admin','password',1,1,0,0,0,0,0,NULL);
 INSERT INTO users VALUES (29,5,'','','user','password',0,0,0,0,1,0,0,NULL);
 INSERT INTO users VALUES (25,2,'','','user','password',0,0,1,0,1,3,1095135716,NULL);
+INSERT INTO users VALUES (31,5,'John','foo@example.org','b','b',0,0,1,0,0,2,1102138225,'makars-icicles');
+INSERT INTO users VALUES (32,5,'Bill','bar@example.org','a','a',0,0,1,0,0,2,1102138225,'superlain-simulants');
+INSERT INTO users VALUES (46,5,'Foobar','dummy@example.org','b','b',0,0,1,0,0,2,1112911985,'100');
+INSERT INTO users VALUES (47,5,'a','a@example.org','asdf','asdf',0,0,0,0,0,0,0,NULL);
 
 --
 -- Table structure for table `users_sequence`
@@ -1511,5 +1679,5 @@ CREATE TABLE users_sequence (
 -- Dumping data for table `users_sequence`
 --
 
-INSERT INTO users_sequence VALUES (29);
+INSERT INTO users_sequence VALUES (47);
 

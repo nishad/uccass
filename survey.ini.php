@@ -151,11 +151,11 @@ text_filter = "none, na, n/a, no, nothing, nope, asdf"
 ;     the user-supplied text and only use it for survey
 ;     text under very controlled situations.
 ;
-; Survey Text Mode (default is 1)
-survey_text_mode = 1
+; Survey Text Mode (default is 0)
+survey_text_mode = 2
 ;
 ; User Text Mode (default is 0)
-user_text_mode = 0
+user_text_mode = 2
 
 ; Date Format
 ;
