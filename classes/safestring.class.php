@@ -28,9 +28,10 @@
 ======================================================
   Class Methods
 
-  bool SafeString(string dbtype)
+  bool SafeString(string dbtype, string character_set)
    - Constructor: Initializes variables
    - Created ADOdb object with database type matching dbtype
+   - Character set is used with htmlentities
   string getSafeString(string str[, string mode])
    - Returns escaped str based upon mode
    - Default mode is SAFE_STRING_TEXT
@@ -147,6 +148,7 @@ class SafeString
                     $str = preg_replace_callback('#&lt;(span)(.*?)&gt;(.*?)&lt;/span&gt;#i',array(&$this,'_safe_string_callback'),$str);
                     $str = preg_replace_callback('#&lt;(a)(.*?)&gt;(.*?)&lt;/a&gt;#i',array(&$this,'_safe_string_callback'),$str);
                     $str = preg_replace_callback('#&lt;(img)(.*?)&gt;#i',array(&$this,'_safe_string_callback'),$str);
+                    $str = nl2br($str);
                 break;
 
                 case SAFE_STRING_FULLHTML:
@@ -155,7 +157,7 @@ class SafeString
 
                 case SAFE_STRING_TEXT:
                 default:
-                    $str = htmlentities($str,ENT_QUOTES,$this->charset);
+                    $str = nl2br(htmlentities($str,ENT_QUOTES,$this->charset));
                 break;
             }
         }

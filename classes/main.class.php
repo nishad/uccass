@@ -24,8 +24,8 @@ session_start();
 
 //Set Error Reporting Level to not
 //show notices or warnings
-error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-//error_reporting(E_ALL);
+//error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+error_reporting(E_ALL);
 
 //Turn off runtime escaping of quotes
 set_magic_quotes_runtime(0);
@@ -61,6 +61,7 @@ define('ANSWER_TYPE_S','S');    //Textbox (sentence)
 define('ANSWER_TYPE_N','N');    //None
 define('ANSWER_TYPE_MS','MS');  //Multiple choice, single answer
 define('ANSWER_TYPE_MM','MM');  //Multiple choice, multiple answer
+define('LABEL_PREFIX','L');
 
 //Orientation Types
 define('ANSWER_ORIENTATION_H','H'); //Horizontal
@@ -82,6 +83,11 @@ define('EXPORT_CSV_TEXT',1);
 define('EXPORT_CSV_NUMERIC',2);
 define('MULTI_ANSWER_SEPERATOR',', ');
 
+//HTML Constants
+define('BR','<br />');
+define('NBSP','&nbsp;');
+define('NL',"\n");
+
 class UCCASS_Main
 {
     function UCCASS_Main()
@@ -92,9 +98,15 @@ class UCCASS_Main
     *********************/
     function load_configuration()
     {
+        require('language.default.php');
+        $this->lang = &$lang;
+
         //Ensure install.php file has be removed
         if(!isset($_REQUEST['config_submit']) && file_exists('install.php'))
-        { $this->error("WARNING: install.php file still exists. Survey System will not run with this file present. Click <a href=\"install.php\">here</a> to run the installation program or move/rename the install.php file so that the installation program can not be re-run."); return; }
+        {
+            $this->error($this->lang['install_warning']);
+            return;
+        }
 
         $ini_file = 'survey.ini.php';
         //Load values from .ini. file
@@ -102,13 +114,13 @@ class UCCASS_Main
         {
             $this->CONF = @parse_ini_file($ini_file);
             if(count($this->CONF) == 0)
-            { $this->error("Error parsing {$ini_file} file"); return; }
+            { $this->error($this->lang['config_parse_error']); return; }
         }
         else
-        { $this->error("Cannot find {$ini_file}"); return; }
+        { $this->error($this->lang['config_not_found']); return; }
 
         //Version of Survey System
-        $this->CONF['version'] = 'v1.8.1';
+        $this->CONF['version'] = $this->lang['version'];
 
         //Default path to Smarty
         if(!isset($this->CONF['smarty_path']) || $this->CONF['smarty_path'] == '')
@@ -123,14 +135,14 @@ class UCCASS_Main
         if(file_exists($adodb_file))
         { require($this->CONF['adodb_path'] . '/adodb.inc.php'); }
         else
-        { $this->error("Cannot find file: $adodb_file"); return; }
+        { $this->error($this->lang['file_not_found'] . ': ' . $adodb_file); return; }
 
         //Load Smarty Files
         $smarty_file = $this->CONF['smarty_path'] . '/Smarty.class.php';
         if(file_exists($smarty_file))
         { require($this->CONF['smarty_path'] . '/Smarty.class.php'); }
         else
-        { $this->error("Cannot find file: $smarty_file"); return; }
+        { $this->error($this->lang['file_not_found'] . ': ' . $smarty_file); return; }
 
         //Create Smarty object and set
         //paths within object
@@ -140,12 +152,9 @@ class UCCASS_Main
         $this->smarty->config_dir      =  $this->CONF['smarty_path'] . '/configs';         // directory where config files are located
         $this->smarty->plugins_dir     =  array($this->CONF['smarty_path'] . '/plugins');  // plugin directories
 
-        if(!$this->set_template_paths($this->CONF['default_template']))
-        { $this->error("WARNING: Cannot find default template path. Expecting: {$this->CONF['template_path']}"); return; }
-
         //Ensure templates_c directory is writable
         if(!is_writable($this->smarty->compile_dir))
-        { $this->error("WARNING: Compiled template directory is not writable ({$this->smarty->compile_dir}). Please refer to the installation document for instructions."); return; }
+        { $this->error($lang['template_path_writable_warning']); return; }
 
         //If SAFE_MODE is ON in PHP, turn off subdirectory use for Smarty
         if(ini_get('safe_mode'))
@@ -156,34 +165,44 @@ class UCCASS_Main
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
         $conn = $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
         if(!$conn)
-        { $this->error('Error connecting to database: '. $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_connect_error'] . $this->db->ErrorMsg()); return; }
 
-        $this->CONF['orientation'] = array('Vertical','Horizontal','Dropdown','Matrix');
-        $this->CONF['text_modes'] = array('Text Only','Limited HTML','Full HTML');
-        $this->CONF['dependency_modes'] = array('Hide','Require','Show');
+        //Create SafeString object for escaping user text
+        require($this->CONF['path'] . '/classes/safestring.class.php');
+        $this->SfStr = new SafeString($this->CONF['db_type'],$this->CONF['charset']);
 
-        //Validate and set default survey and user text modes
+        //Set template, html and image paths/directories into configuration
+        if(!$this->set_template_paths($this->CONF['default_template']))
+        { $this->error($this->lang['template_path_warning'] . $this->CONF['template_path']); return; }
+
+        $this->SfStr->setHTML($this->CONF['html']);
+        $this->SfStr->setImagesHTML($this->CONF['images_html']);
+
+        //Define variables
+        $this->CONF['orientation'] = array($this->lang['vertical'],$this->lang['horizontal'],$this->lang['dropdown'],$this->lang['matrix']);
+        $this->CONF['text_modes'] = array($this->lang['text_only'],$this->lang['limited_html'],$this->lang['full_html']);
+        $this->CONF['dependency_modes'] = array($this->lang['hide'],$this->lang['require'],$this->lang['show']);
+
+        //Validate and set default survey text modes
         $this->CONF['survey_text_mode'] = (int)$this->CONF['survey_text_mode'];
         if($this->CONF['survey_text_mode'] < 0 || $this->CONF['survey_text_mode'] > 2)
         { $this->CONF['survey_text_mode'] = 0; }
 
+        //Validate and set default user text mode
         $this->CONF['user_text_mode'] = (int)$this->CONF['user_text_mode'];
         if($this->CONF['user_text_mode'] < 0 || $this->CONF['user_text_mode'] > 2)
         { $this->CONF['user_text_mode'] = 0; }
 
+        //Set default value on permission to create new surveys (default is private)
         if(strcasecmp($this->CONF['create_access'],'public')==0)
         { $this->CONF['create_access'] = 0; }
         else
         { $this->CONF['create_access'] = 1; }
 
+        //Check session for admin_priv flag and if present, set configuration
+        //flag to show Admin links
         if(isset($_SESSION['priv'][0][ADMIN_PRIV]))
         { $this->CONF['show_admin_link'] = 1; }
-
-        //Create SafeString object for escaping user text
-        require($this->CONF['path'] . '/classes/safestring.class.php');
-        $this->SfStr = new SafeString($this->CONF['db_type'],$this->CONF['charset']);
-        $this->SfStr->setHTML($this->CONF['html']);
-        $this->SfStr->setImagesHTML($this->CONF['images_html']);
 
         //Assign configuration values to template
         $this->smarty->assign_by_ref('conf',$this->CONF);
@@ -196,24 +215,58 @@ class UCCASS_Main
     *********************/
     function set_template_paths($template)
     {
-        $this->template = $template;
+        //Look in URL or Form data for "sid" and load survey template
+        $sid = 0;
+        if(isset($_GET['sid']))
+        { $sid = (int)$_GET['sid']; }
+        elseif(isset($_POST['sid']))
+        { $sid = (int)$_POST['sid']; }
 
-        $this->CONF['template_path'] = $this->CONF['path'] . '/templates/' . $template;
-        if(!file_exists($this->CONF['template_path']))
-        { return(FALSE); }
-
-        $this->CONF['template_html'] = $this->CONF['html'] . '/templates/' . $template;
-
-        if(file_exists($this->CONF['template_path'] . '/images'))
+        if($sid)
         {
-            $this->CONF['images_html'] = $this->CONF['html'] . '/templates/' . $template . '/images';
-            $this->CONF['images_path'] = $this->CONF['path'] . '/templates/' . $template . '/images';
+            //Retrieve template for passed "sid"
+            $query = "SELECT name, template, survey_text_mode FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = {$sid}";
+            $rs = $this->db->Execute($query);
+            if($rs === FALSE)
+            { $this->error($this->lang['db_connect_error'] . $this->db->ErrorMsg()); return; }
+            if($r = $rs->FetchRow($rs))
+            {
+                $this->CONF['template'] = $r['template'];
+                $this->CONF['survey_name'] = $this->SfStr->getSafeString($r['name'],$r['survey_text_mode']);
+                $this->CONF['sid'] = $sid;
+            }
         }
         else
         {
-            $this->CONF['images_html'] = $this->CONF['html'] . '/templates/' . $template;
-            $this->CONF['images_path'] = $this->CONF['path'] . '/templates/' . $template;
+            //If no "sid" detected, load template that was passed
+            $this->CONF['template'] = $template;
         }
+
+        //Set template path into configuration array and ensure template directory exists
+        $this->CONF['template_path'] = $this->CONF['path'] . '/templates/' . $this->CONF['template'];
+        if(!file_exists($this->CONF['template_path']))
+        { return(FALSE); }
+
+        //Load HTTP path to site and template
+        $this->CONF['template_html'] = $this->CONF['html'] . '/templates/' . $this->CONF['template'];
+
+        //Check for images directory within template
+        if(file_exists($this->CONF['template_path'] . '/images'))
+        {
+            //Set image paths to images folder within template
+            $this->CONF['images_html'] = $this->CONF['html'] . '/templates/' . $this->CONF['template'] . '/images';
+            $this->CONF['images_path'] = $this->CONF['path'] . '/templates/' . $this->CONF['template'] . '/images';
+        }
+        else
+        {
+            //No image folder exists in template, so set image paths to template folder itself
+            $this->CONF['images_html'] = $this->CONF['html'] . '/templates/' . $this->CONF['template'];
+            $this->CONF['images_path'] = $this->CONF['path'] . '/templates/' . $this->CONF['template'];
+        }
+
+        //Include language file for chosen template
+        include($this->CONF['template_path'] . '/language.tpl');
+        $this->lang = &$lang;
 
         return(TRUE);
     }
@@ -228,10 +281,10 @@ class UCCASS_Main
         if(is_object($this->smarty))
         {
             $this->smarty->assign("error",$msg);
-            echo $this->smarty->fetch($this->template.'/error.tpl');
+            echo $this->smarty->fetch($this->CONF['template'].'/error.tpl');
         }
         else
-        { echo "Error: $msg"; exit(); }
+        { echo ucfirst($this->lang['error']) . ": {$msg}"; exit(); }
     }
 
     /**************
@@ -281,11 +334,11 @@ class UCCASS_Main
             {
                 case MSGTYPE_ERROR:
                     $this->smarty->assign_by_ref('error',$_SESSION['message']['text']);
-                    $retval = $this->smarty->fetch($this->template.'/error.tpl');
+                    $retval = $this->smarty->fetch($this->CONF['template'].'/error.tpl');
                 break;
                 default:
                     $this->smarty->assign_by_ref('message',$_SESSION['message']);
-                    $retval = $this->smarty->fetch($this->template.'/message.tpl');
+                    $retval = $this->smarty->fetch($this->CONF['template'].'/message.tpl');
                 break;
             }
             unset($_SESSION['message']);
@@ -332,7 +385,7 @@ class UCCASS_Main
         { $values['title'] = $this->SfStr->getSafeString($title,SAFE_STRING_TEXT); }
 
         $this->smarty->assign_by_ref('values',$values);
-        return $this->smarty->fetch($this->template.'/main_header.tpl') . $this->showMessage();
+        return $this->smarty->fetch($this->CONF['template'].'/main_header.tpl') . $this->showMessage();
     }
 
     /*********
@@ -344,7 +397,7 @@ class UCCASS_Main
         $this->db->Close();
 
         //Return footer template
-        return $this->smarty->fetch($this->template.'/main_footer.tpl');
+        return $this->smarty->fetch($this->CONF['template'].'/main_footer.tpl');
     }
 
     /*************************
@@ -376,7 +429,7 @@ class UCCASS_Main
 
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { return $this->error("Error getting answer values: " . $this->db->ErrorMsg()); }
+            { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
             while($r = $rs->FetchRow($rs))
             {
@@ -435,7 +488,7 @@ class UCCASS_Main
 
         $this->smarty->assign_by_ref("answers",$answers);
 
-        $retval = $this->smarty->fetch($this->template.'/display_answers.tpl');
+        $retval = $this->smarty->fetch($this->CONF['template'].'/display_answers.tpl');
 
         return $retval;
     }
@@ -494,7 +547,7 @@ class UCCASS_Main
             $query = "SELECT access_control, public_results, survey_limit_times, survey_limit_seconds FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid=$sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Error getting access control setting: ' . $this->db->ErrorMsg()); }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
             elseif($r = $rs->FetchRow($rs))
             {
                 $_SESSION['access_control'][$sid] = $r['access_control'];
@@ -566,7 +619,7 @@ class UCCASS_Main
 
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Error retrieving user permissions: ' . $this->db->ErrorMsg()); return FALSE; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
 
             if($r = $rs->FetchRow($rs))
             {
@@ -591,7 +644,7 @@ class UCCASS_Main
                         $query = "SELECT COUNT(uid) AS count_uid FROM {$this->CONF['db_tbl_prefix']}completed_surveys WHERE uid={$r['uid']} AND completed > $lim GROUP BY uid";
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
-                        { $this->error('Error getting count of completed surveys: ' . $this->db->ErrorMsg()); return FALSE; }
+                        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
                         elseif($r2 = $rs->FetchRow($rs))
                         {
                             if($r2['count_uid'] < $numallowed)
@@ -638,7 +691,7 @@ class UCCASS_Main
             $query = "SELECT uid, name, email, take_priv, results_priv FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND invite_code = {$input['invite_code']}";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Error getting permissions while checking invitation code: ' . $this->db->ErrorMsg()); return FALSE; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
             elseif($r = $rs->FetchRow($rs))
             {
                 if($priv == TAKE_PRIV && $numallowed)
@@ -651,7 +704,7 @@ class UCCASS_Main
                     $query = "SELECT COUNT(uid) AS count_uid FROM {$this->CONF['db_tbl_prefix']}completed_surveys WHERE uid={$r['uid']} AND completed > $lim GROUP BY uid";
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
-                    { $this->error('Error getting count of completed surveys: ' . $this->db->ErrorMsg()); return FALSE; }
+                    { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
                     elseif($r2 = $rs->FetchRow($rs))
                     {
                         if($r2['count_uid'] < $numallowed)
@@ -734,7 +787,7 @@ class UCCASS_Main
         $query = "SELECT COUNT(sid) as count_sid FROM {$this->CONF['db_tbl_prefix']}ip_track WHERE ip = $ip AND sid = $sid $criteria GROUP BY sid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Unable to check for ip address: ' . $this->db->ErrorMsg()); }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         elseif($r = $rs->FetchRow($rs))
         {
             if($r['count_sid'] < $numallowed)
@@ -766,7 +819,7 @@ class UCCASS_Main
             $query = "SELECT access_control FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid=$sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Unable to get access control setting for survey: ' . $this->db->ErrorMsg()); }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
             elseif($r = $rs->FetchRow($rs))
             { $retval = $r['access_control']; }
         }
@@ -779,7 +832,7 @@ class UCCASS_Main
         //set an error message and show login form again.
         if(isset($_REQUEST['username']))
         {
-            $data['message'] = 'Incorrect Username and/or Password';
+            $data['message'] = $this->lang['wrong_login_info'];
             $data['username'] = $this->SfStr->getSafeString($_REQUEST['username'],SAFE_STRING_TEXT);
         }
         //Set required data for login page
@@ -794,14 +847,14 @@ class UCCASS_Main
             }
         }
         $this->smarty->assign_by_ref('data',$data);
-        return $this->smarty->Fetch($this->template.'/login.tpl');
+        return $this->smarty->Fetch($this->CONF['template'].'/login.tpl');
     }
 
     function showInvite($page, $hidden)
     {
         if(isset($_REQUEST['invite_code']))
         {
-            $data['message'] = 'Incorrect invitation code.';
+            $data['message'] = $this->lang['wrong_invite_code'];
             $data['invite_code'] = $this->SfStr->getSafeString($_REQUEST['invite_code'],SAFE_STRING_TEXT);
         }
 
@@ -816,7 +869,7 @@ class UCCASS_Main
         }
 
         $this->smarty->assign_by_ref('data',$data);
-        return $this->smarty->Fetch($this->template.'/invite_code.tpl');
+        return $this->smarty->Fetch($this->CONF['template'].'/invite_code.tpl');
     }
 
     function setError($error)
@@ -834,6 +887,9 @@ class UCCASS_Main
 
     function isError()
     { return count($this->error); }
+
+    function lang($key)
+    { return (isset($this->lang[$key])) ? $this->lang[$key] : ''; }
 }
 
 ?>

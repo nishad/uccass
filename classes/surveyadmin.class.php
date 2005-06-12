@@ -97,7 +97,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
         }
 
         $this->smarty->assign_by_ref('data',$data);
-        $retval = $this->smarty->Fetch($this->template.'/'.$template);
+        $retval = $this->smarty->Fetch($this->CONF['template'].'/'.$template);
 
         return $retval;
     }

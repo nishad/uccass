@@ -8,7 +8,9 @@
       &nbsp;|&nbsp;
       <a href="{$conf.html}/edit_answer.php?sid={$data.sid}">Edit Answer Type</a>
       &nbsp;|&nbsp;
-      <a href="{$conf.html}/edit_survey.php?sid={$data.sid}&mode=access_control">Access Control</a>
+      <a href="{$conf.html}/access_control.php?sid={$data.sid}">Access Control</a>
+      &nbsp;|&nbsp;
+      <a href="{$conf.html}/reports.php?sid={$data.sid}">Reports</a>
       &nbsp;|&nbsp;
       <a href="{$conf.html}/survey.php?sid={$data.sid}&preview_survey=1" target="_blank">Preview Survey</a>
       &nbsp;|&nbsp;

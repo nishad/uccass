@@ -86,7 +86,7 @@ class UCCASS_Survey extends UCCASS_Main
         if(isset($survey) && count($survey) > 0)
         { $this->smarty->assign_by_ref("survey",$survey); }
 
-        $retval = $this->smarty->fetch($this->template.'/available_surveys.tpl');
+        $retval = $this->smarty->fetch($this->CONF['template'].'/available_surveys.tpl');
 
         return $retval;
     }
@@ -150,7 +150,7 @@ class UCCASS_Survey extends UCCASS_Main
 
         //Retrieve survey information
         $rs = $this->db->Execute("SELECT s.name, s.start_date, s.end_date, s.redirect_page,
-            s.active, MAX(q.page) AS max_page, s.template, s.survey_text_mode, s.user_text_mode, s.time_limit
+            s.active, MAX(q.page) AS max_page, s.survey_text_mode, s.user_text_mode, s.time_limit
             FROM {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
             WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid");
 
@@ -166,15 +166,8 @@ class UCCASS_Survey extends UCCASS_Main
         $survey = array_merge($survey,$r);
         //Set survey name to be used outside
         //of class to set page title
-        $this->survey_name = $this->SfStr->getSafeString($r['name']);
         $survey['name'] = $this->SfStr->getSafeString($survey['name'],$survey['survey_text_mode']);
         $_SESSION['take_survey']['redirect_page'] = $r['redirect_page'];
-
-        if($this->CONF['default_template'] != $survey['template'])
-        {
-            if(!$this->set_template_paths($survey['template']))
-            { $this->error("Unable to load template for survey. Expecting to find template in {$this->CONF['template_path']}"); return; }
-        }
 
         $survey['total_pages'] = $r['max_page'];
         $now = time();
@@ -466,7 +459,7 @@ class UCCASS_Survey extends UCCASS_Main
                         if(strpos($r['question'],LOOKBACK_START_DELIMITER.LOOKBACK_TEXT)!== FALSE)
                         { $q['question'] = $this->_process_Lookback($r['question'],$survey['survey_text_mode'],$survey['user_text_mode']); }
                         else
-                        { $q['question'] = nl2br($this->SfStr->getSafeString($r['question'],$survey['survey_text_mode'])); }
+                        { $q['question'] = $this->SfStr->getSafeString($r['question'],$survey['survey_text_mode']); }
 
                         $q['num_answers'] = $r['num_answers'];
 
@@ -481,7 +474,7 @@ class UCCASS_Survey extends UCCASS_Main
                             if($r['num_answers'] > 1)
                             { $q['req_label'] = $r['num_required']; }
 
-                            $q['required_text'] = $this->smarty->fetch($this->template.'/question_required.tpl');
+                            $q['required_text'] = $this->smarty->Fetch($this->CONF['template'].'/question_required.tpl');
                         }
 
                         $q['label'] = $this->SfStr->getSafeString($r['label'],$survey['survey_text_mode']);
@@ -597,17 +590,17 @@ class UCCASS_Survey extends UCCASS_Main
 
                         if($end_matrix)
                         {
-                            $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MF.tpl');
+                            $question_text .= $this->smarty->Fetch($this->CONF['template'].'/take_survey_question_MF.tpl');
                             $end_matrix = FALSE;
                         }
 
                         if($begin_matrix)
                         {
-                            $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MH.tpl');
+                            $question_text .= $this->smarty->Fetch($this->CONF['template'].'/take_survey_question_MH.tpl');
                             $begin_matrix = FALSE;
                         }
 
-                        $question_text .= $this->smarty->fetch($this->template.'/'.$template);
+                        $question_text .= $this->smarty->Fetch($this->CONF['template'].'/'.$template);
 
                         $x++;
                     }
@@ -618,7 +611,7 @@ class UCCASS_Survey extends UCCASS_Main
                     $matrix_aid = FALSE;
                     $end_matrix = FALSE;
                     $begin_matrix = FALSE;
-                    $question_text .= $this->smarty->fetch($this->template.'/take_survey_question_MF.tpl');
+                    $question_text .= $this->smarty->Fetch($this->CONF['template'].'/take_survey_question_MF.tpl');
                 }
 
                 $_SESSION['take_survey']['qstart'][$page+1] = $qstart + $x - $no_counts;
@@ -647,7 +640,7 @@ class UCCASS_Survey extends UCCASS_Main
         if(isset($message))
         { $this->smarty->assign('message',$message); }
 
-        return $this->smarty->fetch($this->template.'/take_survey.tpl');
+        return $this->smarty->Fetch($this->CONF['template'].'/take_survey.tpl');
     }
 
     /*****************************************
@@ -719,7 +712,6 @@ class UCCASS_Survey extends UCCASS_Main
         {
             case AC_COOKIE:
                 $name = 'uccass'.md5($survey['sid']);
-                $now = time();
 
                 if(isset($_COOKIE[$name]))
                 {
@@ -733,11 +725,10 @@ class UCCASS_Survey extends UCCASS_Main
                 { $value = array($now); }
 
                 $value = serialize($value);
-                setcookie($name,$value,time()+31557600);
+                setcookie($name,$value,$now+31557600);
             break;
             case AC_INVITATION:
             case AC_USERNAMEPASSWORD:
-                $now = time();
                 $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}completed_surveys (uid, sid, completed) VALUES ({$_SESSION['priv'][$survey['sid']]['uid']},{$survey['sid']},$now)";
                 $rs = $this->db->Execute($query);
             break;

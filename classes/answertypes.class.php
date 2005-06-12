@@ -57,22 +57,22 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             if(strlen($_REQUEST['name']) > 0)
             { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
             else
-            { $error .= 'Please enter a name. '; }
+            { $error .= $this->lang['enter_name']; }
 
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
 
             switch($_REQUEST['type'])
             {
-                case 'T':
-                case 'S':
-                case 'N':
+                case ANSWER_TYPE_T:
+                case ANSWER_TYPE_S:
+                case ANSWER_TYPE_N:
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     if(isset($_REQUEST['add_answers_submit']))
-                    { $error .= ' Cannot add answers to types T, S, or N.'; }
+                    { $error .= $this->lang['add_answer_error']; }
                 break;
-                case 'MM':
-                case 'MS':
-                case 'S':
+                case ANSWER_TYPE_MM:
+                case ANSWER_TYPE_MS:
+                case ANSWER_TYPE_S:
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
 
                     if(isset($_REQUEST['value']) && is_array($_REQUEST['value']) &&
@@ -89,7 +89,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                                 $image_key = array_search($_REQUEST['image'][$key],$input['allowable_images']);
                                 if($image_key === FALSE)
-                                { $error .= 'Invalid image name. '; }
+                                { $error .= $this->lang['bad_image']; }
                                 else
                                 {
                                     $input['image'][] = $this->SfStr->getSafeString($_REQUEST['image'][$key],$ss_type);
@@ -104,10 +104,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         }
 
                         if(count($input['value']) == 0)
-                        { $error .= ' Answer values must be provided.'; }
+                        { $error .= $this->lang['answer_value_error']; }
                     }
                     else
-                    { $error .= ' Bad display answer value or numeric value was entered.'; }
+                    { $error .= $this->lang['bad_answer-numeric_value']; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -118,7 +118,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     if($input['num_answers'] > 99)
                     {
                         $input['num_answers'] = 99;
-                        $error .= ' Only 99 answers are allowed.';
+                        $error .= $this->lang['only_99_allowed'];
                         $input['show_add_answers'] = FALSE;
                     }
                     elseif($input['num_answers'] == 99)
@@ -126,7 +126,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= 'Incorrect Answer Type';
+                    $error .= $this->lang['bad_answer_type'];
                 break;
             }
 
@@ -137,7 +137,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                           ($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']})";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
-                { $this->error("Error inserting new answer: " . $this->db->ErrorMsg()); }
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
                 else
                 {
                     if($c = count($input['value']))
@@ -154,7 +154,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                         if($rs === FALSE)
                         {
-                            $this->error("Error inserting answer values: " . $this->db->ErrorMsg());
+                            $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg());
                             $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid");
                         }
                     }
@@ -177,8 +177,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             }
         }
 
-        $selected[$_REQUEST['type']] = ' selected';
-        $this->smarty->assign('selected',$selected);
+        if(isset($_REQUEST['type']))
+        {
+            $selected[$_REQUEST['type']] = ' selected';
+            $this->smarty->assign('selected',$selected);
+        }
 
         if(strlen($error)>0)
         {
@@ -192,6 +195,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $input['numeric_value'][$key] = $this->SfStr->getSafeString($_REQUEST['numeric_value'][$key],SAFE_STRING_TEXT);
                 $input['image'][$key][$_REQUEST['image'][$key]] = ' selected';
             }
+
             $show['error'] = $error;
         }
         $data['sid'] = $input['sid'];
@@ -200,10 +204,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $this->smarty->assign_by_ref('show',$show);
         $this->smarty->assign_by_ref('data',$data);
 
-        $data['links'] = $this->smarty->fetch($this->template.'/edit_survey_links.tpl');
-        $data['content'] = $this->smarty->fetch($this->template.'/edit_survey_new_at.tpl');
+        $data['links'] = $this->smarty->fetch($this->CONF['template'].'/edit_survey_links.tpl');
+        $data['content'] = $this->smarty->fetch($this->CONF['template'].'/edit_survey_new_at.tpl');
 
-        $retval = $this->smarty->fetch($this->template.'/edit_survey.tpl');
+        $retval = $this->smarty->fetch($this->CONF['template'].'/edit_survey.tpl');
 
         return $retval;
     }
@@ -270,7 +274,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error("Error getting survey count: " . $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
         $r = $rs->FetchRow($rs);
         if($r['c'] > 0)
         {
@@ -287,7 +291,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             $query1 = "SELECT aid FROM {$this->CONF['db_tbl_prefix']}answer_types at WHERE at.sid = $sid";
             $rs = $this->db->Execute($query1);
             if($rs === FALSE)
-            { $this->error('Error getting aid values from answer_types table: ' . $this->db->ErrorMsg()); return; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
             else
             {
                 while($r = $rs->FetchRow($rs))
@@ -296,13 +300,13 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
                 $rs = $this->db->Execute($query2);
                 if($rs === FALSE)
-                { $this->error('Error deleting answer values: ' . $this->db->ErrorMsg()); return; }
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
             }
 
             $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid AND sid = $sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Error deleting answer types: ' . $this->db->ErrorMsg()); return; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
             $show['del_message'] = TRUE;
             $this->smarty->assign_by_ref('show',$show);
@@ -310,22 +314,22 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             return $this->edit_answer_type_choose($sid);
         }
         elseif(isset($_REQUEST['delete_submit']))
-        { $show['message'] = "Checkbox must be selected in order to delete answer."; }
+        { $show['message'] = $this->lang['must_checkbox']; }
 
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
-            $error = '';
-            $load_answer = FALSE;
-
             if(isset($_REQUEST['add_answers_submit']))
             { $ss_type = SAFE_STRING_TEXT; }
             else
             { $ss_type = SAFE_STRING_DB; }
 
+            $error = '';
+            $load_answer = FALSE;
+
             if(strlen($_REQUEST['name']) > 0)
             { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
             else
-            { $error .= "Please enter a name. "; }
+            { $error .= $this->lang['enter_name']; }
 
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
 
@@ -335,24 +339,24 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
             switch($_REQUEST['type'])
             {
-                case 'T':
-                case 'S':
-                case 'N':
+                case ANSWER_TYPE_T:
+                case ANSWER_TYPE_S:
+                case ANSWER_TYPE_N:
                     $input['value'] = '';
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
                     if(isset($_REQUEST['add_answers_submit']))
-                    { $error .= ' Cannot add answers to types T, S, or N.'; }
+                    { $error .= $this->lang['add_answer_error']; }
                     $input['show_add_answers'] = FALSE;
                     $input['num_answers'] = 0;
                     if(isset($_REQUEST['value']))
                     { $input['delete_avid'] = array_keys($_REQUEST['value']); }
                     $load_answer = TRUE;
                 break;
-                case 'MM':
-                case 'MS':
-                case 'S':
+                case ANSWER_TYPE_MM:
+                case ANSWER_TYPE_MS:
+                case ANSWER_TYPE_S:
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
@@ -380,7 +384,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                 $user_image = $_REQUEST['image'][$avid];
                                 $image_key = array_search($user_image,$input['allowable_images']);
                                 if($image_key === FALSE)
-                                { $error .= 'Invalid image selection. '; }
+                                { $error .= $this->lang['bad_image_sel']; }
                                 else
                                 {
                                     $input['image'][] = $this->SfStr->getSafeString($user_image,$ss_type);
@@ -403,10 +407,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         }
 
                         if(count($input['value']) == 0)
-                        { $error .= ' Answer values must be provided.'; }
+                        { $error .= $lang['answer_value_error']; }
                     }
                     else
-                    { $error .= ' Bad display value or numeric value entered.'; }
+                    { $error .= $lang['bad_answer-numeric_value']; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -420,7 +424,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     if($input['num_answers'] > 99)
                     {
                         $input['num_answers'] = 99;
-                        $error .= ' Only 99 answers are allowed.';
+                        $error .= $lang['only_99_allowed'];
                         $input['show_add_answers'] = FALSE;
                     }
                     elseif($input['num_answers'] == 99)
@@ -440,7 +444,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= "Incorrect Answer Type";
+                    $error .= $lang['bad_answer_type'];
                 break;
             }
 
@@ -452,21 +456,21 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                           WHERE aid = $aid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
-                { $this->error("Error updating answer: " . $this->db->ErrorMsg()); }
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
                 else
                 {
                     $query = array();
 
                     switch($_REQUEST['type'])
                     {
-                        case 'T':
-                        case 'S':
-                        case 'N':
+                        case ANSWER_TYPE_T:
+                        case ANSWER_TYPE_S:
+                        case ANSWER_TYPE_N:
                             $query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid";
                         break;
 
-                        case 'MS':
-                        case 'MM':
+                        case ANSWER_TYPE_MS:
+                        case ANSWER_TYPE_MM:
 
                             $sql_value = '';
                             $sql_numeric_value = '';
@@ -512,7 +516,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     {
                         $rs = $this->db->Execute($q);
                         if($rs === FALSE)
-                        { $this->error("Error updating answer values: " . $this->db->ErrorMsg()); }
+                        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
                     }
 
                     $load_answer = TRUE;
@@ -528,7 +532,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             $query = "SELECT aid, name, type, label, sid FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error("Error selecting answer type information: " . $this->db->ErrorMsg()); return;}
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
             if($r = $rs->FetchRow($rs))
             {
                 $answer = array();
@@ -541,7 +545,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $query = "SELECT avid, value, numeric_value, image FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid ORDER BY avid ASC";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
-                { $this->error('Error getting answer values: ' . $this->db->ErrorMsg()); return;}
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
                 if($r = $rs->FetchRow($rs))
                 {
                     do{
@@ -568,7 +572,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $this->smarty->assign_by_ref('answer',$answer);
             }
             else
-            { $error = "Invalid answer type"; }
+            { $error = $lang['bad_answer_type']; }
         }
 
         if(!empty($error))
@@ -589,13 +593,13 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $data['sid'] = $input['sid'];
         $this->smarty->assign_by_ref('data',$data);
         $this->smarty->assign_by_ref('show',$show);
-        $data['links'] = $this->smarty->Fetch($this->template.'/edit_survey_links.tpl');
+        $data['links'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_links.tpl');
 
 
 
-        $data['content'] = $this->smarty->Fetch($this->template.'/edit_survey_edit_at.tpl');
+        $data['content'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_edit_at.tpl');
 
-        $retval = $this->smarty->Fetch($this->template.'/edit_survey.tpl');
+        $retval = $this->smarty->Fetch($this->CONF['template'].'/edit_survey.tpl');
 
         return $retval;
     }
@@ -611,7 +615,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $query = "SELECT aid, name FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = {$answer['sid']} ORDER BY name ASC";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error("Error selecting answers: " . $this->db->ErrorMsg()); }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         while($r = $rs->FetchRow())
         {
             $answer['aid'][] = $r['aid'];
@@ -622,13 +626,13 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $this->smarty->assign('answer',$answer);
         $this->smarty->assign_by_ref('data',$data);
 
-        $data['links'] = $this->smarty->Fetch($this->template.'/edit_survey_links.tpl');
+        $data['links'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_links.tpl');
 
-        $data['content'] = $this->smarty->Fetch($this->template.'/edit_survey_edit_atc.tpl');
+        $data['content'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_edit_atc.tpl');
 
         $this->smarty->assign_by_ref('show',$show);
 
-        $retval = $this->smarty->Fetch($this->template.'/edit_survey.tpl');
+        $retval = $this->smarty->Fetch($this->CONF['template'].'/edit_survey.tpl');
 
         return $retval;
     }

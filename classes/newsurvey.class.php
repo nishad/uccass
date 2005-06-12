@@ -37,7 +37,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
             }
             $data['page'] = 'new_survey.php';
             $this->smarty->assign_by_ref('data',$data);
-            return $this->smarty->Fetch($this->template.'/login.tpl');
+            return $this->smarty->Fetch($this->CONF['template'].'/login.tpl');
         }
 
         //If Clear button is pressed, reset
@@ -180,7 +180,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
         { $this->smarty->assign('error',$error); }
 
         //Retrieve parsed smarty template
-        $retval = $this->smarty->fetch($this->template.'/add_survey.tpl');
+        $retval = $this->smarty->Fetch($this->CONF['template'].'/add_survey.tpl');
 
         return $retval;
     }
@@ -223,8 +223,8 @@ class UCCASS_NewSurvey extends UCCASS_Main
 
             //CREATE DEFAULT USER
             $uid = $this->db->GenID($this->CONF['db_tbl_prefix'].'users_sequence');
-            $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}users (uid, sid, username, password, edit_priv) VALUES
-                      ($uid, $sid, {$s['username']}, {$s['password']}, 1)";
+            $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}users (uid, sid, username, password, edit_priv, results_priv) VALUES
+                      ($uid, $sid, {$s['username']}, {$s['password']}, 1, 1)";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { $this->error('Error creating default user with edit privileges: ' . $this->db->ErrorMsg()); }

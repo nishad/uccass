@@ -1,4 +1,23 @@
-    <form method="POST" action="{$conf.html}/edit_survey.php">
+      {literal}
+      <script type="text/JavaScript">
+      function doStuff(el,a)
+      {
+          var cbs=document.user_invitee_form.getElementsByTagName('input');
+          var l=cbs.length;
+          for (var i=0; i<l; i++)
+          {
+              if (cbs[i].type=='checkbox')
+              {
+                  var daName=cbs[i].name;
+
+                  regex = new RegExp(el+'_checkbox\\[x?([0-9]+)\\]');
+                  if (regex.test(daName)) cbs[i].checked=a;
+              }
+          }
+      }
+      </script>
+      {/literal}
+      <form method="POST" name="user_invitee_form" action="{$conf.html}/access_control.php">
       <input type="hidden" name="mode" value="{$data.mode}">
       <input type="hidden" name="sid" value="{$data.sid}">
 
@@ -89,7 +108,9 @@
               <th>View Results</th>
             {/section}
             <th>Edit Survey</th>
-            <th bgcolor="#DDDDDD">Action</th>
+            <th bgcolor="#DDDDDD">
+              Action<input type="checkbox" name="users_all" onclick="doStuff('users',this.checked);">
+            </th>
           </tr>
           {section name="u" loop=$data.users show=TRUE}
             <tr{section name="erruid" loop=1 show=$data.users[u].erruid} style="background-color:red"{/section}>
@@ -153,7 +174,9 @@
               {section name="view_results" loop=1 show=$data.show.results_priv}
                 <th>View Results</th>
               {/section}
-              <th bgcolor="#DDDDDD">Action</th>
+              <th bgcolor="#DDDDDD">
+                Action<input type="checkbox" name="invitee_all" onclick="doStuff('invite',this.checked);">
+              </th>
             </tr>
             {section name="i" loop=$data.invite show=TRUE}
               <tr{section name="erruid" loop=1 show=$data.invite[i].erruid} style="background-color:red"{/section}>

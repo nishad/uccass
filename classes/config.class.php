@@ -28,6 +28,9 @@ class UCCASS_Config
     **************/
     function UCCASS_Config($file = '')
     {
+        require('language.default.php');
+        $this->lang = &$lang;
+
         // If $file was passed, load it
         if($file != '')
         { $this->load_file($file); }
@@ -53,7 +56,7 @@ class UCCASS_Config
                 $ini_file = fread($fp,filesize($file));
                 $ini_file = str_replace("\\","\\\\",$ini_file);
                 $ini_file = preg_replace('/^([a-z0-9_.-]+)\s?=\s?"?([^\r\n]+)?"?$/im',
-                                         "</pre>$1: <input type=\"text\" name=\"$1\" value=\"$2\" size=\"40\"></td></tr><tr><td><pre>\n",
+                                         $this->lang['conf_field_replacement'],
                                          $ini_file);
 
                 //Strip semi-colons from the beginning
@@ -61,31 +64,13 @@ class UCCASS_Config
                 //to the rest of the data.
                 $ini_file = preg_replace('/^;(.*)$/em','@htmlentities(stripslashes("$1"));',$ini_file);
 
-                $this->form = "<html><head><title>UCCASS Configuration</title></head><body>
-                               <form method=\"POST\" action=\"install.php\">
-                               <table cellpadding=\"4\" border=\"1\"><tr><td>
-                               Install Type:
-                                 <select name=\"installation_type\" size=\"1\">
-                                   <option value=\"\">Choose...</option>
-                                   <option value=\"updateconfigonly\">Update Configuration Only</option>
-                                   <option value=\"newinstallation\">New Installation</option>
-                                   <option value=\"upgrade_104\">Upgrade From v1.04</option>
-                                   <option value=\"upgrade_105\">Upgrade From v1.05</option>
-                                   <option value=\"upgrade_106\">Upgrade From v1.06</option>
-                                   <option value=\"upgrade_180\">Upgrade From v1.8.0</option>
-                                 </select>
-                               </td></tr><tr><td>
-                               <pre>{$ini_file}</pre></td></tr>
-                               <tr><td>
-                               <input type=\"submit\" name=\"config_submit\" value=\"Save All Settings\">
-                               </td></tr>
-                               </form>";
+                $this->form = $this->lang['conf_form_begin'] . $ini_file . $this->lang['conf_form_end'];
             }
             else
-            { $this->error("Cannot read configuration file: $file"); return; }
+            { $this->error($this->lang['config_not_read']); return; }
         }
         else
-        { $this->error("Configuration file does not exist: $file"); return; }
+        { $this->error($this->lang['config_not_found']); return; }
 
         fclose($fp);
 
@@ -122,15 +107,15 @@ class UCCASS_Config
                 }
 
                 if(!fwrite($fp,$ini_file))
-                { $this->error("Cannot write to file"); return; }
+                { $this->error($this->lang['config_not_write']); return; }
 
                 fclose($fp);
             }
             else
-            { $this->error("Cannot write to file: $file"); return; }
+            { $this->error($this->lang['config_not_write']); return; }
         }
         else
-        { $this->error("Config file does not exist: $file"); return; }
+        { $this->error($this->lang['config_not_found']); return; }
 
         return TRUE;
     }
@@ -182,8 +167,6 @@ class UCCASS_Config
                         }
                         $query = '';
                     }
-                    if(!empty($query))
-                    { $query .= "\n"; }
                 }
             }
         }
@@ -228,9 +211,7 @@ class UCCASS_Config
     ***************/
     function success()
     {
-        echo "Configuration values have been saved.<br><br>
-              Click on the link below to access the Survey System:
-              <a href=\"{$this->CONF['html']}/index.php\">"
+        echo $this->lang['config_change_success'] . "<a href=\"{$this->CONF['html']}/index.php\">"
               .htmlentities($_POST['site_name'])."</a>";
         return;
     }
@@ -240,12 +221,15 @@ class UCCASS_Config
     ****************/
     function error($msg)
     {
-        echo '<table width="50%" align="center" border="1">
-              <tr><td>Error</td></tr><tr><td>' . $msg . '</td></tr>
-              </table>';
-
+        echo $this->lang['error'] . ': ' . $msg;
         return;
     }
+
+    function lang($key)
+    {
+        return (isset($this->lang[$key])) ? $this->lang[$key] : '';
+    }
+
 }
 
 ?>

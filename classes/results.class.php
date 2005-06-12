@@ -19,6 +19,12 @@
 // Affero General Public License for more details.
 //======================================================
 
+define('ACTION_HIDE_QUESTIONS','hide_questions');
+define('ACTION_SHOW_QUESTIONS','show_questions');
+define('ACTION_SHOW_ALL_QUESTIONS','show_all_questions');
+define('ACTION_FILTER','filter');
+define('ACTION_CLEAR_FILTER','clear_filter');
+
 class UCCASS_Results extends UCCASS_Main
 {
     function UCCASS_Results()
@@ -29,54 +35,50 @@ class UCCASS_Results extends UCCASS_Main
     *************************/
     function survey_results($sid=0)
     {
-        $sid = (int)$sid;
+        $data = array();
+        $survey['sid'] = (int)$sid;
+        $survey['export_csv_text'] = EXPORT_CSV_TEXT;
+        $survey['export_csv_numeric'] = EXPORT_CSV_NUMERIC;
 
-        if(!$this->_CheckAccess($sid,RESULTS_PRIV,"results.php?sid=$sid"))
+        if(!$this->_CheckAccess($sid,RESULTS_PRIV,"results.php?sid={$survey['sid']}"))
         {
-            switch($this->_getAccessControl($sid))
+            switch($this->_getAccessControl($survey['sid']))
             {
                 case AC_INVITATION:
-                    return $this->showInvite('results.php',array('sid'=>$sid));
+                    return $this->showInvite('results.php',array('sid'=>$survey['sid']));
                 break;
                 case AC_USERNAMEPASSWORD:
                 default:
-                    return $this->showLogin('results.php',array('sid'=>$sid));
+                    return $this->showLogin('results.php',array('sid'=>$survey['sid']));
                 break;
             }
         }
 
-        if($sid <= 0)
-        { $this->error("Invalid Survey ID"); return; }
-
-        //defaults
-        $q_num = 1;
+        if(empty($survey['sid']))
+        { $this->error($this->lang['invalid_survey']); return; }
 
         //Retrieve survey information
-        $rs = $this->db->Execute("SELECT name, survey_text_mode
-                                  FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = $sid");
-        if($rs === FALSE) { $this->error('Error retrieving survey information: ' . $this->db->ErrorMsg()); return; }
+        $rs = $this->db->Execute("SELECT name, survey_text_mode, template
+                                  FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid = {$survey['sid']}");
+        if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
         if($r = $rs->FetchRow($rs))
         {
             $survey['name'] = $this->SfStr->getSafeString($r['name'],$r['survey_text_mode']);
-            $survey['sid'] = $sid;
             $survey['survey_text_mode'] = $r['survey_text_mode'];
-
-            //Set class variable of name to use outside of function
-            $this->survey_name = $this->SfStr->getSafeString($r['name'],SAFE_STRING_TEXT);
         }
         else
-        { $this->error("Survey $sid does not exist"); return; }
+        { $this->error($this->lang['invalid_survey']); return; }
 
 
         //if viewing answers to single
         //question with text box
         if(isset($_REQUEST['qid']))
-        { return $this->survey_results_text($sid,$_REQUEST['qid']); }
+        { return $this->survey_results_text($survey['sid'],$_REQUEST['qid']); }
         elseif(isset($_SESSION['results']['page']))
         { unset($_SESSION['results']['page']); }
 
         //Set defaults for show/hide questions
-        $hide_show_where = '';
+        $survey['hide_show_where'] = '';
         $survey['hide_show_questions'] = TRUE;
         $survey['show_all_questions'] = FALSE;
 
@@ -84,27 +86,33 @@ class UCCASS_Results extends UCCASS_Main
         //from session if it's present
         if(isset($_SESSION['hide-show'][$sid]))
         {
-            $hide_show_where = $_SESSION['hide-show'][$sid];
+            $survey['hide_show_where'] = $_SESSION['hide-show'][$sid];
             $survey['show_all_questions'] = TRUE;
             $survey['hide_show_questions'] = FALSE;
         }
 
-        $survey['required'] = $this->smarty->fetch($this->template.'/question_required.tpl');
+        $survey['required'] = $this->smarty->fetch($this->CONF['template'].'/question_required.tpl');
 
         if(isset($_REQUEST['results_action']))
         {
-            $retval = $this->process_results_action($sid);
+            $retval = $this->process_results_action($survey['sid']);
             if($_REQUEST['action'] == 'filter')
             { return $retval; }
         }
 
         if(isset($_REQUEST['filter_submit']))
-        { $this->process_filter($sid); }
-        elseif(!isset($_SESSION['filter'][$sid]))
+        { $this->process_filter($survey['sid'],$survey['survey_text_mode']); }
+        elseif(!isset($_SESSION['filter'][$survey['sid']]))
         {
-            $_SESSION['filter'][$sid] = '';
-            $_SESSION['filter_total'][$sid] = '';
+            $_SESSION['filter'][$survey['sid']] = '';
+            $_SESSION['filter_total'][$survey['sid']] = '';
         }
+
+        //Filter text has already had safe_string() applied
+        if(isset($_SESSION['filter_text'][$survey['sid']]) && strlen($_SESSION['filter_text'][$survey['sid']])>0)
+        { $survey['filter_text'] = $_SESSION['filter_text'][$survey['sid']]; }
+        if(strlen($_SESSION['filter'][$survey['sid']])>0)
+        { $survey['show']['clear_filter'] = TRUE; }
 
         $x = 0;
 
@@ -118,10 +126,10 @@ class UCCASS_Results extends UCCASS_Main
         $survey['maxtime']['seconds']  = 0;
 
         $sql = "SELECT r.quitflag, AVG(r.elapsed_time) AS avgtime, MIN(r.elapsed_time) AS mintime, MAX(r.elapsed_time) AS maxtime
-                FROM {$this->CONF['db_tbl_prefix']}time_limit r WHERE r.sid = $sid {$_SESSION['filter'][$sid]}
+                FROM {$this->CONF['db_tbl_prefix']}time_limit r WHERE r.sid = {$survey['sid']} {$_SESSION['filter'][$survey['sid']]}
                 GROUP BY r.quitflag";
         $rs = $this->db->Execute($sql);
-        if($rs === FALSE) {$this->error('Error getting average, min and max survey times: ' . $this->db->ErrorMsg()); return; }
+        if($rs === FALSE) {$this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
         while($r = $rs->FetchRow($rs))
         {
             if($r['quitflag'])
@@ -140,170 +148,211 @@ class UCCASS_Results extends UCCASS_Main
             }
         }
 
+        $this->smarty->assign_by_ref('survey',$survey);
+
+        if(isset($_GET['report_id']))
+        { $this->_loadCustomReport($_GET['report_id'],$survey); }
+        else
+        { $this->_loadDefaultResults($survey); }
+
+        $retval = $this->smarty->fetch($this->CONF['template'].'/results.tpl');
+
+        if(empty($_SESSION['filter'][$sid]) && isset($_SESSION['filter_text'][$survey['sid']]))
+        { unset($_SESSION['filter_text'][$survey['sid']]); }
+
+        return $retval;
+    }
+
+    function _loadDefaultResults(&$survey)
+    {
+        $data = array();
+        $this->_loadBarGraph($survey,$data);
+        $this->_loadReports($survey);
+
+        $x=0;
+
+        $output['filter'] = $this->smarty->fetch($this->CONF['template'].'/results_filter.tpl');
+        foreach($data as $qid=>$qdata)
+        {
+            $this->smarty->assign_by_ref('qdata',$qdata);
+            $output['question'][$x] = $this->smarty->fetch($this->CONF['template'].'/results_question.tpl');
+            switch($qdata['type'])
+            {
+                case ANSWER_TYPE_MM:
+                case ANSWER_TYPE_MS:
+                    $output['bar_graph'][$x] = $this->smarty->fetch($this->CONF['template'].'/results_bar_graph.tpl');
+                    $output['total_ans'][$x] = $this->smarty->fetch($this->CONF['template'].'/results_total_ans.tpl');
+                    $output['average'][$x] = $this->smarty->fetch($this->CONF['template'].'/results_average.tpl');
+                break;
+
+                case ANSWER_TYPE_T:
+                case ANSWER_TYPE_S:
+                    $output['total_ans'][$x] = $this->smarty->Fetch($this->CONF['template'].'/results_total_ans.tpl');
+                    $output['text'][$x] = $this->smarty->Fetch($this->CONF['template'].'/results_text.tpl');
+                break;
+            }
+            $x++;
+        }
+
+        $this->smarty->assign_by_ref('output',$output);
+    }
+
+    function _loadBarGraph(&$survey,&$data=array(),$qid_array=array())
+    {
+        $q_num = 1;
+        $qid_list = '';
+
+        if(!empty($qid_array))
+        { $qid_list = ' AND q.qid IN (' . implode(',',$qid_array) . ') '; }
+
         //retrieve questions
         $sql = "SELECT q.qid, q.question, q.num_required, q.aid, a.type, a.label, COUNT(r.qid) AS r_total, COUNT(rt.qid) AS rt_total
                 FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results r
                   ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid,
                   {$this->CONF['db_tbl_prefix']}answer_types a
-                WHERE q.sid = $sid and q.aid = a.aid
+                WHERE q.sid = {$survey['sid']} and q.aid = a.aid
                   and ((q.qid = r.qid AND NOT ".$this->db->IfNull('rt.qid',0).") OR (q.qid = rt.qid AND NOT ".$this->db->IfNull('r.qid',0).")
                   OR (NOT ".$this->db->IfNull('r.qid',0)." AND NOT ".$this->db->IfNull('rt.qid',0)."))
-                  $hide_show_where {$_SESSION['filter_total'][$sid]}
+                  {$qid_list} {$survey['hide_show_where']} {$_SESSION['filter_total'][$survey['sid']]}
                 GROUP BY q.qid
                 ORDER BY q.page, q.oid";
+//echo $sql . '<br /><br />';
         $rs = $this->db->Execute($sql);
-        if($rs === FALSE) { $this->error("Error retrieving questions: " . $this->db->ErrorMsg()); return;}
+        if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
 
         while($r = $rs->FetchRow($rs))
         {
-            $qid[$x] = $r['qid'];
-            $question[$x] = nl2br($this->SfStr->getSafeString($r['question'],$survey['survey_text_mode']));
-            $num_answers[$x] = max($r['r_total'],$r['rt_total']);
+            $x = $r['qid'];
+            $data[$x]['qid'] = $r['qid'];
+            $data[$x]['question'] = nl2br($this->SfStr->getSafeString($r['question'],$survey['survey_text_mode']));
+            $data[$x]['num_answers'] = max($r['r_total'],$r['rt_total']);
 
             if($r['num_required']>0)
-            { $num_required[$x] = $r['num_required']; }
+            { $data[$x]['num_required'] = $r['num_required']; }
 
             if($r['type'] != "N")
-            { $question_num[$x] = $q_num++; }
-            $type[$x] = $r['type'];
+            { $data[$x]['question_num'] = $q_num++; }
+            $data[$x]['type'] = $r['type'];
             switch($r['type'])
             {
                 case "MM":
                 case "MS":
-                    $answer[$x] = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode']);
-                    $count[$x] = array_fill(0,count($answer[$x]['avid']),0);
-                    $show['numanswers'][$x] = TRUE;
+                    $data[$x]['answer'] = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode']);
+                    $data[$x]['count'] = array_fill(0,count($data[$x]['answer']['avid']),0);
+                    $data[$x]['show']['numanswers'] = TRUE;
                 break;
 
                 case "T":
                 case "S":
-                    $text[$x] = $r['qid'];
-                    $show['numanswers'][$x] = TRUE;
+                    $data[$x]['text'] = $r['qid'];
+                    $data[$x]['show']['numanswers'] = TRUE;
                 break;
 
                 case 'N':
-                    $show['numanswers'][$x] = FALSE;
+                    $data[$x]['show']['numanswers'] = FALSE;
                 break;
             }
-            $x++;
         }
 
         //retrieve answers to questions
         $sql = "SELECT r.qid, r.avid, count(*) AS c FROM {$this->CONF['db_tbl_prefix']}results r,
                 {$this->CONF['db_tbl_prefix']}answer_values av,
                 {$this->CONF['db_tbl_prefix']}questions q
-                WHERE r.qid = q.qid and r.sid = $sid and r.avid = av.avid $hide_show_where
-                {$_SESSION['filter'][$sid]}
+                WHERE r.qid = q.qid and r.sid = {$survey['sid']} and r.avid = av.avid {$survey['hide_show_where']}
+                {$_SESSION['filter'][$survey['sid']]} {$qid_list}
                 GROUP BY r.qid, r.avid
                 ORDER BY r.avid ASC";
+//echo $sql;
         $rs = $this->db->Execute($sql);
-        if($rs === FALSE) { $this->error("Error retrieving answers: " . $this->db->ErrorMsg()); return;}
+        if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
         while($r = $rs->FetchRow($rs))
         {
-            $key = array_search($r['qid'],$qid);
-            if($key !== FALSE)
-            {
-                $k = array_search($r['avid'],$answer[$key]['avid']);
-                if($k !== FALSE)
-                { $count[$key][$k] = $r['c']; }
-            }
+            $k = array_search($r['avid'],$data[$r['qid']]['answer']['avid']);
+            if($k !== FALSE)
+            { $data[$r['qid']]['count'][$k] = $r['c']; }
         }
 
-        //Filter text has already had safe_string() applied
-        if(isset($_SESSION['filter_text'][$sid]) && strlen($_SESSION['filter_text'][$sid])>0)
-        { $this->smarty->assign('filter_text',$_SESSION['filter_text'][$sid]); }
-        if(strlen($_SESSION['filter'][$sid])>0)
+        foreach($data as $qid=>$q_data)
         {
-            $show['clear_filter'] = TRUE;
-            $this->smarty->assign('show',$show);
-        }
-
-        if(isset($count) && count($count) > 0)
-        {
-            foreach($count as $key=>$value)
+            if(!empty($q_data['count']))
             {
-                $total[$key] = array_sum($count[$key]);
-                foreach($count[$key] as $k=>$v)
+                $data[$qid]['total'] = array_sum($data[$qid]['count']);
+                $data[$qid]['average'] = 0;
+                foreach($data[$qid]['count'] as $k=>$v)
                 {
-                    if($total[$key] > 0)
-                    { $p = 100 * $v / $total[$key]; }
+                    if($data[$qid]['total'] > 0)
+                    { $p = 100 * $v / $data[$qid]['total']; }
                     else
                     { $p = 0; }
-                    $percent[$key][$k] = sprintf('%2.2f',$p);
-                    $width[$key][$k] = round($this->CONF['image_width'] * $p/100);
-
-                    $img_size = getimagesize($this->CONF['images_path'] . '/' . $answer[$key]['image'][$k]);
-                    $height[$key][$k] = $img_size[1];
-
-                    //Check for _left image (beginning of bar)
-                    $img = $answer[$key]['image'][$k];
-                    $last_period = strrpos($img,'.');
-
-                    $left_img = substr($img,0,$last_period) . '_left' . substr($img,$last_period);
-                    $right_img = substr($img,0,$last_period) . '_right' . substr($img,$last_period);
-
-                    if(file_exists($this->CONF['images_path'] . '/' . $left_img))
-                    { $answer[$key]['left_image'][$k] = $left_img; }
-
-                    if(file_exists($this->CONF['images_path'] . '/' . $right_img))
-                    { $answer[$key]['right_image'][$k] = $right_img; }
-
-                    $show[$key]['middle_image'][$k] = FALSE;
-                    if(isset($answer[$key]['left_image'][$k]) && isset($answer[$key]['right_image'][$k]))
-                    { $show[$key]['left_right_image'][$k] = TRUE; }
-                    else
-                    {
-                        if(isset($answer[$key]['left_image'][$k]))
-                        { $show[$key]['left_image'][$k] = TRUE; }
-                        elseif(isset($answer[$key]['left_image'][$k]))
-                        { $show[$key]['right_image'][$k] = TRUE; }
-                        else
-                        {
-                            $show[$key]['left_right_image'][$k] = FALSE;
-                            $show[$key]['left_image'][$k] = FALSE;
-                            $show[$key]['right_image'][$k] = FALSE;
-                            $show[$key]['middle_image'][$k] = TRUE;
-                        }
-                    }
+                    $data[$qid]['percent'][$k] = sprintf('%2.2f',$p);
+                    $data[$qid]['average'] += $v * $data[$qid]['answer']['numeric_value'][$k];
+                    $this->_loadImageData($data,$qid,$k,$p);
                 }
+                if($data[$qid]['total'] > 0 && $data[$qid]['average'] > 0)
+                { $data[$qid]['average'] = sprintf('%2.2f',$data[$qid]['average'] / $data[$qid]['total']); }
             }
         }
+        return $data;
+    }
 
-        $survey['export_csv_text'] = EXPORT_CSV_TEXT;
-        $survey['export_csv_numeric'] = EXPORT_CSV_NUMERIC;
+    function _loadImageData(&$data,$qid,$k,$p)
+    {
+        $data[$qid]['width'][$k] = round($this->CONF['image_width'] * $p/100);
 
-        $this->smarty->assign_by_ref('survey',$survey);
-        $this->smarty->assign_by_ref('question',$question);
-        $this->smarty->assign_by_ref('qid',$qid);
-        $this->smarty->assign_by_ref('question_num',$question_num);
+        $img_size = getimagesize($this->CONF['images_path'] . '/' . $data[$qid]['answer']['image'][$k]);
+        $data[$qid]['height'][$k] = $img_size[1];
 
-        if(isset($num_required))
-        { $this->smarty->assign_by_ref('num_required',$num_required); }
-        if(isset($answer))
-        { $this->smarty->assign_by_ref('answer',$answer); }
-        if(isset($num_answers))
-        { $this->smarty->assign_by_ref('num_answers',$num_answers); }
-        if(isset($count))
-        { $this->smarty->assign_by_ref('count',$count); }
-        if(isset($text))
-        { $this->smarty->assign_by_ref('text',$text); }
-        if(isset($total))
-        { $this->smarty->assign_by_ref('total',$total);}
-        if(isset($percent))
-        { $this->smarty->assign_by_ref('percent',$percent); }
-        if(isset($width))
-        { $this->smarty->assign_by_ref('width',$width); }
-        if(isset($height))
-        { $this->smarty->assign_by_ref('height',$height); }
-        if(isset($show))
-        { $this->smarty->assign_by_ref('show',$show); }
+        //Check for _left image (beginning of bar)
+        $img = $data[$qid]['answer']['image'][$k];
+        $last_period = strrpos($img,'.');
 
-        $retval = $this->smarty->fetch($this->template.'/results.tpl');
+        $left_img = substr($img,0,$last_period) . '_left' . substr($img,$last_period);
+        $right_img = substr($img,0,$last_period) . '_right' . substr($img,$last_period);
 
-        if(empty($_SESSION['filter'][$sid]) && isset($_SESSION['filter_text'][$sid]))
-        { unset($_SESSION['filter_text'][$sid]); }
+        if(file_exists($this->CONF['images_path'] . '/' . $left_img))
+        { $data[$qid]['answer']['left_image'][$k] = $left_img; }
 
-        return $retval;
+        if(file_exists($this->CONF['images_path'] . '/' . $right_img))
+        { $data[$qid]['answer']['right_image'][$k] = $right_img; }
+
+        $data[$qid]['show']['middle_image'][$k] = FALSE;
+        if(isset($data[$qid]['answer']['left_image'][$k]) && isset($data[$qid]['answer']['right_image'][$k]))
+        { $data[$qid]['show']['left_right_image'][$k] = TRUE; }
+        else
+        {
+            if(isset($data[$qid]['answer']['left_image'][$k]))
+            { $data[$qid]['show']['left_image'][$k] = TRUE; }
+            elseif(isset($data[$qid]['answer']['right_image'][$k]))
+            { $data[$qid]['show']['right_image'][$k] = TRUE; }
+            else
+            {
+                $data[$qid]['show']['left_right_image'][$k] = FALSE;
+                $data[$qid]['show']['left_image'][$k] = FALSE;
+                $data[$qid]['show']['right_image'][$k] = FALSE;
+                $data[$qid]['show']['middle_image'][$k] = TRUE;
+            }
+        }
+    }
+
+    function _loadReports(&$survey)
+    {
+        $query = "SELECT r.report_id, r.report_name FROM {$this->CONF['db_tbl_prefix']}reports r, {$this->CONF['db_tbl_prefix']}report_questions rq
+                  WHERE sid = {$survey['sid']} AND r.report_id = rq.report_id GROUP BY r.report_id ORDER BY r.report_name ASC";
+        $rs = $this->db->Execute($query);
+        if($rs === FALSE)
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+        while($r = $rs->FetchRow($rs))
+        {
+            $survey['report_name'][] = $r['report_name'];
+            $survey['report_id'] = $r['report_id'];
+        }
+    }
+
+    function _loadCustomReport($report_id,$survey)
+    {
+        $report_id = (int)$report_id;
+
+        $query = "SELECT r.report_name, rq.qid, rq.layout, rq.display, rq.crosstab_questions";
     }
 
     /********************
@@ -325,7 +374,7 @@ class UCCASS_Results extends UCCASS_Main
             $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}results_text WHERE rid IN ($rid_list) AND sid = $sid AND qid = $qid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Error deleting checked answers: ' . $this->db->ErrorMsg()); return; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
         }
 
         $rs = $this->db->Execute("SELECT q.question, a.type, s.survey_text_mode, s.user_text_mode
@@ -333,11 +382,11 @@ class UCCASS_Results extends UCCASS_Main
                                   {$this->CONF['db_tbl_prefix']}surveys s
                                   WHERE q.sid = $sid AND q.qid = $qid AND q.sid = s.sid
                                   AND q.aid = a.aid AND a.type IN ('T','S')");
-        if($rs === FALSE) { return $this->error("Unable to select question: " . $this->db->ErrorMsg()); }
+        if($rs === FALSE) { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         if($r = $rs->FetchRow($rs))
         { $question = nl2br($this->SfStr->getSafeString($r['question'],$r['survey_text_mode'])); }
         else
-        { return $this->error("Question $qid does not exist for survey $sid or is not the correct type (Text or Sentence)"); }
+        { return $this->error($this->lang['invalid_text_question']); }
 
         $survey_text_mode = $r['survey_text_mode'];
         $user_text_mode = $r['user_text_mode'];
@@ -376,7 +425,7 @@ class UCCASS_Results extends UCCASS_Main
         if(isset($_REQUEST['per_page']))
         {
             $per_page = (int)$_REQUEST['per_page'];
-            $selected[$per_page] = " selected";
+            $selected[$per_page] = FORM_SELECTED;
         }
         else
         { $per_page = $this->CONF['text_results_per_page']; }
@@ -386,14 +435,14 @@ class UCCASS_Results extends UCCASS_Main
         $rs = $this->db->Execute("SELECT COUNT(*) AS c FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
                                   $search {$_SESSION['filter'][$sid]}");
         if($rs === FALSE)
-        { return $this->error("Error getting count of answers: " . $this->db->ErrorMsg()); }
+        { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         $r = $rs->FetchRow($rs);
         $answer['num_answers'] = $r['c'];
 
         $rs = $this->db->SelectLimit("SELECT rid, answer FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
                                   $search {$_SESSION['filter'][$sid]} ORDER BY entered DESC",$per_page,$start);
         if($rs === FALSE)
-        { return $this->error("Error selecting answers: " . $this->db->ErrorMsg()); }
+        { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
         $answer['text'] = array();
         $answer['rid'] = array();
@@ -431,7 +480,7 @@ class UCCASS_Results extends UCCASS_Main
         $this->smarty->assign('qid',$qid);
         $this->smarty->assign('button',$button);
 
-        $retval = $this->smarty->fetch($this->template.'/results_text.tpl');
+        $retval = $this->smarty->fetch($this->CONF['template'].'/results_text_detail.tpl');
         return $retval;
     }
 
@@ -456,7 +505,7 @@ class UCCASS_Results extends UCCASS_Main
         $rs = $this->db->Execute($query);
 
         $old_aid = '';
-        if($rs === FALSE) { $this->error("Error selecting filter questions: " . $this->db->ErrorMsg()); }
+        if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         if($r = $rs->FetchRow())
         {
             do
@@ -475,7 +524,7 @@ class UCCASS_Results extends UCCASS_Main
         $rs = $this->db->Execute("SELECT MIN(entered) AS mindate,
                                   MAX(entered) AS maxdate FROM
                                   {$this->CONF['db_tbl_prefix']}results WHERE sid = $sid");
-        if($rs === FALSE) { $this->error("Error selecting min/max survey dates: " . $this->db->ErrorMsg()); }
+        if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         $r = $rs->FetchRow();
         $date['min'] = date('Y-m-d',$r['mindate']);
         $date['max'] = date('Y-m-d',$r['maxdate']);
@@ -485,7 +534,7 @@ class UCCASS_Results extends UCCASS_Main
 
         $this->smarty->assign('sid',$sid);
 
-        $retval = $this->smarty->fetch($this->template.'/filter.tpl');
+        $retval = $this->smarty->fetch($this->CONF['template'].'/filter.tpl');
 
         return $retval;
     }
@@ -493,7 +542,7 @@ class UCCASS_Results extends UCCASS_Main
     /**********************
     * PROCESS FILTER FORM *
     **********************/
-    function process_filter($sid)
+    function process_filter($sid,$text_mode)
     {
         $sid = (int)$sid;
 
@@ -516,24 +565,24 @@ class UCCASS_Results extends UCCASS_Main
             {
                 if(is_array($value))
                 {
-                    $answer_values = $this->get_answer_values($filter_qid,BY_QID,$survey['survey_text_mode']);
+                    $answer_values = $this->get_answer_values($filter_qid,BY_QID,$text_mode);
                     $selected_answers = '';
                     $avid_list = '';
                     foreach($value as $avid)
                     {
                         if(isset($answer_values[$avid]))
                         {
-                            $selected_answers .= $answer_values[$avid] . ', ';
+                            $selected_answers .= $answer_values[$avid] . $this->lang['filter_answer_seperator'];
                             $avid_list .= $avid . ',';
                         }
                     }
-                    $selected_answers = $this->SfStr->getSafeString(substr($selected_answers,0,-2),$survey['survey_text_mode']);
+                    $selected_answers = $this->SfStr->getSafeString(substr($selected_answers,0,-2),$text_mode);
                     $avid_list = substr($avid_list,0,-1);
                     $criteria[] = "(q.qid = $filter_qid AND r.avid IN ({$avid_list}))";
 
-                    $question_text = $this->SfStr->getSafeString($_REQUEST['name'][$filter_qid],$survey['survey_text_mode'],1);
+                    $question_text = $this->SfStr->getSafeString($_REQUEST['name'][$filter_qid],$text_mode,1);
 
-                    $_SESSION['filter_text'][$sid] .= "{$question_text} => $selected_answers<br>";
+                    $_SESSION['filter_text'][$sid] .= $question_text . $this->lang['filter_seperator'] . $selected_answers . BR . NL;
                 }
             }
 
@@ -552,7 +601,7 @@ class UCCASS_Results extends UCCASS_Main
                 {
                     $where .= " AND r.entered > $start_date ";
                     $start_date = $this->SfStr->getSafeString($_REQUEST['start_date'],SAFE_STRING_TEXT);
-                    $_SESSION['filter_text'][$sid] .= "Start Date: {$start_date}<br />";
+                    $_SESSION['filter_text'][$sid] .= $this->lang['filter_start_date'] . $start_date . BR . NL;
                     $num_dates++;
                 }
             }
@@ -562,7 +611,7 @@ class UCCASS_Results extends UCCASS_Main
                 {
                     $where .= " AND r.entered < $end_date ";
                     $end_date = $this->SfStr->getSafeString($_REQUEST['end_date'],SAFE_STRING_TEXT);
-                    $_SESSION['filter_text'][$sid] .= "End Date: {$end_date}<br />";
+                    $_SESSION['filter_text'][$sid] .= $this->lang['filter_end_date'] . $end_date . BR . NL;
                     $num_dates++;
                 }
             }
@@ -575,7 +624,7 @@ class UCCASS_Results extends UCCASS_Main
                 r.qid = q.qid {$where} group by sequence {$having}";
 
             $rs = $this->db->Execute($sql);
-            if($rs === FALSE) { return $this->error("Error selecting sequences: " . $this->db->ErrorMsg()); }
+            if($rs === FALSE) { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
             $sequence = array();
             while($r = $rs->FetchRow($rs))
@@ -591,10 +640,10 @@ class UCCASS_Results extends UCCASS_Main
                     $_SESSION['filter_total'][$sid] = " AND (r.sequence IN ($seq_list) OR rt.sequence IN ($seq_list) OR (NOT ".$this->db->IfNull('r.sequence',0)." AND NOT ".$this->db->IfNull('rt.sequence',0).")) ";
                 }
                 else
-                { $_SESSION['filter_text'][$sid] = "<span class=\"error\">Number of completed surveys matching filter is below the Filter Limit set in the configuration. Showing all results.</span><br>\n"; }
+                { $_SESSION['filter_text'][$sid] = $this->lang['filter_limit']; }
             }
             else
-            { $_SESSION['filter_text'][$sid] = "<span class=\"error\">Filter criteria did not match any records. Showing all results.</span><br>"; }
+            { $_SESSION['filter_text'][$sid] = $this->lang['filter_no_match']; }
         }
         else
         {
@@ -615,8 +664,8 @@ class UCCASS_Results extends UCCASS_Main
 
         switch($_REQUEST['action'])
         {
-            case "hide_questions":
-            case "show_questions":
+            case ACTION_HIDE_QUESTIONS:
+            case ACTION_SHOW_QUESTIONS:
                 if(isset($_REQUEST['select_qid']) && !empty($_REQUEST['select_qid']))
                 {
                     $list = '';
@@ -624,7 +673,7 @@ class UCCASS_Results extends UCCASS_Main
                     { $list .= (int)$select_qid . ','; }
 
                     $not = '';
-                    if($_REQUEST['action'] == 'hide_questions')
+                    if($_REQUEST['action'] == ACTION_HIDE_QUESTIONS)
                     { $not = 'NOT'; }
 
                     $hide_show_where = " AND q.qid $not IN (" . substr($list,0,-1) . ') ';
@@ -632,12 +681,12 @@ class UCCASS_Results extends UCCASS_Main
                 }
             break;
 
-            case "show_all_questions":
+            case ACTION_SHOW_ALL_QUESTIONS:
                 $hide_show_where = '';
                 unset($_SESSION['hide-show'][$sid]);
             break;
 
-            case "filter":
+            case ACTION_FILTER:
                 if(isset($_REQUEST['select_qid']) && !empty($_REQUEST['select_qid']))
                 {
                     $retval = $this->filter($sid);
@@ -645,7 +694,7 @@ class UCCASS_Results extends UCCASS_Main
                 }
             break;
 
-            case "clear_filter":
+            case ACTION_CLEAR_FILTER:
                 $_SESSION['filter'][$sid] = '';
                 $_SESSION['filter_total'][$sid] = '';
                 $_SESSION['filter_text'][$sid] = '';

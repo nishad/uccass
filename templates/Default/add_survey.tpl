@@ -30,7 +30,7 @@
         from all other surveys so they can be told apart. Use a descriptive name such
         as "C447 Oct-2002 Command Climate Assessment" instead of "charlie survey."
         <br />
-        <input type="text" name="survey_name" size="40" maxlength="255" value="{$survey_name}">
+        <input type="text" name="survey_name" size="40" maxlength="255" value="{$conf.survey_name}">
       </div>
     </td>
   </tr>

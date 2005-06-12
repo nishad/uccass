@@ -130,7 +130,7 @@ class UCCASS_Special_Results extends UCCASS_Main
 
         $this->smarty->assign_by_ref('data',$data);
         $this->smarty->assign_by_ref('survey',$survey);
-        return $this->smarty->fetch($this->template.'/results_table.tpl');
+        return $this->smarty->Fetch($this->CONF['template'].'/results_table.tpl');
     }
 
     function results_csv($sid, $export_type=EXPORT_CSV_TEXT)
@@ -233,8 +233,11 @@ class UCCASS_Special_Results extends UCCASS_Main
         $answers[$x]['date'] = $last_date;
 
         $line = '';
+        $replace = array("\r","\n",'"');
+        $replace_with = array('',' ','""');
+
         foreach($questions as $question)
-        { $line .= "\"" . str_replace('"','""',$question) . "\","; }
+        { $line .= "\"" . str_replace($replace,$replace_with,$question) . "\","; }
         $retval .= $line . "Datetime\n";
 
         $xvals = array_keys($answers);
@@ -249,7 +252,7 @@ class UCCASS_Special_Results extends UCCASS_Main
                     if(is_numeric($answers[$x][$qid]))
                     { $line .= "{$answers[$x][$qid]},"; }
                     else
-                    { $line .= "\"" . str_replace('"','""',$answers[$x][$qid]) . "\","; }
+                    { $line .= "\"" . str_replace($replace,$replace_with,$answers[$x][$qid]) . "\","; }
                 }
                 else
                 { $line .= ","; }
