@@ -1,5 +1,19 @@
 Version 1.8.2
 
+  2005-06-14
+
+    Extensive re-write of newsurvey.class.php to match
+    new format and use language files
+
+    Added ability for user to enter a number to limit the
+    number of text answers shown per page
+
+    Added ability to sort text answers by newest or oldest
+    answer first
+
+    Fixed bug with loopbacks not being replaced properly
+    when survey was set to LimitedHTML mode
+
   2005-05-01
 
     Added code to create custom reports. Users can choose

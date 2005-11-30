@@ -15,13 +15,29 @@
       <td>
 
         <div style="text-align:center">
-          [ <a href="{$conf.html}/results.php?sid={$sid}">All Results</a>
+          [ <a href="{$conf.html}/results.php?sid={$sid}">Graphic Results</a>
             &nbsp;|&nbsp;
             <a href="{$conf.html}/index.php">Main</a> ]
         </div>
 
         <div class="whitebox">
           Answers to Question {$qnum}: {$question}
+        </div>
+
+        <div style="margin-top:1em; margin-bottom:2em">
+          <span style="margin-right:4em">
+            Show <input type="text" name="per_page" value="{$answer.per_page}" size="3"> answers per page
+            <input type="submit" name="per_page_submit" value="Go">
+          </span>
+          <input type="text" name="search" value="{$answer.search_text}">
+          <input type="submit" name="submit" value="Search">
+          {section name="clear_search" loop=1 show=$button.clear}
+            <input type="submit" name="clear" value="Clear Search Results">
+          {/section}
+          <br />
+          Show <input type="radio" name="answer_time_sort" value="0"{$answer.time_sort_checked[0]}> newest /
+          <input type="radio" name="answer_time_sort" value="1"{$answer.time_sort_checked[1]}> oldest
+          answers first <input type="submit" name="answer_time_sort_submit" value="Sort">
         </div>
 
         <div class="indented_cell">
@@ -33,16 +49,6 @@
             Showing only answers matching search for: <strong>{$answer.search_text}</strong>
           </div>
         {/section}
-
-        <div style="text-align:right">
-          <input type="text" name="search" value="{$answer.search_text}">
-          <input type="submit" name="submit" value="Search">
-          {section name="clear_search" loop=1 show=$button.clear}
-            <input type="submit" name="clear" value="Clear Search Results">
-          {/section}
-        </div>
-
-        <br />
 
         {section name="a" loop=$answer.text}
           <div class="indented_cell">
@@ -74,7 +80,7 @@
         {/section}
 
         <div style="text-align:center">
-          [ <a href="{$conf.html}/results.php?sid={$sid}">All Results</a>
+          [ <a href="{$conf.html}/results.php?sid={$sid}">Graphic Results</a>
             &nbsp;|&nbsp;
             <a href="{$conf.html}/index.php">Main</a> ]
         </div>

@@ -14,7 +14,9 @@
         &nbsp;&nbsp;
         [ <a href="{$conf.html}/results.php?sid={$survey.sid}">Graphic Results</a> ]
         &nbsp;&nbsp;
-        [ <a href="{$conf.html}/results_csv.php?sid={$survey.sid}">Export Results to CSV</a>
+        [ Export Results to CSV as
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_text}">Text</a> or
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_numeric}">Numeric</a> Values
           <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
       </div>
 

@@ -1,4 +1,4 @@
-<form method="GET" action="{$conf.html}/new_survey.php">
+<form method="POST" action="{$conf.html}/new_survey.php">
 
 <table width="70%" align="center" cellpadding="0" cellspacing="0">
   <tr class="grayboxheader">
@@ -8,17 +8,6 @@
   </tr>
 </table>
 <table width="70%" align="center" class="bordered_table">
-
-{* ERROR MESSAGE *}
-  {section name="error" loop=1 show=$error}
-  <tr>
-    <td class="error">Error: {$error}</td>
-  </tr>
-  {/section}
-{* / ERROR MESSAGE *}
-
-{* STEP 1: SURVEY NAME FORM *}
-{section name="name_survey" loop=1 show=$show.survey_name}
   <tr>
     <td class="whitebox">Survey Name</td>
   </tr>
@@ -30,7 +19,7 @@
         from all other surveys so they can be told apart. Use a descriptive name such
         as "C447 Oct-2002 Command Climate Assessment" instead of "charlie survey."
         <br />
-        <input type="text" name="survey_name" size="40" maxlength="255" value="{$conf.survey_name}">
+        <input type="text" name="survey_name" size="40" maxlength="255" value="{$data.survey_name}">
       </div>
     </td>
   </tr>
@@ -42,8 +31,8 @@
       <div class="indented_cell">
         You must create a default user that will have permissions to edit the survey you're creating. You
         can later edit this user or add others from the Access Control portion of the Edit Survey pages.
-        <p>Username: <input type="text" name="username" value="{$value.username}"></p>
-        <p>Password: <input type="password" name="password" value="{$value.password}"><p>
+        <p>Username: <input type="text" name="username" value="{$data.username}"></p>
+        <p>Password: <input type="password" name="password" value="{$data.password}"><p>
       </div>
     </td>
   </tr>
@@ -59,35 +48,26 @@
         liking.
         <br />
         <select name="copy_survey" size="1">
-          {section name="cs" loop=$public_surveys.sid show=1}
-            <option value="{$public_surveys.sid[cs]}">{$public_surveys.name[cs]}</option>
+          {section name="cs" loop=$data.available_surveys.sid}
+            <option value="{$data.available_surveys.sid[cs]}"{$data.available_surveys.selected[cs]}>{$data.available_surveys.name[cs]}</option>
           {/section}
         </select>
       </div>
     </td>
   </tr>
-{/section}
-{* SURVEY NAME FORM *}
 
   <tr>
     <td align="center">
-    <br />
-{* START OVER BUTTON *}
-{section name="start_over_button" loop=1 show=$show.start_over_button}
-<input type="submit" value="{$button.start_over|default:"Start Over / Clear All"}" name="clear">
-{/section}
-
-{* NEXT BUTTON *}
-{section name="next_button" loop=1 show=$show.next_button}
-&nbsp;
-<input type="submit" name="next" value="{$button.next|default:"Next Step"}">
-{/section}
+      <br />
+      <input type="submit" value="Reset" name="clear">
+      &nbsp;
+      <input type="submit" name="next" value="Create Survey">
     </td>
   </tr>
 
   <tr>
     <td style="text-align:center;">
-      [ <a href="{$conf.html}">Main</a> ]
+      [ <a href="{$conf.html}">Return to Main</a> ]
     </td>
   </tr>
 </table>

@@ -346,6 +346,9 @@ class UCCASS_Survey extends UCCASS_Main
 
                 $qpage = $_SESSION['take_survey']['page'];
 
+                if($qpage == 1)
+                { $show['previous_button'] = FALSE; }
+
                 if(!isset($_SESSION['take_survey']['qstart'][1]))
                 { $_SESSION['take_survey']['qstart'][1] = 1; }
 
@@ -651,7 +654,8 @@ class UCCASS_Survey extends UCCASS_Main
         $_SESSION['take_survey']['lookback_user_text_mode'] = $user_text_mode;
         $_SESSION['take_survey']['lookback_survey_text_mode'] = $survey_text_mode;
 
-        $pattern = '/(^|.*)' . preg_quote(LOOKBACK_START_DELIMITER . LOOKBACK_TEXT) . '\.([0-9]+)' . preg_quote(LOOKBACK_END_DELIMITER) . '(.*|$)/sU';
+        //$pattern = '/(^|.*)' . preg_quote(LOOKBACK_START_DELIMITER . LOOKBACK_TEXT) . '([0-9]+)' . preg_quote(LOOKBACK_END_DELIMITER) . '(.*|$)/sU';
+        $pattern = '/' . preg_quote(LOOKBACK_START_DELIMITER . LOOKBACK_TEXT) . '([0-9]+)' . preg_quote(LOOKBACK_END_DELIMITER) . '/i';
         return preg_replace_callback($pattern,array($this,'_lookback_callback'),$question);
     }
 
@@ -659,23 +663,26 @@ class UCCASS_Survey extends UCCASS_Main
     function _lookback_callback($matches)
     {
         $retval = '';
-        if(isset($matches[2]) && isset($_SESSION['take_survey']['lookback'][$matches[2]]));
+        if(isset($matches[1]) && isset($_SESSION['take_survey']['lookback'][$matches[1]]));
         {
-            $qid = $matches[2];
+            $qid = $matches[1];
             $answers = $this->get_answer_values($qid,BY_QID,$_SESSION['take_survey']['lookback_survey_text_mode']);
 
             $ans = array();
-            foreach($_SESSION['take_survey']['lookback'][$qid] as $avid)
+            if(!empty($_SESSION['take_survey']['lookback'][$qid]))
             {
-                if(empty($answers['avid']))
-                { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode']));}
-                else
+                foreach($_SESSION['take_survey']['lookback'][$qid] as $avid)
                 {
-                    $avid_key = array_search($avid,$answers['avid']);
-                    if($avid_key !== FALSE)
-                    { $ans[] = $answers['value'][$avid_key]; }
+                    if(empty($answers['avid']))
+                    { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode']));}
                     else
-                    { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode'])); }
+                    {
+                        $avid_key = array_search($avid,$answers['avid']);
+                        if($avid_key !== FALSE)
+                        { $ans[] = $answers['value'][$avid_key]; }
+                        else
+                        { $ans[] = nl2br($this->SfStr->getSafeString($avid,$_SESSION['take_survey']['lookback_user_text_mode'])); }
+                    }
                 }
             }
             $retval = implode(', ',$ans);
@@ -683,8 +690,8 @@ class UCCASS_Survey extends UCCASS_Main
 
         if(empty($retval))
         { $retval = $matches[0]; }
-        else
-        { $retval = nl2br($this->SfStr->getSafeString($matches[1],$_SESSION['take_survey']['lookback_survey_text_mode'])) . $retval . nl2br($this->SfStr->getSafeString($matches[3],$_SESSION['take_survey']['lookback_survey_text_mode'])); }
+        //else
+        //{ $retval = nl2br($this->SfStr->getSafeString($matches[1],$_SESSION['take_survey']['lookback_survey_text_mode'])) . $retval . nl2br($this->SfStr->getSafeString($matches[3],$_SESSION['take_survey']['lookback_survey_text_mode'])); }
 
         return $retval;
     }

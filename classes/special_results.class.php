@@ -19,6 +19,9 @@
 // Affero General Public License for more details.
 //======================================================
 
+define('CSV_SEP', ',');
+define('CSV_STRING_SEP', '"');
+
 class UCCASS_Special_Results extends UCCASS_Main
 {
     function UCCASS_Special_Results()
@@ -30,7 +33,7 @@ class UCCASS_Special_Results extends UCCASS_Main
         set_time_limit(120);
     }
 
-    function results_table($sid)
+    function showResultsTable($sid)
     {
         $sid = (int)$sid;
 
@@ -59,7 +62,7 @@ class UCCASS_Special_Results extends UCCASS_Main
                   WHERE q.sid = $sid and s.sid = q.sid ORDER BY q.page, q.oid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Error in query: ' . $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
         $questions = array();
         if($r = $rs->FetchRow($rs))
@@ -75,7 +78,7 @@ class UCCASS_Special_Results extends UCCASS_Main
             }while($r = $rs->FetchRow($rs));
         }
         else
-        { $this->error('No questions for this survey.'); return; }
+        { $this->error($this->lang['no_questions']); return; }
 
         if(isset($_SESSION['filter_text'][$sid]) && isset($_SESSION['filter'][$sid]) && strlen($_SESSION['filter_text'][$sid])>0)
         { $this->smarty->assign_by_ref('filter_text',$_SESSION['filter_text'][$sid]); }
@@ -91,7 +94,7 @@ class UCCASS_Special_Results extends UCCASS_Main
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Error in query: ' . $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
         $seq = '';
         $x = -1;
@@ -123,7 +126,7 @@ class UCCASS_Special_Results extends UCCASS_Main
                 if(isset($answers[$x][$qid_value]))
                 { $data['answers'][$x][] = $answers[$x][$qid_value]; }
                 else
-                { $data['answers'][$x][] = '&nbsp;'; }
+                { $data['answers'][$x][] = NBSP; }
             }
             $data['answers'][$x][] = $answers[$x]['date'];
         }
@@ -133,7 +136,7 @@ class UCCASS_Special_Results extends UCCASS_Main
         return $this->smarty->Fetch($this->CONF['template'].'/results_table.tpl');
     }
 
-    function results_csv($sid, $export_type=EXPORT_CSV_TEXT)
+    function sendResultsCSV($sid, $export_type=EXPORT_CSV_TEXT)
     {
         $sid = (int)$sid;
 
@@ -155,14 +158,14 @@ class UCCASS_Special_Results extends UCCASS_Main
         }
 
         header("Content-Type: text/plain; charset={$this->CONF['charset']}");
-        header("Content-Disposition: attachment; filename=Export.csv");
+        header("Content-Disposition: attachment; filename={$this->lang['csv_filename']}");
 
         $query = "SELECT q.qid, q.question, s.date_format
                   FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}surveys s
                   WHERE q.sid = $sid and s.sid = q.sid ORDER BY q.page, q.oid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Error in query: ' . $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
         $questions = array();
         if($r = $rs->FetchRow($rs))
@@ -173,7 +176,7 @@ class UCCASS_Special_Results extends UCCASS_Main
             }while($r = $rs->FetchRow($rs));
         }
         else
-        { $this->error('No questions for this survey'); return; }
+        { $this->error($this->lang['no_questions']); return; }
 
         if(isset($_SESSION['filter_text'][$sid]) && isset($_SESSION['filter'][$sid]) && strlen($_SESSION['filter_text'][$sid])>0)
         { $this->smarty->assign_by_ref('filter_text',$_SESSION['filter_text'][$sid]); }
@@ -190,7 +193,7 @@ class UCCASS_Special_Results extends UCCASS_Main
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Error in query: ' . $this->db->ErrorMsg()); return; }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
         $seq = '';
         $x = 0;
@@ -233,12 +236,12 @@ class UCCASS_Special_Results extends UCCASS_Main
         $answers[$x]['date'] = $last_date;
 
         $line = '';
-        $replace = array("\r","\n",'"');
+        $replace = array(CR,NL,'"');
         $replace_with = array('',' ','""');
 
         foreach($questions as $question)
-        { $line .= "\"" . str_replace($replace,$replace_with,$question) . "\","; }
-        $retval .= $line . "Datetime\n";
+        { $line .= CSV_STRING_SEP . str_replace($replace,$replace_with,$question) . CSV_STRING_SEP . CSV_SEP; }
+        $retval .= $line . $this->lang['datetime'] . NL;
 
         $xvals = array_keys($answers);
 
@@ -250,14 +253,14 @@ class UCCASS_Special_Results extends UCCASS_Main
                 if(isset($answers[$x][$qid]))
                 {
                     if(is_numeric($answers[$x][$qid]))
-                    { $line .= "{$answers[$x][$qid]},"; }
+                    { $line .= $answers[$x][$qid] . CSV_SEP; }
                     else
-                    { $line .= "\"" . str_replace($replace,$replace_with,$answers[$x][$qid]) . "\","; }
+                    { $line .= CSV_STRING_SEP . str_replace($replace,$replace_with,$answers[$x][$qid]) . CSV_STRING_SEP . CSV_SEP; }
                 }
                 else
-                { $line .= ","; }
+                { $line .= CSV_SEP; }
             }
-            $retval .= $line . '"' . $answers[$x]['date'] . "\"\n";
+            $retval .= $line . CSV_STRING_SEP . $answers[$x]['date'] . CSV_STRING_SEP . NL;
         }
 
         return $retval;

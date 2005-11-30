@@ -38,11 +38,11 @@
 
 ; File Path to UCCASS files
 ; ex: /home/user/name/public_html/uccass
-path =
+path = "c:/program files/apache group/apache/htdocs/uccass"
 
 ; HTML Path to UCCASS installation
 ; ex: https://www.youdomain.com/subdir/uccass
-html =
+html = "http://grape/uccass"
 
 ; Site Name
 ;
@@ -194,13 +194,13 @@ db_type = mysql
 db_host = localhost
 
 ; Database User
-db_user =
+db_user = root
 
 ; Database Password
-db_password =
+db_password = password
 
 ; Database Name
-db_database =
+db_database = uccass
 
 ; Database Table Prefix
 ;
@@ -211,7 +211,7 @@ db_database =
 ; programs in the same database. Leave
 ; blank for no prefix and to use the
 ; default table names.
-db_tbl_prefix =
+db_tbl_prefix = "uc_"
 
 ; Database / HTML Character Set
 ;
@@ -230,7 +230,7 @@ db_tbl_prefix =
 ; and PHP support for the htmlentities() function. Consult
 ; your MySQL and PHP documentation to see if other
 ; character sets are supported.
-charset = "ISO-8859-1"
+charset = "UTF-8"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; SMARTY CONFIGURATION ;

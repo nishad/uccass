@@ -25,6 +25,10 @@ define('ACTION_SHOW_ALL_QUESTIONS','show_all_questions');
 define('ACTION_FILTER','filter');
 define('ACTION_CLEAR_FILTER','clear_filter');
 
+define('DEFAULT_ANSWER_TIME_SORT', 'DESC');
+define('ASCENDING', 'ASC');
+define('DESCENDING', 'DESC');
+
 class UCCASS_Results extends UCCASS_Main
 {
     function UCCASS_Results()
@@ -33,7 +37,7 @@ class UCCASS_Results extends UCCASS_Main
     /*************************
     * VIEW RESULTS OF SURVEY *
     *************************/
-    function survey_results($sid=0)
+    function showSurveyResults($sid=0)
     {
         $data = array();
         $survey['sid'] = (int)$sid;
@@ -73,7 +77,7 @@ class UCCASS_Results extends UCCASS_Main
         //if viewing answers to single
         //question with text box
         if(isset($_REQUEST['qid']))
-        { return $this->survey_results_text($survey['sid'],$_REQUEST['qid']); }
+        { return $this->showTextResults($survey['sid'],$_REQUEST['qid']); }
         elseif(isset($_SESSION['results']['page']))
         { unset($_SESSION['results']['page']); }
 
@@ -95,13 +99,13 @@ class UCCASS_Results extends UCCASS_Main
 
         if(isset($_REQUEST['results_action']))
         {
-            $retval = $this->process_results_action($survey['sid']);
+            $retval = $this->_processResultsAction($survey['sid']);
             if($_REQUEST['action'] == 'filter')
             { return $retval; }
         }
 
         if(isset($_REQUEST['filter_submit']))
-        { $this->process_filter($survey['sid'],$survey['survey_text_mode']); }
+        { $this->_processFilter($survey['sid'],$survey['survey_text_mode']); }
         elseif(!isset($_SESSION['filter'][$survey['sid']]))
         {
             $_SESSION['filter'][$survey['sid']] = '';
@@ -216,7 +220,8 @@ class UCCASS_Results extends UCCASS_Main
                   {$qid_list} {$survey['hide_show_where']} {$_SESSION['filter_total'][$survey['sid']]}
                 GROUP BY q.qid
                 ORDER BY q.page, q.oid";
-//echo $sql . '<br /><br />';
+echo $sql;
+
         $rs = $this->db->Execute($sql);
         if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
 
@@ -262,7 +267,7 @@ class UCCASS_Results extends UCCASS_Main
                 {$_SESSION['filter'][$survey['sid']]} {$qid_list}
                 GROUP BY r.qid, r.avid
                 ORDER BY r.avid ASC";
-//echo $sql;
+
         $rs = $this->db->Execute($sql);
         if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
         while($r = $rs->FetchRow($rs))
@@ -358,7 +363,7 @@ class UCCASS_Results extends UCCASS_Main
     /********************
     * VIEW TEXT RESULTS *
     ********************/
-    function survey_results_text($sid,$qid)
+    function showTextResults($sid,$qid)
     {
         $sid = (int)$sid;
         $qid = (int)$qid;
@@ -377,11 +382,12 @@ class UCCASS_Results extends UCCASS_Main
             { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
         }
 
-        $rs = $this->db->Execute("SELECT q.question, a.type, s.survey_text_mode, s.user_text_mode
-                                  FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}answer_types a,
-                                  {$this->CONF['db_tbl_prefix']}surveys s
-                                  WHERE q.sid = $sid AND q.qid = $qid AND q.sid = s.sid
-                                  AND q.aid = a.aid AND a.type IN ('T','S')");
+        $query = "SELECT q.question, a.type, s.survey_text_mode, s.user_text_mode
+                  FROM {$this->CONF['db_tbl_prefix']}questions q, {$this->CONF['db_tbl_prefix']}answer_types a,
+                  {$this->CONF['db_tbl_prefix']}surveys s
+                  WHERE q.sid = $sid AND q.qid = $qid AND q.sid = s.sid
+                  AND q.aid = a.aid AND a.type IN ('T','S')";
+        $rs = $this->db->Execute($query);
         if($rs === FALSE) { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
         if($r = $rs->FetchRow($rs))
         { $question = nl2br($this->SfStr->getSafeString($r['question'],$r['survey_text_mode'])); }
@@ -422,15 +428,39 @@ class UCCASS_Results extends UCCASS_Main
         elseif(isset($_REQUEST['prev']) && $_SESSION['results']['page'] > 0)
         { $_SESSION['results']['page']--; }
 
-        if(isset($_REQUEST['per_page']))
+        if(isset($_REQUEST['per_page_submit']))
         {
             $per_page = (int)$_REQUEST['per_page'];
-            $selected[$per_page] = FORM_SELECTED;
+            if($per_page <= 0)
+            { $per_page = $this->CONF['text_results_per_page']; }
         }
+        elseif(isset($_SESSION['per_page'][$qid]))
+        { $per_page = $_SESSION['per_page'][$qid]; }
         else
         { $per_page = $this->CONF['text_results_per_page']; }
 
+        $answer['per_page'] = $per_page;
+        $_SESSION['per_page'][$qid] = $per_page;
+
         $start = $per_page * $_SESSION['results']['page'];
+
+        if(isset($_REQUEST['answer_time_sort_submit']))
+        {
+            if($_REQUEST['answer_time_sort'] == 1)
+            { $answer_time_sort = ASCENDING; }
+            else
+            { $answer_time_sort = DESCENDING; }
+        }
+        elseif(isset($_SESSION['answer_time_sort'][$qid]))
+        { $answer_time_sort = $_SESSION['answer_time_sort'][$qid]; }
+        else
+        { $answer_time_sort = DEFAULT_ANSWER_TIME_SORT; }
+        $_SESSION['answer_time_sort'][$qid] = $answer_time_sort;
+
+        switch($answer_time_sort) {
+            case ASCENDING: $answer['time_sort_checked'][1] = FORM_CHECKED; break;
+            case DESCENDING: $answer['time_sort_checked'][0] = FORM_CHECKED; break;
+        }
 
         $rs = $this->db->Execute("SELECT COUNT(*) AS c FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
                                   $search {$_SESSION['filter'][$sid]}");
@@ -440,7 +470,7 @@ class UCCASS_Results extends UCCASS_Main
         $answer['num_answers'] = $r['c'];
 
         $rs = $this->db->SelectLimit("SELECT rid, answer FROM {$this->CONF['db_tbl_prefix']}results_text r WHERE qid = $qid
-                                  $search {$_SESSION['filter'][$sid]} ORDER BY entered DESC",$per_page,$start);
+                                  $search {$_SESSION['filter'][$sid]} ORDER BY entered {$answer_time_sort}",$per_page,$start);
         if($rs === FALSE)
         { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
@@ -452,7 +482,10 @@ class UCCASS_Results extends UCCASS_Main
 
         while($r = $rs->FetchRow($rs))
         {
-            $answer['num'][] = $answer['num_answers'] - $start - $cnt++;
+            switch($answer_time_sort) {
+                case ASCENDING: $answer['num'][] = 1 + $start + $cnt++; break;
+                case DESCENDING: $answer['num'][] = $answer['num_answers'] - $start - $cnt++; break;
+            }
             $answer['text'][] = $this->SfStr->getSafeString($r['answer'],$user_text_mode);
             $answer['rid'][] = $r['rid'];
         }
@@ -487,7 +520,7 @@ class UCCASS_Results extends UCCASS_Main
     /**********************
     * DISPLAY FILTER FORM *
     **********************/
-    function filter($sid)
+    function showFilter($sid)
     {
         $x = 0;
         $qid_list = '';
@@ -542,7 +575,7 @@ class UCCASS_Results extends UCCASS_Main
     /**********************
     * PROCESS FILTER FORM *
     **********************/
-    function process_filter($sid,$text_mode)
+    function _processFilter($sid,$text_mode)
     {
         $sid = (int)$sid;
 
@@ -580,7 +613,7 @@ class UCCASS_Results extends UCCASS_Main
                     $avid_list = substr($avid_list,0,-1);
                     $criteria[] = "(q.qid = $filter_qid AND r.avid IN ({$avid_list}))";
 
-                    $question_text = $this->SfStr->getSafeString($_REQUEST['name'][$filter_qid],$text_mode,1);
+                    $question_text = $this->SfStr->getSafeString($_REQUEST['name'][$filter_qid],$text_mode);
 
                     $_SESSION['filter_text'][$sid] .= $question_text . $this->lang['filter_seperator'] . $selected_answers . BR . NL;
                 }
@@ -656,7 +689,7 @@ class UCCASS_Results extends UCCASS_Main
         exit();
     }
 
-    function process_results_action($sid)
+    function _processResultsAction($sid)
     {
         $sid = (int)$sid;
         $redirect = TRUE;
@@ -674,7 +707,7 @@ class UCCASS_Results extends UCCASS_Main
 
                     $not = '';
                     if($_REQUEST['action'] == ACTION_HIDE_QUESTIONS)
-                    { $not = 'NOT'; }
+                    { $not = NOT; }
 
                     $hide_show_where = " AND q.qid $not IN (" . substr($list,0,-1) . ') ';
                     $_SESSION['hide-show'][$sid] = $hide_show_where;
@@ -689,7 +722,7 @@ class UCCASS_Results extends UCCASS_Main
             case ACTION_FILTER:
                 if(isset($_REQUEST['select_qid']) && !empty($_REQUEST['select_qid']))
                 {
-                    $retval = $this->filter($sid);
+                    $retval = $this->showFilter($sid);
                     $redirect = FALSE;
                 }
             break;

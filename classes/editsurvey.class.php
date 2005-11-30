@@ -110,31 +110,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 }
             break;
 
-            //Displays and processes the access control functions
-            // - Process access control options
-            // - Process updating the user list
-            // - Process performing an action on a group of users
-            // - Process updating the invitee list
-            // - Process performing an action on a group of invitees
-            // - Showing access control page/form
-            /* case MODE_ACCESSCONTROL:
-                if(isset($_REQUEST['update_access_control']))
-                { $this->_processUpdateAccessControl($sid); }
-                //elseif(isset($_REQUEST['update_users']))
-                //{ $this->_processUpdateUsers($sid); }
-                elseif(isset($_REQUEST['users_go']))
-                { $this->_processUsersAction($sid); }
-                //elseif(isset($_REQUEST['invite_update']))
-                //{ $this->_processUpdateInvite($sid); }
-                elseif(isset($_REQUEST['invite_go']))
-                { $this->_processInviteAction($sid); }
-                else
-                {
-                    $this->data['content'] = MODE_ACCESSCONTROL;
-                    $this->_loadAccessControl($sid);
-                }
-            break; */
-
             //Default mode for displaying and processing survey properties
             // - Processing delete survey request
             // - Process removing all answers from survey request
@@ -345,7 +320,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         $error = array();
 
         //set tables to delete any results from to clear all answers from this survey
-        $tables = array('results','results_text','ip_track','time_limit');
+        $tables = array('results','results_text','ip_track','time_limit','completed_surveys');
         foreach($tables as $tbl)
         {
             $rs = $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}$tbl WHERE sid = $sid");
@@ -1158,7 +1133,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 else
                 {
                     $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
-                              (page > $page) OR (page = $page AND oid > $oid)";
+                              ((page > $page) OR (page = $page AND oid > $oid))";
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
                     { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }

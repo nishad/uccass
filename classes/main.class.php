@@ -74,7 +74,7 @@ define('FORM_CHECKED',' checked');
 define('FORM_SELECTED',' selected');
 
 //Lookback Settings
-define('LOOKBACK_TEXT','$lookback');
+define('LOOKBACK_TEXT','$lookback.');
 define('LOOKBACK_START_DELIMITER','{');
 define('LOOKBACK_END_DELIMITER','}');
 
@@ -87,6 +87,16 @@ define('MULTI_ANSWER_SEPERATOR',', ');
 define('BR','<br />');
 define('NBSP','&nbsp;');
 define('NL',"\n");
+define('CR',"\r");
+define('NOT', 'NOT');
+
+//Hack to get rid of cookies named "sid"
+if(isset($_POST['sid']))
+{ $_REQUEST['sid'] = $_POST['sid']; }
+elseif(isset($_GET['sid']))
+{ $_REQUEST['sid'] = $_GET['sid']; }
+else
+{ unset($_REQUEST['sid']); }
 
 class UCCASS_Main
 {

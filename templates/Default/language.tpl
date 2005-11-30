@@ -109,4 +109,15 @@ $lang['filter_start_date'] = 'Start Date: ';
 $lang['filter_end_date'] = 'End Date: ';
 $lang['filter_limit'] = '<span class="error">Number of completed surveys matching filter is below the Filter Limit set in the configuration. Showing all results.</span>';
 $lang['filter_no_match'] = '<span class="error">Filter criteria did not match any records. Showing all results.</span>';
+$lang['no_questions'] = 'No questions for this survey.';
+$lang['csv_filename'] = 'Export.csv';
+$lang['datetime'] = 'Datetime';
+
+//New Survey
+$lang['survey_name_used'] = 'A survey already exists with that name.';
+$lang['invalid_copy_survey'] = 'Invalid survey chosen to copy from.';
+$lang['invalid_new_username'] = 'Username field is required. ';
+$lang['invalid_new_password'] = 'Password field is required. ';
+$lang['default_copy_name'] = 'None - Start with blank survey';
+$lang['survey_created'] = 'Survey successfully created. ';
 ?>

@@ -17,7 +17,7 @@
     <input type="hidden" name="answer[{$q.qid}][{$smarty.section.na.index}]" value="">
     {section name="mm" loop=$q.num_values show=TRUE}
       <input type="checkbox" name="answer[{$q.qid}][{$smarty.section.na.index}][]" value="{$q.avid[mm]}" id="{$q.qid}-{$q.avid[mm]}"{$q.selected[na][mm]}>
-      <label for="{$q.qid}-{$q.avid[mm2]}"> {$q.value[mm]}</label>
+      <label for="{$q.qid}-{$q.avid[mm]}"> {$q.value[mm]}</label>
       <br />
     {/section}
     <br />

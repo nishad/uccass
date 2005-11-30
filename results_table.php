@@ -7,7 +7,7 @@ $survey = new UCCASS_Special_Results;
 
 $output = $survey->com_header($survey->lang('title_survey_results'));
 
-$output .= $survey->results_table(@$_REQUEST['sid']);
+$output .= $survey->showResultsTable(@$_REQUEST['sid']);
 
 echo $output . $survey->com_footer();
 
