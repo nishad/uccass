@@ -66,7 +66,10 @@ if(count($_POST) > 0)
             if($error)
             { echo $c->lang('install_bad'); }
             else
-            { echo $c->lang('install_good'); }
+            {
+                echo $c->lang('install_good');
+                echo "<p><a href={$survey->CONF['html']}/>Begin using UCCASS</a></p>";
+            }
         }
     }
 }
