@@ -127,6 +127,7 @@ class UCCASS_Survey extends UCCASS_Main
         $show['next_button'] = TRUE;
         $show['quit_button'] = TRUE;
         $show['page_num'] = TRUE;
+        $show['quit'] = FALSE;
         $now = time();
         $stay_on_same_page = 0;
 
