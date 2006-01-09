@@ -38,6 +38,7 @@
 
 ; File Path to UCCASS files
 ; ex: /home/user/name/public_html/uccass
+; (write . (dot) if you don't know the absolute path)
 path = "c:/program files/apache group/apache/htdocs/uccass"
 
 ; HTML Path to UCCASS installation
@@ -187,10 +188,12 @@ create_access = private
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; Database Type (mysql, mssql, etc)
+; Database Type (mysql, mssql, postgres7, etc)
+; For each supported database type there's a file adodb-<database type>.inc.php in the directory ADOdb/drivers 
 db_type = mysql
 
-; Database Host
+; Database Host (hostname[:port])
+; ex: 127.0.0.1, mysql.examplehost.cz:6036
 db_host = localhost
 
 ; Database User
@@ -211,6 +214,8 @@ db_database = uccass
 ; programs in the same database. Leave
 ; blank for no prefix and to use the
 ; default table names.
+; Max. length 20 characters (determined by 
+; XMLS_PREFIX_MAXLEN in ADOdb/adodb-xmlschema.inc.php).
 db_tbl_prefix = "uc_"
 
 ; Database / HTML Character Set

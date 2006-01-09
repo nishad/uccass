@@ -132,33 +132,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
             if(!isset($_REQUEST['add_answers_submit']) && (!isset($error) || strlen($error) == 0))
             {
-                $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
-                $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES
-                          ($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']})";
-                $rs = $this->db->Execute($query);
-                if($rs === FALSE)
-                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
-                else
+            	// Store the answer into the databese
+            	if( $this->db_insert_answer_type($input) === true )
                 {
-                    if($c = count($input['value']))
-                    {
-                        $sql = '';
-                        for($x=0;$x<$c;$x++)
-                        {
-                            $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
-                            $sql .= "($avid,$aid,{$input['value'][$x]},{$input['numeric_value'][$x]},{$input['image'][$x]}),";
-                        }
-                        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, numeric_value, image) VALUES " . substr($sql,0,-1);
-                        $rs = $this->db->Execute($query);
-
-
-                        if($rs === FALSE)
-                        {
-                            $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg());
-                            $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid");
-                        }
-                    }
-
                     $success=TRUE;
                     $this->smarty->assign('success',$success);
 
@@ -504,7 +480,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                             }
 
                             if(count($insert))
-                            { $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,numeric_value,image) VALUES " . implode(',',$insert); }
+                            {
+								// J.Holy: only MySQL allows multiple inserts
+                            	foreach($insert as $single_insert)
+								{ $query[] = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,numeric_value,image) VALUES " . $single_insert; } 
+							}
 
 
                             if(count($input['delete_avid']))
@@ -636,6 +616,62 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
         return $retval;
     }
+	
+	
+    /***************************
+    * INSERT NEW ANSWER TYPE INTO DATABASE
+    * Stores the new answer types and its answer values into a database.
+    * 
+    * @param array $input An associative array representing the input form with
+    * answer type/values data.
+    * @return True upon success
+    * 
+    * @access private
+    * @author Jakub Holy
+    * ***************************/
+    function db_insert_answer_type($input) 
+    {
+        $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES"
+                  ."($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']})";
+        $rs = $this->db->Execute($query);
+        if($rs === FALSE)
+        { 
+        	$this->error($this->lang['db_query_error'] . $this->db->ErrorMsg());
+        	return false; 
+        }
+        else		// answer type successfully inserted into the DB
+        {
+            // Save all answer values of the new answer type if any exist:
+            if($c = count($input['value']))
+            {
+                $inserted_answers_ids = array();
+                for($x=0;$x<$c;$x++)	// for all answer values
+                {
+                    $avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
+                    $sql = "($avid,$aid,{$input['value'][$x]},{$input['numeric_value'][$x]},{$input['image'][$x]})";
+                    $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid, aid, value, numeric_value, image) VALUES " . $sql;
+                    // Insert the answer value into the DB...
+                    $rs = $this->db->Execute($query);
+					
+					// Check the result: has the insertion succeded?
+                    if($rs === FALSE)
+                    {
+                        $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg());
+                        $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid");
+                        // Delete the answer values already successfully inserted, if any
+                        foreach($inserted_answers_ids as $inserted_avid) 
+                        { $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE avid = $inserted_avid"); }
+                        return false;
+                    } 
+                    else	// Store the id of the successfully inserted value for deletion on error 
+                    { $inserted_answers_ids[] = $avid; }
+                } // for all answer values
+                
+            } // if any answer values exist
+            return true;
+        } // if-else answer the type inserted with success
+    } // db_insert_answer_type
 
 }
 

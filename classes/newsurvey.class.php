@@ -31,7 +31,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
     {
         //If permission is required to create surveys, validate login or permissions
         if($this->CONF['create_access'] && !$this->_CheckLogin(0,CREATE_PRIV,'new_survey.php'))
-        { $this->showLogin('new_survey.php'); }
+        { return $this->showLogin('new_survey.php'); }
 
         //If Next button was pressed, process sent data
         if(isset($_REQUEST['next']))

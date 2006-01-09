@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
+<!-- Modified by Jakub Holy -->
 <!DOCTYPE adodb_schema [
-<!ELEMENT schema (table*, sql*)>
+<!ELEMENT schema (table*, sql*,sequence*)>
 <!ATTLIST schema version CDATA #REQUIRED>
-<!ELEMENT table ((field+|DROP), constraint*, descr?, index*)>
+<!ELEMENT table ((field+|DROP), constraint*, descr?, index*, data*, opt*)>
 <!ELEMENT field ((NOTNULL|KEY|PRIMARY)?, (AUTO|AUTOINCREMENT)?, (DEFAULT|DEFDATE|DEFTIMESTAMP)?, NOQUOTE, constraint, descr?)>
+<!ELEMENT data (row+)>
+<!ELEMENT row (f+)>
+<!ELEMENT f (#CDATA)>
 <!ELEMENT descr (#CDATA)>
 <!ELEMENT NOTNULL EMPTY>
 <!ELEMENT KEY EMPTY>
@@ -14,11 +18,21 @@
 <!ELEMENT DEFDATE EMPTY>
 <!ELEMENT DEFTIMESTAMP EMPTY>
 <!ELEMENT NOQUOTE EMPTY>
-<!ELEMENT DROP EMPTY>
+<!ELEMENT DROP EMPTY> <!-- Drop the table -->
 <!ELEMENT constraint (#CDATA)>
+<!-- An additional option (e.g. table level) - ex.: type=ISAM. Use only one opt 
+for a given platform, separate multiple options by commas - see ADOdb dictionary's CreateTableSQL -->
+<!ELEMENT opt (#CDATA)>	
 <!ATTLIST table name CDATA #REQUIRED platform CDATA #IMPLIED version CDATA #IMPLIED>
 <!ATTLIST field name CDATA #REQUIRED type (C|C2|X|X2|B|D|T|L|I|F|N) #REQUIRED size CDATA #IMPLIED>
+<!ATTLIST data platform CDATA #IMPLIED>
+<!ATTLIST f name CDATA #IMPLIED>
 <!ATTLIST DEFAULT value CDATA #REQUIRED>
+<!-- The platform may be either: 'platform1[|platform2...]' or: '- platform1'
+	For available platforms see ADOdb dictionary; ex.: postgres, mysql.
+	'- mysql' tells us to apply it to all databases but mysql. -->
+<!ATTLIST constraint platform CDATA #IMPLIED>
+<!ATTLIST opt platform CDATA #IMPLIED>
 <!ELEMENT index ((col+|DROP), CLUSTERED?, BITMAP?, UNIQUE?, FULLTEXT?, HASH?, descr?)>
 <!ELEMENT col (#CDATA)>
 <!ELEMENT CLUSTERED EMPTY>
@@ -26,8 +40,15 @@
 <!ELEMENT UNIQUE EMPTY>
 <!ELEMENT FULLTEXT EMPTY>
 <!ELEMENT HASH EMPTY>
-<!ATTLIST index name CDATA #REQUIRED>
+<!ATTLIST index name CDATA #REQUIRED platform CDATA #IMPLIED>
+
 <!ELEMENT sql (query+, descr?)>
 <!ELEMENT query (#CDATA)>
 <!ATTLIST sql name CDATA #IMPLIED platform CDATA #IMPLIED, key CDATA, prefixmethod (AUTO|MANUAL|NONE) >
+
+<!-- sequence tells adodb-xmlschema to create a sequence of the given name and with 
+the given initial value (if any). If drop="true" the sequence will be dropped. -->
+<!ELEMENT sequence EMPTY>
+<!ATTLIST sequence name CDATA #REQUIRED initialValue CDATA #IMPLIED 
+	platform CDATA #IMPLIED drop CDATA #IMPLIED>
 ] >

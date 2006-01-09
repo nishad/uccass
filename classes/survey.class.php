@@ -51,6 +51,7 @@ class UCCASS_Survey extends UCCASS_Main
         $now = time();
 
         //Turn on/off surveys depending on start/end date
+        // Note: The 1st query sets active also surveys with (end_date < now) but the 2nd corrects it.
         $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 1 WHERE start_date != 0 AND (start_date < $now) OR (start_date < $now AND $now < end_date)");
         $rs = $this->Query("UPDATE {$this->CONF['db_tbl_prefix']}surveys SET active = 0 WHERE end_date != 0 AND ($now < start_date OR $now > end_date)");
 
@@ -106,7 +107,7 @@ class UCCASS_Survey extends UCCASS_Main
             if($check === ALREADY_COMPLETED || ($ac_control != AC_USERNAMEPASSWORD && $ac_control != AC_INVITATION))
             {
                 $this->setMessageRedirect("index.php");
-                $this->setMessage('Notice','You have already completed the requested survey.',MSGTYPE_NOTICE);
+                $this->setMessage('Notice','You have already completed the requested survey.',MSGTYPE_NOTICE); // L10N
             }
             else
             {
@@ -153,7 +154,16 @@ class UCCASS_Survey extends UCCASS_Main
         $rs = $this->db->Execute("SELECT s.name, s.start_date, s.end_date, s.redirect_page,
             s.active, MAX(q.page) AS max_page, s.survey_text_mode, s.user_text_mode, s.time_limit
             FROM {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
-            WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid");
+            WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid
+			, s.name, s.start_date, s.end_date, s.redirect_page, s.active, 
+			s.template, s.survey_text_mode, s.user_text_mode, s.time_limit");
+        /* 
+         * OR use a subselect:
+		"SELECT s.name, s.start_date, s.end_date, s.redirect_page, " .
+        "s.active, maxpage.max_page, s.template, s.survey_text_mode, s.user_text_mode, s.time_limit " .
+        "FROM surveys s, (SELECT MAX(q.page) as max_page FROM questions q WHERE q.sid=$sid) maxpage " .
+        "WHERE s.sid = $sid";
+        */
 
         if($rs === FALSE) { $this->error("Error retrieving Survey:" . $this->db->ErrorMsg());return; }
         if($r = $rs->FetchRow($rs))
@@ -192,7 +202,7 @@ class UCCASS_Survey extends UCCASS_Main
                 //Check for no answers submitted or less than required
                 if(!isset($_REQUEST['answer'][$qid]))
                 {
-                    $error = "Required questions were not answered.";
+                    $error = "Required questions were not answered."; // L10N
                     $stay_on_same_page = 1;
                 }
                 else
@@ -217,7 +227,7 @@ class UCCASS_Survey extends UCCASS_Main
 
                     if($num_answered < $num_required)
                     {
-                        $error = 'Required questions were not answered.';
+                        $error = 'Required questions were not answered.'; // L10N
                         $stay_on_same_page = 1;
                     }
                 }
@@ -240,9 +250,9 @@ class UCCASS_Survey extends UCCASS_Main
                     foreach($value as $answernum=>$avid)
                     {
                         $cnt = 0;
-                        if(is_array($avid))
+                        if(is_array($avid)) // MM question: avid = array(avid1, avid2, ...) (html name: answer[qid][blocknumber][])
                         {
-                            foreach($avid as $answernum2=>$avid2)
+                            foreach($avid as $answernum2=>$avid2) // MM question - $answernum2 is an avid's index assigned by php 
                             {
                                 if(strlen($avid2) > 0)
                                 {
@@ -264,6 +274,7 @@ class UCCASS_Survey extends UCCASS_Main
             }
         }
 
+		// UPDATE PAGE NUMBER
         if(!$stay_on_same_page)
         {
             if(isset($_REQUEST['next']) && $_SESSION['take_survey']['page'] < $survey['total_pages']+1)
@@ -272,10 +283,11 @@ class UCCASS_Survey extends UCCASS_Main
             { $_SESSION['take_survey']['page']--; }
         }
 
+		// CHECK TIME LIMIT NOT EXCEEDED
         if($survey['time_limit'] && ($now > $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5))
         {
             $_SESSION['take_survey']['page'] = $survey['total_pages']+1;
-            $this->setMessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');
+            $this->setMessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');	// L10N
         }
 
         //////////////////////
@@ -298,9 +310,10 @@ class UCCASS_Survey extends UCCASS_Main
                         $url = $this->CONF['html'] . '/results.php?sid=' . $sid;
                     break;
                     default:
+                    	// Absolute url
                         if(preg_match('!^https?://!',$_SESSION['take_survey']['redirect_page']))
                         { $url = $_SESSION['take_survey']['redirect_page']; }
-                        else
+                        else	// Relative url
                         {
                             if(substr($_SESSION['take_survey']['redirect_page'],0,1) != '/')
                             { $_SESSION['take_survey']['redirect_page'] = '/' . $_SESSION['take_survey']['redirect_page']; }
@@ -361,7 +374,7 @@ class UCCASS_Survey extends UCCASS_Main
                         q.page = $qpage";
                 $rs = $this->db->Execute($sql);
                 if($rs === FALSE)
-                { $this->error("Error retrieving dependencies: " . $this->db->ErrorMsg()); return; }
+                { $this->error("Error retrieving dependencies: " . $this->db->ErrorMsg()); return; }	// L10N
 
                 if($r = $rs->FetchRow($rs))
                 {
@@ -384,7 +397,7 @@ class UCCASS_Survey extends UCCASS_Main
                         where q.sid = $sid and q.aid = a.aid and q.page=$qpage order by q.oid ASC";
 
                 $rs = $this->db->Execute($sql);
-                if($rs === FALSE) { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); return(FALSE);}
+                if($rs === FALSE) { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); return(FALSE);}	// L10N
                 $x = 0;
                 $no_counts = 0;
                 $question_text = '';
@@ -413,12 +426,12 @@ class UCCASS_Survey extends UCCASS_Main
                                 //user has given answer, so see if dependant answer
                                 //is present in the answers the user chose
                                 //First check if answer saved in session is an
-                                //array or not
+                                //array or not (it should always be an array of answer blocks [usually only one])
                                 if(is_array($_SESSION['take_survey']['answer'][$dep_qid]))
                                 {
                                     //Answer is an array (such as MM). Loop through
                                     //answer array and look for matching dependant answer
-                                    foreach($_SESSION['take_survey']['answer'][$dep_qid] as $aid)
+                                    foreach($_SESSION['take_survey']['answer'][$dep_qid] as $aid) // more excatly: as $answerblocknum=>$avid; see line 251
                                     {
                                         if(is_array($aid))
                                         {
@@ -776,7 +789,7 @@ class UCCASS_Survey extends UCCASS_Main
                             {
                                 $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_text_sequence');
                                 $answer = $this->SfStr->getSafeString($answer,SAFE_STRING_DB);
-                                $results_text[] = "($rid,$id,{$survey['sid']},{$r['qid']},$answer,$now)";
+                                $results_text[$rid] = "($rid,$id,{$survey['sid']},{$r['qid']},$answer,$now)"; //rid as key - will need it later
                             }
                             break;
 
@@ -789,7 +802,7 @@ class UCCASS_Survey extends UCCASS_Main
                                     if($a)
                                     {
                                         $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_sequence');
-                                        $results[] = "($rid,$id,{$survey['sid']},{$r['qid']},$a,$now)";
+                                        $results[$rid] = "($rid,$id,{$survey['sid']},{$r['qid']},$a,$now)"; //rid as key - will need it later
                                     }
                                 }
                             }
@@ -800,7 +813,7 @@ class UCCASS_Survey extends UCCASS_Main
                             if($answer)
                             {
                                 $rid = $this->db->GenID($this->CONF['db_tbl_prefix'].'results_sequence');
-                                $results[] = "($rid,$id,{$survey['sid']},{$r['qid']},$answer,$now)";
+                                $results[$rid] = "($rid,$id,{$survey['sid']},{$r['qid']},$answer,$now)"; //rid as key - will need it later
                             }
                             break;
                     }
@@ -809,6 +822,9 @@ class UCCASS_Survey extends UCCASS_Main
         }
 
         //insert answers to questions in each table
+        $this->save_answers("INSERT INTO {$this->CONF['db_tbl_prefix']}results_text (rid, sequence, sid, qid, answer, entered) VALUES ", $results_text);
+		$this->save_answers("INSERT INTO {$this->CONF['db_tbl_prefix']}results (rid, sequence, sid, qid, avid, entered) VALUES ", $results);
+        /*
         if(count($results_text) > 0)
         {
             $t_string = implode(",",$results_text);
@@ -824,7 +840,7 @@ class UCCASS_Survey extends UCCASS_Main
             if($rs === FALSE)
             { $this->error("Error inserting numeric answers: " . $this->db->ErrorMsg()); }
         }
-
+		*/
         //Insert elapsed time to take survey
         $etime = $now - $survey['start_time'];
         $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}time_limit (sequence,sid,elapsed_time) VALUES ($id,{$survey['sid']},$etime)";
@@ -837,6 +853,39 @@ class UCCASS_Survey extends UCCASS_Main
 
         return;
     }
+    
+    /****************************
+    * SAVE ANSWERS TO SURVEY *
+    * Save results/result_text to the results/results_text table. In case of a
+    * failed insert delete all answers inserted so far (rollback) and 
+    * $this->error is called.
+    * 
+    * @param string $insert_start Beginning of the insert string starting with
+    * INSERT and up to VALUES
+    * @param array $results Array with values to be saved, one element per
+    * answer. An element will be appended directly to 'insert... values '.
+    * Must not be null, may be empty.
+    * 
+    * @access private
+    * @author Jakub Holy
+    * ***************************/
+    function save_answers($insert_start, $results_array)
+    {
+    	$inserted_rids = array();	// ids of successfully inserted result text 
+        foreach($results_array as $rid => $single_result)
+        {
+        	$rs = $this->db->Execute($insert_start . $single_result);
+            if($rs === FALSE)
+            { 
+            	// "rollback" - delete already inserted answers
+            	$rids_list = implode(',',$inserted_rids);
+            	$rs = $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}results_text WHERE rid in ($rids_list)");
+            	$this->error("Error inserting answers(sql:$insert_start): " . $this->db->ErrorMsg());
+            }
+            else
+            { $inserted_rids[] = $rid;}
+        }
+    } // save_results
 
 }
 

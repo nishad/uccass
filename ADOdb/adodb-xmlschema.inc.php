@@ -1,43 +1,18 @@
 <?php
-// Copyright (c) 2004 ars Cognita Inc., all rights reserved
+// Copyright (c) 2004-2005 ars Cognita Inc., all rights reserved
 /* ******************************************************************************
     Released under both BSD license and Lesser GPL library license. 
  	Whenever there is any discrepancy between the two licenses, 
  	the BSD license will take precedence. 
-	
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list
- of conditions and the following disclaimer.
-Redistributions in binary form must reproduce the above copyright notice, this l
-ist of conditions and the following disclaimer in the documentation and/or other
- materials provided with the distribution.
-Neither the name of the ars Cognita, Inc.,  nor the names of its contributors may be used 
-to endorse or promote products derived from this software without specific prior
-written permission.
-
-DISCLAIMER:
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WA
-RRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIREC
-T, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR P
-ROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWI
-SE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE P
-OSSIBILITY OF SUCH DAMAGE.
-
 *******************************************************************************/
 /**
  * xmlschema is a class that allows the user to quickly and easily
  * build a database on any ADOdb-supported platform using a simple
  * XML schema.
  *
- * Last Editor: $Author: jholmes763 $
+ * Last Editor: $Author: malyvelky $
  * @author Richard Tango-Lowy & Dan Cech
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  *
  * @package axmls
  * @tutorial getting_started.pkg
@@ -61,7 +36,7 @@ if( !defined( 'XMLS_PREFIX' ) ) {
 * Maximum length allowed for object prefix
 */
 if( !defined( 'XMLS_PREFIX_MAXLEN' ) ) {
-	define( 'XMLS_PREFIX_MAXLEN', 10 );
+	define( 'XMLS_PREFIX_MAXLEN', 20 );
 }
 
 /**
@@ -82,7 +57,7 @@ if( !defined( 'XMLS_CONTINUE_ON_ERROR' ) ) {
 * Current Schema Version
 */
 if( !defined( 'XMLS_SCHEMA_VERSION' ) ) {
-	define( 'XMLS_SCHEMA_VERSION', '0.2' );
+	define( 'XMLS_SCHEMA_VERSION', '0.3' );
 }
 
 /**
@@ -90,6 +65,24 @@ if( !defined( 'XMLS_SCHEMA_VERSION' ) ) {
 */
 if( !defined( 'XMLS_DEFAULT_SCHEMA_VERSION' ) ) {
 	define( 'XMLS_DEFAULT_SCHEMA_VERSION', '0.1' );
+}
+
+/**
+* How to handle data rows that already exist in a database during and upgrade.
+* Options are INSERT (attempts to insert duplicate rows), UPDATE (updates existing
+* rows) and IGNORE (ignores existing rows).
+*/
+if( !defined( 'XMLS_MODE_INSERT' ) ) {
+	define( 'XMLS_MODE_INSERT', 0 );
+}
+if( !defined( 'XMLS_MODE_UPDATE' ) ) {
+	define( 'XMLS_MODE_UPDATE', 1 );
+}
+if( !defined( 'XMLS_MODE_IGNORE' ) ) {
+	define( 'XMLS_MODE_IGNORE', 2 );
+}
+if( !defined( 'XMLS_EXISTING_DATA' ) ) {
+	define( 'XMLS_EXISTING_DATA', XMLS_MODE_INSERT );
 }
 
 /**
@@ -104,6 +97,7 @@ if( !defined( 'XMLS_DEFAULT_UPGRADE_METHOD' ) ) {
 */
 if( !defined( '_ADODB_LAYER' ) ) {
 	require( 'adodb.inc.php' );
+	require( 'adodb-datadict.inc.php' );
 }
 
 /**
@@ -168,6 +162,24 @@ class dbObject {
 	*/
 	function destroy() {
 		unset( $this );
+	}
+	
+	/**
+	* Return the current platform (database type) we're working with as used in
+	* the Data dictionary for SQL generation.
+	* The platform is taken from the data dictionnary (its field upperName, set
+	* in the method NewDataDictionary in adodb.inc.php) and not from an
+	* ADOConnection because they may differ - and the one of the data
+	* dictionnary is actually used in code generation. For example PostgreSQL 7
+	* an ADOConnection->databaseType would return "posgres7" while the
+	* dictionnary uses "posgres".
+	* 
+	* @author Jakub Holy
+	* @return string Identifier of the current database platform as used in
+	* a data dictionnary
+	*/
+	function &getCurrentPlatform() {
+		return is_object( $this->parent ) ? $this->parent->getCurrentPlatform() : $this->dict->upperName;
 	}
 	
 	/**
@@ -253,6 +265,13 @@ class dbTable extends dbObject {
 	var $drop_field = array();
 	
 	/**
+	* @var array Platform-specific options
+	* @access private
+	*/
+	var $currentPlatform = true;
+	
+	
+	/**
 	* Iniitializes a new table object.
 	*
 	* @param string $prefix DB Object prefix
@@ -274,7 +293,14 @@ class dbTable extends dbObject {
 		
 		switch( $this->currentElement ) {
 			case 'INDEX':
-				xml_set_object( $parser, $this->addIndex( $attributes ) );
+				if( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) ) {
+					xml_set_object( $parser, $this->addIndex( $attributes ) );
+				}
+				break;
+			case 'DATA':
+				if( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) ) {
+					xml_set_object( $parser, $this->addData( $attributes ) );
+				}
 				break;
 			case 'DROP':
 				$this->drop();
@@ -284,13 +310,16 @@ class dbTable extends dbObject {
 				$fieldName = $attributes['NAME'];
 				$fieldType = $attributes['TYPE'];
 				$fieldSize = isset( $attributes['SIZE'] ) ? $attributes['SIZE'] : NULL;
-				$fieldOpts = isset( $attributes['OPTS'] ) ? $attributes['OPTS'] : NULL;
+				$fieldOpts = !empty( $attributes['OPTS'] ) ? $attributes['OPTS'] : NULL;
 				
 				$this->addField( $fieldName, $fieldType, $fieldSize, $fieldOpts );
 				break;
-			case 'KEY':	
+			case 'KEY':
 			case 'NOTNULL':
 			case 'AUTOINCREMENT':
+			case 'DEFDATE':
+			case 'DEFTIMESTAMP':
+			case 'UNSIGNED':
 				// Add a field option
 				$this->addFieldOpt( $this->current_field, $this->currentElement );
 				break;
@@ -304,6 +333,11 @@ class dbTable extends dbObject {
 				
 				$this->addFieldOpt( $this->current_field, $this->currentElement, $attributes['VALUE'] );
 				break;
+			case 'OPT':
+			case 'CONSTRAINT':
+				// Accept platform-specific options
+				$this->currentPlatform = ( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) );
+				break;
 			default:
 				// print_r( array( $tag, $attributes ) );
 		}
@@ -316,11 +350,21 @@ class dbTable extends dbObject {
 	*/
 	function _tag_cdata( &$parser, $cdata ) {
 		switch( $this->currentElement ) {
-			// Table constraint
+			// Table/field constraint
 			case 'CONSTRAINT':
-			// Table option
+				if( isset( $this->current_field ) ) {
+					$this->addFieldOpt( $this->current_field, $this->currentElement, $cdata );
+				} else {
+					$this->addTableOpt( $cdata );
+				}
+				break;
+			// Table/field option
 			case 'OPT':
-				$this->addTableOpt( $cdata );
+				if( isset( $this->current_field ) ) {
+					$this->addFieldOpt( $this->current_field, $cdata );
+				} else {
+					$this->addTableOpt( $cdata );
+				}
 				break;
 			default:
 				
@@ -341,6 +385,15 @@ class dbTable extends dbObject {
 				xml_set_object( $parser, $this->parent );
 				$this->destroy();
 				break;
+			case 'FIELD':
+				unset($this->current_field);
+				break;
+			case 'OPT':
+			case 'CONSTRAINT':
+				$this->currentPlatform = true;
+				break;
+			default:
+				
 		}
 	}
 	
@@ -354,6 +407,19 @@ class dbTable extends dbObject {
 		$name = strtoupper( $attributes['NAME'] );
 		$this->indexes[$name] =& new dbIndex( $this, $attributes );
 		return $this->indexes[$name];
+	}
+	
+	/**
+	* Adds data to a table object
+	*
+	* @param array $attributes Data attributes
+	* @return object dbData object
+	*/
+	function &addData( $attributes ) {
+		if( !isset( $this->data ) ) {
+			$this->data =& new dbData( $this, $attributes );
+		}
+		return $this->data;
 	}
 	
 	/**
@@ -404,7 +470,9 @@ class dbTable extends dbObject {
 		
 		// Set the field options
 		if( isset( $opts ) ) {
-			$this->fields[$field_id]['OPTS'] = $opts;
+			$this->fields[$field_id]['OPTS'] = array($opts);
+		} else {
+			$this->fields[$field_id]['OPTS'] = array();
 		}
 	}
 	
@@ -420,11 +488,13 @@ class dbTable extends dbObject {
 	* @return array Field specifier array
 	*/
 	function addFieldOpt( $field, $opt, $value = NULL ) {
-		if( !isset( $value ) ) {
-			$this->fields[$this->FieldID( $field )]['OPTS'][] = $opt;
-		// Add the option and value
-		} else {
-			$this->fields[$this->FieldID( $field )]['OPTS'][] = array( $opt => $value );
+		if( $this->currentPlatform ) {
+			if( !isset( $value ) ) {
+				$this->fields[$this->FieldID( $field )]['OPTS'][] = $opt;
+			// Add the option and value
+			} else {
+				$this->fields[$this->FieldID( $field )]['OPTS'][] = array( $opt => $value );
+			}
 		}
 	}
 	
@@ -438,8 +508,11 @@ class dbTable extends dbObject {
 	* @return array Options
 	*/
 	function addTableOpt( $opt ) {
-		$this->opts[] = $opt;
-		
+		if( $this->currentPlatform ) {
+			if(!isset($this->opts[$this->getCurrentPlatform()]))
+			{ $this->opts[$this->getCurrentPlatform()] = ''; }
+			$this->opts[$this->getCurrentPlatform()] .= $opt;	// append is better - no problem with newlines in cdata
+		}
 		return $this->opts;
 	}
 	
@@ -476,7 +549,7 @@ class dbTable extends dbObject {
 			// drop any existing fields not in schema
 			foreach( $legacy_fields as $field_id => $field ) {
 				if( !isset( $this->fields[$field_id] ) ) {
-					$sql[] = $xmls->dict->DropColumnSQL( $this->name, '`'.$field->name.'`' );
+					$sql[] = $xmls->dict->DropColumnSQL( $this->name, $field->name );
 				}
 			}
 		// if table doesn't exist
@@ -511,7 +584,7 @@ class dbTable extends dbObject {
 					if( is_array( $opt ) ) {
 						$key = key( $opt );
 						$value = $opt[key( $opt )];
-						$fldarray[$field_id][$key] = $value;
+						@$fldarray[$field_id][$key] .= $value;
 					// Option doesn't have arguments
 					} else {
 						$fldarray[$field_id][$opt] = $opt;
@@ -546,6 +619,10 @@ class dbTable extends dbObject {
 		
 		foreach( $this->indexes as $index ) {
 			$sql[] = $index->create( $xmls );
+		}
+		
+		if( isset( $this->data ) ) {
+			$sql[] = $this->data->create( $xmls );
 		}
 		
 		return $sql;
@@ -734,6 +811,251 @@ class dbIndex extends dbObject {
 }
 
 /**
+* Creates a data object in ADOdb's datadict format
+*
+* This class stores information about table data, and is called
+* when we need to load field data into a table.
+*
+* @package axmls
+* @access private
+*/
+class dbData extends dbObject {
+	
+	var $data = array();
+	
+	var $row;
+	
+	/**
+	* Initializes the new dbData object.
+	*
+	* @param object $parent Parent object
+	* @param array $attributes Attributes
+	*
+	* @internal
+	*/
+	function dbData( &$parent, $attributes = NULL ) {
+		$this->parent =& $parent;
+	}
+	
+	/**
+	* XML Callback to process start elements
+	*
+	* Processes XML opening tags. 
+	* Elements currently processed are: ROW and F (field). 
+	*
+	* @access private
+	*/
+	function _tag_open( &$parser, $tag, $attributes ) {
+		$this->currentElement = strtoupper( $tag );
+		
+		switch( $this->currentElement ) {
+			case 'ROW':
+				$this->row = count( $this->data );
+				$this->data[$this->row] = array();
+				break;
+			case 'F':
+				$this->addField($attributes);
+			default:
+				// print_r( array( $tag, $attributes ) );
+		}
+	}
+	
+	/**
+	* XML Callback to process CDATA elements
+	*
+	* Processes XML cdata.
+	*
+	* @access private
+	*/
+	function _tag_cdata( &$parser, $cdata ) {
+		switch( $this->currentElement ) {
+			// Index field name
+			case 'F':
+				$this->addData( $cdata );
+				break;
+			default:
+				
+		}
+	}
+	
+	/**
+	* XML Callback to process end elements
+	*
+	* @access private
+	*/
+	function _tag_close( &$parser, $tag ) {
+		$this->currentElement = '';
+		
+		switch( strtoupper( $tag ) ) {
+			case 'DATA':
+				xml_set_object( $parser, $this->parent );
+				break;
+		}
+	}
+	
+	/**
+	* Adds a field to the insert
+	*
+	* @param string $name Field name
+	* @return string Field list
+	*/
+	function addField( $attributes ) {
+		// check we're in a valid row
+		if( !isset( $this->row ) || !isset( $this->data[$this->row] ) ) {
+			return;
+		}
+		
+		// Set the field index so we know where we are
+		if( isset( $attributes['NAME'] ) ) {
+			$this->current_field = $this->FieldID( $attributes['NAME'] );
+		} else {
+			$this->current_field = count( $this->data[$this->row] );
+		}
+		
+		// initialise data
+		if( !isset( $this->data[$this->row][$this->current_field] ) ) {
+			$this->data[$this->row][$this->current_field] = '';
+		}
+	}
+	
+	/**
+	* Adds options to the index
+	*
+	* @param string $opt Comma-separated list of index options.
+	* @return string Option list
+	*/
+	function addData( $cdata ) {
+		// check we're in a valid field
+		if ( isset( $this->data[$this->row][$this->current_field] ) ) {
+			// add data to field
+			$this->data[$this->row][$this->current_field] .= $cdata;
+		}
+	}
+	
+	/**
+	* Generates the SQL that will add/update the data in the database
+	*
+	* @param object $xmls adoSchema object
+	* @return array Array containing index creation SQL
+	*/
+	function create( &$xmls ) {
+		$table = $xmls->dict->TableName($this->parent->name);
+		$table_field_count = count($this->parent->fields);
+		$tables = $xmls->db->MetaTables(); 
+		$sql = array();
+		
+		$ukeys = $xmls->db->MetaPrimaryKeys( $table );
+		if( !empty( $this->parent->indexes ) and !empty( $ukeys ) ) {
+			foreach( $this->parent->indexes as $indexObj ) {
+				if( !in_array( $indexObj->name, $ukeys ) ) $ukeys[] = $indexObj->name;
+			}
+		}
+		
+		// eliminate any columns that aren't in the table
+		foreach( $this->data as $row ) {
+			$table_fields = $this->parent->fields;
+			$fields = array();
+			$rawfields = array(); // Need to keep some of the unprocessed data on hand.
+			
+			foreach( $row as $field_id => $field_data ) {
+				if( !array_key_exists( $field_id, $table_fields ) ) {
+					if( is_numeric( $field_id ) ) {
+						$field_id = reset( array_keys( $table_fields ) );
+					} else {
+						continue;
+					}
+				}
+				
+				$name = $table_fields[$field_id]['NAME'];
+				
+				switch( $table_fields[$field_id]['TYPE'] ) {
+					case 'I':
+					case 'I1':
+					case 'I2':
+					case 'I4':
+					case 'I8':
+						$fields[$name] = intval($field_data);
+						break;
+					case 'C':
+					case 'C2':
+					case 'X':
+					case 'X2':
+					default:
+						$fields[$name] = $xmls->db->qstr( $field_data );
+						$rawfields[$name] = $field_data;
+				}
+				
+				unset($table_fields[$field_id]);
+				
+			}
+			
+			// check that at least 1 column is specified
+			if( empty( $fields ) ) {
+				continue;
+			}
+			
+			// check that no required columns are missing
+			if( count( $fields ) < $table_field_count ) {
+				foreach( $table_fields as $field ) {
+					if( isset( $field['OPTS'] ) and ( in_array( 'NOTNULL', $field['OPTS'] ) || in_array( 'KEY', $field['OPTS'] ) ) && !in_array( 'AUTOINCREMENT', $field['OPTS'] ) ) {
+						continue(2);
+					}
+				}
+			}
+			
+			// The rest of this method deals with updating existing data records.
+			
+			if( !in_array( $table, $tables ) or ( $mode = $xmls->existingData() ) == XMLS_MODE_INSERT ) {
+				// Table doesn't yet exist, so it's safe to insert.
+				logMsg( "$table doesn't exist, inserting or mode is INSERT" );
+				$sql[] = 'INSERT INTO '. $table .' ('. implode( ',', array_keys( $fields ) ) .') VALUES ('. implode( ',', $fields ) .')';
+				continue;
+			}
+			
+			// Prepare to test for potential violations. Get primary keys and unique indexes
+			$mfields = array_merge( $fields, $rawfields );
+			$keyFields = array_intersect( $ukeys, array_keys( $mfields ) );
+			
+			if( empty( $ukeys ) or count( $keyFields ) == 0 ) {
+				// No unique keys in schema, so safe to insert
+				logMsg( "Either schema or data has no unique keys, so safe to insert" );
+				$sql[] = 'INSERT INTO '. $table .' ('. implode( ',', array_keys( $fields ) ) .') VALUES ('. implode( ',', $fields ) .')';
+				continue;
+			}
+			
+			// Select record containing matching unique keys.
+			$where = '';
+			foreach( $ukeys as $key ) {
+				if( isset( $mfields[$key] ) and $mfields[$key] ) {
+					if( $where ) $where .= ' AND ';
+					$where .= $key . ' = ' . $xmls->db->qstr( $mfields[$key] );
+				}
+			}
+			$records = $xmls->db->Execute( 'SELECT * FROM ' . $table . ' WHERE ' . $where );
+			switch( $records->RecordCount() ) {
+				case 0:
+					// No matching record, so safe to insert.
+					logMsg( "No matching records. Inserting new row with unique data" );
+					$sql[] = $xmls->db->GetInsertSQL( $records, $mfields );
+					break;
+				case 1:
+					// Exactly one matching record, so we can update if the mode permits.
+					logMsg( "One matching record..." );
+					if( $mode == XMLS_MODE_UPDATE ) {
+						logMsg( "...Updating existing row from unique data" );
+						$sql[] = $xmls->db->GetUpdateSQL( $records, $mfields );
+					}
+					break;
+				default:
+					// More than one matching record; the result is ambiguous, so we must ignore the row.
+					logMsg( "More than one matching record. Ignoring row." );
+			}
+		}
+		return $sql;
+	}
+}
+
+/**
 * Creates the SQL to execute a list of provided SQL queries
 *
 * @package axmls
@@ -788,8 +1110,6 @@ class dbQuerySet extends dbObject {
 			case 'NONE':
 				$this->prefixMethod = 'NONE';
 				break;
-			default:
-				$this->prefixMethod = 'AUTO';
 		}
 	}
 	
@@ -884,19 +1204,11 @@ class dbQuerySet extends dbObject {
 	* @return string SQL query string.
 	*/
 	function buildQuery( $sql = NULL ) {
-		if( !isset( $this->query ) ) {
+		if( !isset( $this->query ) OR empty( $sql ) ) {
 			return FALSE;
 		}
 		
-		if( empty( $sql ) ) {
-			return FALSE;
-		}
-		
-		if( !empty( $this->query ) ) {
-			$this->query .= ' ';
-		}
-		
-		$this->query .= trim( $sql );
+		$this->query .= $sql;
 		
 		return $this->query;
 	}
@@ -911,8 +1223,7 @@ class dbQuerySet extends dbObject {
 			return FALSE;
 		}
 		
-		$this->queries[] = $this->query;
-		$return = $this->query;
+		$this->queries[] = $return = trim($this->query);
 		
 		unset( $this->query );
 		
@@ -933,9 +1244,9 @@ class dbQuerySet extends dbObject {
 					
 					// Process object prefix.
 					// Evaluate SQL statements to prepend prefix to objects
-					$query = $this->prefixQuery( '/^\s*((?is)INSERT\s+(INTO\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query );
-					$query = $this->prefixQuery( '/^\s*((?is)UPDATE\s+(FROM\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query );
-					$query = $this->prefixQuery( '/^\s*((?is)DELETE\s+(FROM\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query );
+					$query = $this->prefixQuery( '/^\s*((?is)INSERT\s+(INTO\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query, $xmls->objectPrefix );
+					$query = $this->prefixQuery( '/^\s*((?is)UPDATE\s+(FROM\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query, $xmls->objectPrefix );
+					$query = $this->prefixQuery( '/^\s*((?is)DELETE\s+(FROM\s+)?)((\w+\s*,?\s*)+)(\s.*$)/', $query, $xmls->objectPrefix );
 					
 					// SELECT statements aren't working yet
 					#$data = preg_replace( '/(?ias)(^\s*SELECT\s+.*\s+FROM)\s+(\W\s*,?\s*)+((?i)\s+WHERE.*$)/', "\1 $prefix\2 \3", $data );
@@ -995,6 +1306,163 @@ class dbQuerySet extends dbObject {
 	}
 }
 
+/** Information about a sequence to create. */
+class SequenceInfo {
+	/** @var string Name of the sequence to create. */
+	var $name;
+	/** @var integer Initial value of the sequence (the first id that it should return). */
+	var $initialValue;
+	/** @var bool If false (the default) a sequence will be created otherwise it will be dropped.
+	 * @access private */
+	var $drop = false;
+	
+	/**
+	 * Create a new SequenceInfo that will create a sequence when createOrDrop
+	 * is called.
+	 * @param string name Name of the sequence 
+	 * @param integer initialValue Initial value of the sequence; if unset it
+	 * will be set by $adoConnection->CreateSequence (perhaps to 1).
+	 */ 
+	function SequenceInfo($name, $initialValue = NULL) {
+		$this->name = $name; 
+		$this->initialValue = $initialValue;		
+		$this->drop = false;
+	}
+	
+	/**
+	 * Creates the sequence in the database or drops it: if $this->doDrop is
+	 * true the sequence is dropped otherwise it's created.
+	 * @param object adoConnection An ADOConnection connected to the target
+	 * database.
+	 * @return The result of $adoConnection->CreateSequence (likely false on
+	 * failure).
+	 */
+	function createOrDrop($adoConnection){
+		if(!$this->getDrop()){
+			if($this->initialValue == NULL) {
+				return $adoConnection->CreateSequence($this->name);
+			} else {
+				return $adoConnection->CreateSequence($this->name, $this->initialValue);
+			}//if-else initialValue
+		} else {
+			return $adoConnection->DropSequence($this->name);
+		} // if-else doDrop	
+	} // createOrDrop
+	
+	/**
+	 * Drop the corresponding sequence from the database instead of creating it.
+	 * @param bool $doDrop If true (the default) the sequence will be dropped,
+	 * created otherwise.
+	 * @return object SequenceInfo $this or false upon error
+	 */
+	function &doDrop($doDrop = true) {
+		if(!is_bool($doDrop)){ return false;}
+		$this->drop = $doDrop;
+		return $this;
+	}
+	
+	/**@return bool Will this sequence be dropped (true) or created (false)?*/
+	function getDrop(){return $this->drop === true;}
+}
+
+/**
+* Creates a sequence object in ADOdb's datadict format
+*
+* This class stores information about a database sequence. As charactaristics of
+* the sequence are loaded from the external source, methods and properties of
+* this class are used to build up the sequence description in ADOdb's datadict
+* format.
+* 
+* Sequences are handled differently from other objects because they're not
+* supported directly by Adodb data dictionary - only ADOConnection knows how to 
+* create an index and it doesn't provide the sql for that.
+* See ADOConnection->CreateSequence
+*
+* @author Jakub Holy
+* @package axmls
+* @access private
+*/
+class dbSequence extends dbObject {
+	
+	/**
+	* @var string	sequence name
+	*/
+	var $name;
+	
+	/**
+	* @var string	Initial value of the sequence (the first returned from it).
+	*/
+	var $initialValue;
+	
+	/**
+	* @var boolean Mark sequence for destruction
+	* @access private
+	*/
+	var $drop = FALSE;
+	
+	/**
+	* Initializes the new dbSequence object.
+	*
+	* @param object $parent Parent object
+	* @param array $attributes Attributes
+	*
+	* @internal
+	*/
+	function dbSequence( &$parent, $attributes = NULL ) {
+		$this->parent =& $parent;
+
+		$this->name = $this->prefix($attributes['NAME']);
+		$this->initialValue = isset($attributes['INITIALVALUE'])? $attributes['INITIALVALUE'] : null;
+		$doDrop = isset($attributes['DROP'])? $attributes['DROP'] : false;
+		if( isset($doDrop) && (strcasecmp($doDrop,'TRUE') == 0)){
+			$this->drop();
+		}
+	}
+	
+	/**
+	* XML Callback to process start elements
+	*
+	* Processes XML opening tags. 
+	*
+	* @access private
+	*/
+	function _tag_open( &$parser, $tag, $attributes ) {}
+	
+	/**
+	* XML Callback to process CDATA elements
+	*
+	* Processes XML cdata.
+	*
+	* @access private
+	*/
+	function _tag_cdata( &$parser, $cdata ) {}
+	
+	/**
+	* XML Callback to process end elements
+	*
+	* @access private
+	*/
+	function _tag_close( &$parser, $tag ) {
+		switch( strtoupper( $tag ) ) {
+			case 'SEQUENCE':
+				{
+					$seq = new SequenceInfo($this->name, $this->initialValue);
+					$seq->doDrop($this->drop);
+					$this->parent->addSequence( $seq );
+				}				
+				xml_set_object( $parser, $this->parent );
+				break;
+		}
+	}
+	
+	/**
+	* Marks an index for destruction
+	*/
+	function drop() {
+		$this->drop = TRUE;
+	}
+} // dbSequence
+
 /**
 * Loads and parses an XML file, creating an array of "ready-to-run" SQL statements
 * 
@@ -1004,7 +1472,7 @@ class dbQuerySet extends dbObject {
 * @tutorial getting_started.pkg
 *
 * @author Richard Tango-Lowy & Dan Cech
-* @version $Revision: 1.7 $
+* @version $Revision: 1.8 $
 *
 * @package axmls
 */
@@ -1015,6 +1483,13 @@ class adoSchema {
 	* @access private
 	*/
 	var $sqlArray;
+	
+	/**
+	* @var array	Array containing SequenceInfo for all sequences to be
+	* created.
+	* @access private
+	*/
+	var $sequenceArray;
 	
 	/**
 	* @var object	ADOdb connection object
@@ -1086,6 +1561,11 @@ class adoSchema {
 	var $continueOnError;
 	
 	/**
+	* @var int	How to handle existing data rows (insert, update, or ignore)
+	*/
+	var $existingData;
+	
+	/**
 	* Creates an adoSchema object
 	*
 	* Creating an adoSchema object is the first step in processing an XML schema.
@@ -1099,13 +1579,16 @@ class adoSchema {
 		$this->mgq = get_magic_quotes_runtime();
 		set_magic_quotes_runtime(0);
 		
-		$this->debug = $this->db->debug;
 		$this->db =& $db;
+		$this->debug = $this->db->debug;
 		$this->dict = NewDataDictionary( $this->db );
 		$this->sqlArray = array();
+		$this->sqlArray[] = '-- WARNING: SQL FOR SEQUENCE CREATION/DESTRUCTION IS NOT INCLUDED';
+		$this->sequenceArray = array();
 		$this->schemaVersion = XMLS_SCHEMA_VERSION;
 		$this->executeInline( XMLS_EXECUTE_INLINE );
 		$this->continueOnError( XMLS_CONTINUE_ON_ERROR );
+		$this->existingData( XMLS_EXISTING_DATA );
 		$this->setUpgradeMethod();
 	}
 	
@@ -1155,6 +1638,47 @@ class adoSchema {
 	}
 	
 	/**
+	* Specifies how to handle existing data row when there is a unique key conflict.
+	*
+	* The existingData setting specifies how the parser should handle existing rows
+	* when a unique key violation occurs during the insert. This can happen when inserting
+	* data into an existing table with one or more primary keys or unique indexes.
+	* The existingData method takes one of three options: XMLS_MODE_INSERT attempts
+	* to always insert the data as a new row. In the event of a unique key violation,
+	* the database will generate an error.  XMLS_MODE_UPDATE attempts to update the 
+	* any existing rows with the new data based upon primary or unique key fields in
+	* the schema. If the data row in the schema specifies no unique fields, the row
+	* data will be inserted as a new row. XMLS_MODE_IGNORE specifies that any data rows
+	* that would result in a unique key violation be ignored; no inserts or updates will
+	* take place. For backward compatibility, the default setting is XMLS_MODE_INSERT,
+	* but XMLS_MODE_UPDATE will generally be the most appropriate setting.
+	*
+	* @param int $mode XMLS_MODE_INSERT, XMLS_MODE_UPDATE, or XMLS_MODE_IGNORE
+	* @return int current mode
+	*/
+	function ExistingData( $mode = NULL ) {
+		if( is_int( $mode ) ) {
+			switch( $mode ) {
+				case XMLS_MODE_UPDATE:
+					$mode = XMLS_MODE_UPDATE;
+					break;
+				case XMLS_MODE_IGNORE:
+					$mode = XMLS_MODE_IGNORE;
+					break;
+				case XMLS_MODE_INSERT:
+					$mode = XMLS_MODE_INSERT;
+					break;
+				default:
+					$mode = XMLS_EXISITNG_DATA;
+					break;
+			}
+			$this->existingData = $mode;
+		}
+		
+		return $this->existingData;
+	}
+	
+	/**
 	* Enables/disables inline SQL execution.
 	*
 	* Call this method to enable or disable inline execution of the schema. If the mode is set to TRUE (inline execution),
@@ -1200,39 +1724,62 @@ class adoSchema {
 	* Loads an XML schema from a file and converts it to SQL.
 	*
 	* Call this method to load the specified schema (see the DTD for the proper format) from
-	* the filesystem and generate the SQL necessary to create the database described. 
+	* the filesystem and generate the SQL necessary to create the database
+	* described. This method automatically converts the schema to the latest
+	* axmls schema version.
 	* @see ParseSchemaString()
 	*
 	* @param string $file Name of XML schema file.
+	* @param bool $returnSchema Return schema rather than parsing.
 	* @return array Array of SQL queries, ready to execute
 	*/
-	function ParseSchema( $filename ) {
-		return $this->ParseSchemaString( $this->ConvertSchemaFile ( $filename ) );
+	function ParseSchema( $filename, $returnSchema = FALSE ) {
+		return $this->ParseSchemaString( $this->ConvertSchemaFile( $filename ), $returnSchema );
 	}
 	
 	/**
 	* Loads an XML schema from a file and converts it to SQL.
 	*
-	* Call this method to load the specified schema from a file (see the DTD for the proper format) 
-	* and generate the SQL necessary to create the database described by the schema.
+	* Call this method to load the specified schema directly from a file (see
+	* the DTD for the proper format) and generate the SQL necessary to create
+	* the database described by the schema. Use this method when you are dealing
+	* with large schema files. Otherwise, ParseSchema() is faster.
+	* This method does not automatically convert the schema to the latest axmls
+	* schema version. You must convert the schema manually using either the
+	* ConvertSchemaFile() or ConvertSchemaString() method.
+	* @see ParseSchema()
+	* @see ConvertSchemaFile()
+	* @see ConvertSchemaString()
 	*
 	* @param string $file Name of XML schema file.
+	* @param bool $returnSchema Return schema rather than parsing.
 	* @return array Array of SQL queries, ready to execute.
 	*
 	* @deprecated Replaced by adoSchema::ParseSchema() and adoSchema::ParseSchemaString()
 	* @see ParseSchema(), ParseSchemaString()
 	*/
-	function ParseSchemaFile( $filename ) {
+	function ParseSchemaFile( $filename, $returnSchema = FALSE ) {
 		// Open the file
 		if( !($fp = fopen( $filename, 'r' )) ) {
-			// die( 'Unable to open file' );
+			logMsg( 'Unable to open file' );
 			return FALSE;
 		}
 		
 		// do version detection here
 		if( $this->SchemaFileVersion( $filename ) != $this->schemaVersion ) {
+			logMsg( 'Invalid Schema Version' );
 			return FALSE;
 		}
+		
+		if( $returnSchema ) {
+			$xmlstring = '';
+			while( $data = fread( $fp, 4096 ) ) {
+				$xmlstring .= $data . "\n";
+			}
+			return $xmlstring;
+		}
+		
+		$this->success = 2;
 		
 		$xmlParser = $this->create_parser();
 		
@@ -1260,21 +1807,28 @@ class adoSchema {
 	* @see ParseSchema()
 	*
 	* @param string $xmlstring XML schema string.
+	* @param bool $returnSchema Return schema rather than parsing.
 	* @return array Array of SQL queries, ready to execute.
 	*/
-	function ParseSchemaString( $xmlstring ) {
+	function ParseSchemaString( $xmlstring, $returnSchema = FALSE ) {
 		if( !is_string( $xmlstring ) OR empty( $xmlstring ) ) {
+			logMsg( 'Empty or Invalid Schema' );
 			return FALSE;
 		}
 		
 		// do version detection here
 		if( $this->SchemaStringVersion( $xmlstring ) != $this->schemaVersion ) {
+			logMsg( 'Invalid Schema Version' );
 			return FALSE;
 		}
 		
-		$xmlParser = $this->create_parser();
+		if( $returnSchema ) {
+			return $xmlstring;
+		}
 		
 		$this->success = 2;
+		
+		$xmlParser = $this->create_parser();
 		
 		if( !xml_parse( $xmlParser, $xmlstring, TRUE ) ) {
 			die( sprintf(
@@ -1285,7 +1839,44 @@ class adoSchema {
 		}
 		
 		xml_parser_free( $xmlParser );
+		
 		return $this->sqlArray;
+	}
+	
+	/**
+	* Loads an XML schema from a file and converts it to uninstallation SQL.
+	*
+	* Call this method to load the specified schema (see the DTD for the proper format) from
+	* the filesystem and generate the SQL necessary to remove the database described.
+	* @see RemoveSchemaString()
+	*
+	* @param string $file Name of XML schema file.
+	* @param bool $returnSchema Return schema rather than parsing.
+	* @return array Array of SQL queries, ready to execute
+	*/
+	function RemoveSchema( $filename, $returnSchema = FALSE ) {
+		return $this->RemoveSchemaString( $this->ConvertSchemaFile( $filename ), $returnSchema );
+	}
+	
+	/**
+	* Converts an XML schema string to uninstallation SQL.
+	*
+	* Call this method to parse a string containing an XML schema (see the DTD for the proper format)
+	* and generate the SQL necessary to uninstall the database described by the schema. 
+	* @see RemoveSchema()
+	*
+	* @param string $schema XML schema string.
+	* @param bool $returnSchema Return schema rather than parsing.
+	* @return array Array of SQL queries, ready to execute.
+	*/
+	function RemoveSchemaString( $schema, $returnSchema = FALSE ) {
+		
+		// grab current version
+		if( !( $version = $this->SchemaStringVersion( $schema ) ) ) {
+			return FALSE;
+		}
+		
+		return $this->ParseSchemaString( $this->TransformSchema( $schema, 'remove-' . $version), $returnSchema );
 	}
 	
 	/**
@@ -1316,11 +1907,20 @@ class adoSchema {
 			$this->success = $this->dict->ExecuteSQLArray( $sqlArray, $continueOnErr );
 		}
 		
+		// Create the sequences
+		$sequenceArray = $this->sequenceArray; 
+		if( !is_array( $sequenceArray ) ) {
+			$this->success = 0;
+		} else {
+			$success = $this->createSequences( $sequenceArray, $continueOnErr );
+			if($this->success == 0){ $this->success = $success; }
+		}
+		
 		return $this->success;
 	}
 	
 	/**
-	* Returns the current SQL array. 
+	* Returns the current SQL array (sequences are not included in it).
 	*
 	* Call this method to fetch the array of SQL queries resulting from 
 	* ParseSchema() or ParseSchemaString(). 
@@ -1329,11 +1929,12 @@ class adoSchema {
 	* @return array Array of SQL statements or FALSE if an error occurs
 	*/
 	function PrintSQL( $format = 'NONE' ) {
-		return $this->getSQL( $format, $sqlArray );
+		return $this->getSQL( $format, $this->sqlArray );
 	}
 	
 	/**
-	* Saves the current SQL array to the local filesystem as a list of SQL queries.
+	* Saves the current SQL array to the local filesystem as a list of SQL
+	* queries (sequences are not included in it).
 	*
 	* Call this method to save the array of SQL queries (generally resulting from a
 	* parsed XML schema) to the filesystem.
@@ -1385,12 +1986,20 @@ class adoSchema {
 	function _tag_open( &$parser, $tag, $attributes ) {
 		switch( strtoupper( $tag ) ) {
 			case 'TABLE':
-				$this->obj = new dbTable( $this, $attributes );
-				xml_set_object( $parser, $this->obj );
+				if( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) ) {
+					$this->obj = new dbTable( $this, $attributes );
+					xml_set_object( $parser, $this->obj );
+				}
 				break;
 			case 'SQL':
 				if( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) ) {
 					$this->obj = new dbQuerySet( $this, $attributes );
+					xml_set_object( $parser, $this->obj );
+				}
+				break;
+			case 'SEQUENCE':
+				if( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) ) {
+					$this->obj = new dbSequence( $this, $attributes );
 					xml_set_object( $parser, $this->obj );
 				}
 				break;
@@ -1448,38 +2057,12 @@ class adoSchema {
 		if( $version == $newVersion ) {
 			$result = $schema;
 		} else {
-			// Fail if XSLT extension is not available
-			if( ! function_exists( 'xslt_create' ) ) {
-				return FALSE;
-			}
-			
-			$xsl_file = dirname( __FILE__ ) . '/xsl/convert-' . $version . '-' . $newVersion . '.xsl';
-			
-			// look for xsl
-			if( !is_readable( $xsl_file ) ) {
-				return FALSE;
-			}
-			
-			$arguments = array (
-				'/_xml' => $schema,
-				'/_xsl' => file_get_contents ($xsl_file)
-			);
-			
-			// create an XSLT processor
-			$xh = xslt_create ();
-			
-			// set error handler
-			xslt_set_error_handler ($xh, array (&$this, 'xslt_error_handler'));
-			
-			// process the schema
-			$result = xslt_process ($xh, 'arg:/_xml', 'arg:/_xsl', NULL, $arguments); 
-			
-			xslt_free ($xh);
+			$result = $this->TransformSchema( $schema, 'convert-' . $version . '-' . $newVersion);
 		}
 		
-		if( is_string ($newFile) AND ( $fp = fopen( $newFile, 'w' ) ) ) {
-			fwrite ($fp, $result);
-			fclose ($fp);
+		if( is_string( $result ) AND is_string( $newFile ) AND ( $fp = fopen( $newFile, 'w' ) ) ) {
+			fwrite( $fp, $result );
+			fclose( $fp );
 		}
 		
 		return $result;
@@ -1520,39 +2103,61 @@ class adoSchema {
 				$result = substr( $result, 3 );
 			}
 		} else {
-			// Fail if XSLT extension is not available
-			if( ! function_exists( 'xslt_create' ) ) {
-				return FALSE;
-			}
-			
-			$xsl_file = dirname( __FILE__ ) . '/xsl/convert-' . $version . '-' . $newVersion . '.xsl';
-			
-			// look for xsl
-			if( !is_readable( $xsl_file ) ) {
-				return FALSE;
-			}
-			
-			$arguments = array (
-				'/_xml' => file_get_contents ($filename),
-				'/_xsl' => file_get_contents ($xsl_file)
-			);
-			
-			// create an XSLT processor
-			$xh = xslt_create ();
-			
-			// set error handler
-			xslt_set_error_handler ($xh, array (&$this, 'xslt_error_handler'));
-			
-			// process the schema
-			$result = xslt_process ($xh, 'arg:/_xml', 'arg:/_xsl', NULL, $arguments); 
-			
-			xslt_free ($xh);
+			$result = $this->TransformSchema( $filename, 'convert-' . $version . '-' . $newVersion, 'file' );
 		}
 		
-		if( is_string ($newFile) AND ( $fp = fopen( $newFile, 'w' ) ) ) {
-			fwrite ($fp, $result);
-			fclose ($fp);
+		if( is_string( $result ) AND is_string( $newFile ) AND ( $fp = fopen( $newFile, 'w' ) ) ) {
+			fwrite( $fp, $result );
+			fclose( $fp );
 		}
+		return $result;
+	}
+	
+	function TransformSchema( $schema, $xsl, $schematype='string' )
+	{
+		// Fail if XSLT extension is not available
+		if( ! function_exists( 'xslt_create' ) ) {
+			return FALSE;
+		}
+		
+		$xsl_file = dirname( __FILE__ ) . '/xsl/' . $xsl . '.xsl';
+		
+		// look for xsl
+		if( !is_readable( $xsl_file ) ) {
+			return FALSE;
+		}
+		
+		switch( $schematype )
+		{
+			case 'file':
+				if( !is_readable( $schema ) ) {
+					return FALSE;
+				}
+				
+				$schema = file_get_contents( $schema );
+				break;
+			case 'string':
+			default:
+				if( !is_string( $schema ) ) {
+					return FALSE;
+				}
+		}
+		
+		$arguments = array (
+			'/_xml' => $schema,
+			'/_xsl' => file_get_contents( $xsl_file )
+		);
+		
+		// create an XSLT processor
+		$xh = xslt_create ();
+		
+		// set error handler
+		xslt_set_error_handler ($xh, array (&$this, 'xslt_error_handler'));
+		
+		// process the schema
+		$result = xslt_process ($xh, 'arg:/_xml', 'arg:/_xsl', NULL, $arguments); 
+		
+		xslt_free ($xh);
 		
 		return $result;
 	}
@@ -1667,7 +2272,7 @@ class adoSchema {
 	* @param boolean $data Include data in schema dump
 	* @return string Generated XML schema
 	*/
-	function ExtractSchema( $data = FALSE ) {
+	function ExtractSchema( $data = FALSE, $indent = '  ' ) {
 		$old_mode = $this->db->SetFetchMode( ADODB_FETCH_NUM );
 		
 		$schema = '<?xml version="1.0"?>' . "\n"
@@ -1675,9 +2280,9 @@ class adoSchema {
 		
 		if( is_array( $tables = $this->db->MetaTables( 'TABLES' ) ) ) {
 			foreach( $tables as $table ) {
-				$schema .= '	<table name="' . $table . '">' . "\n";
+				$schema .= $indent . '<table name="' . htmlentities( $table ) . '">' . "\n";
 				
-				// grab details from database
+				// grab details from database // J.Holy: 'where -1' isn't correct - where requires a boolean (except in MySQL)
 				$rs = $this->db->Execute( 'SELECT * FROM ' . $table . ' WHERE -1' );
 				$fields = $this->db->MetaColumns( $table );
 				$indexes = $this->db->MetaIndexes( $table );
@@ -1687,22 +2292,26 @@ class adoSchema {
 						$extra = '';
 						$content = array();
 						
-						if( $details->max_length > 0 ) {
+						if( isset($details->max_length) && $details->max_length > 0 ) {
 							$extra .= ' size="' . $details->max_length . '"';
 						}
 						
-						if( $details->primary_key ) {
-							$content[] = '<PRIMARY/>';
-						} elseif( $details->not_null ) {
+						if( isset($details->primary_key) && $details->primary_key ) {
+							$content[] = '<KEY/>';
+						} elseif( isset($details->not_null) && $details->not_null ) {
 							$content[] = '<NOTNULL/>';
 						}
 						
-						if( $details->has_default ) {
-							$content[] = '<DEFAULT value="' . $details->default_value . '"/>';
+						if( isset($details->has_default) && $details->has_default ) {
+							$content[] = '<DEFAULT value="' . htmlentities( $details->default_value ) . '"/>';
 						}
 						
-						if( $details->auto_increment ) {
+						if( isset($details->auto_increment) && $details->auto_increment ) {
 							$content[] = '<AUTOINCREMENT/>';
+						}
+						
+						if( isset($details->unsigned) && $details->unsigned ) {
+							$content[] = '<UNSIGNED/>';
 						}
 						
 						// this stops the creation of 'R' columns,
@@ -1710,47 +2319,55 @@ class adoSchema {
 						$details->primary_key = 0;
 						$type = $rs->MetaType( $details );
 						
-						$schema .= '		<field name="' . $details->name . '" type="' . $type . '"' . $extra . '>';
+						$schema .= str_repeat( $indent, 2 ) . '<field name="' . htmlentities( $details->name ) . '" type="' . $type . '"' . $extra;
 						
 						if( !empty( $content ) ) {
-							$schema .= "\n			" . implode( "\n			", $content ) . "\n		";
+							$schema .= ">\n" . str_repeat( $indent, 3 )
+									 . implode( "\n" . str_repeat( $indent, 3 ), $content ) . "\n"
+									 . str_repeat( $indent, 2 ) . '</field>' . "\n";
+						} else {
+							$schema .= "/>\n";
 						}
-						
-						$schema .= '</field>' . "\n";
 					}
 				}
 				
 				if( is_array( $indexes ) ) {
 					foreach( $indexes as $index => $details ) {
-						$schema .= '		<index name="' . $index . '">' . "\n";
+						$schema .= str_repeat( $indent, 2 ) . '<index name="' . $index . '">' . "\n";
 						
 						if( $details['unique'] ) {
-							$schema .= '			<UNIQUE/>' . "\n";
+							$schema .= str_repeat( $indent, 3 ) . '<UNIQUE/>' . "\n";
 						}
 						
 						foreach( $details['columns'] as $column ) {
-							$schema .= '			<col>' . $column . '</col>' . "\n";
+							$schema .= str_repeat( $indent, 3 ) . '<col>' . htmlentities( $column ) . '</col>' . "\n";
 						}
 						
-						$schema .= '		</index>' . "\n";
+						$schema .= str_repeat( $indent, 2 ) . '</index>' . "\n";
 					}
 				}
 				
 				if( $data ) {
 					$rs = $this->db->Execute( 'SELECT * FROM ' . $table );
 					
-					if( is_object( $rs ) ) {
-						$schema .= '		<data>' . "\n";
+					if( is_object( $rs ) && !$rs->EOF ) {
+						$schema .= str_repeat( $indent, 2 ) . "<data>\n";
 						
 						while( $row = $rs->FetchRow() ) {
-							$schema .= '			<row><f>' . implode( '</f><f>', $row ) . '</f></row>' . "\n";
+							foreach( $row as $key => $val ) {
+								if ( $val != htmlentities( $val ) ) {
+									$row[$key] = '<![CDATA[' . $val . ']]>';
+								}
+							}
+							
+							$schema .= str_repeat( $indent, 3 ) . '<row><f>' . implode( '</f><f>', $row ) . "</f></row>\n";
 						}
 						
-						$schema .= '		</data>' . "\n";
+						$schema .= str_repeat( $indent, 2 ) . "</data>\n";
 					}
 				}
 				
-				$schema .= '	</table>' . "\n";
+				$schema .= $indent . "</table>\n";
 			}
 		}
 		
@@ -1780,7 +2397,7 @@ class adoSchema {
 			// prefix too long
 			case strlen( $prefix ) > XMLS_PREFIX_MAXLEN:
 			// prefix contains invalid characters
-			case !preg_match( '/^[a-z][a-z0-9]+$/i', $prefix ):
+			case !preg_match( '/^[a-z][a-z0-9_]+$/i', $prefix ):
 				logMsg( 'Invalid prefix: ' . $prefix );
 				return FALSE;
 		}
@@ -1816,23 +2433,53 @@ class adoSchema {
 	}
 	
 	/**
+	* Return the current platform (database type) we're working with as used in
+	* the Data dictionary for SQL generation.
+	* The platform is taken from the data dictionnary (its field upperName, set
+	* in the method NewDataDictionary in adodb.inc.php) and not from an
+	* ADOConnection because they may differ - and the one of the data
+	* dictionnary is actually used in code generation. For example PostgreSQL 7
+	* an ADOConnection->databaseType would return "posgres7" while the
+	* dictionnary uses "posgres".
+	* 
+	* @author Jakub Holy
+	* @return string Identifier of the current database platform as used in
+	* a data dictionnary
+	*/
+	function &getCurrentPlatform() {
+		return $this->dict->upperName;
+	}
+	
+	/**
 	* Checks if element references a specific platform
 	*
 	* @param string $platform Requested platform
+	* May be either: 'platform1[|platform2...]' or: '- platform1'
 	* @returns boolean TRUE if platform check succeeds
 	*
 	* @access private
 	*/
 	function supportedPlatform( $platform = NULL ) {
-		$regex = '/^(\w*\|)*' . $this->db->databaseType . '(\|\w*)*$/';
-		
-		if( !isset( $platform ) OR preg_match( $regex, $platform ) ) {
-			logMsg( "Platform $platform is supported" );
-			return TRUE;
-		} else {
-			logMsg( "Platform $platform is NOT supported" );
-			return FALSE;
+		if( !empty( $platform ) ) {
+			//WAS: $regex = '/(^|\|)' . $this->db->databaseType . '(\||$)/i';
+			// NOW: databaseType and platform according to data dictionnary may differ => consider both
+			$regex = '/(^|\|)('. $this->db->databaseType . '|' . $this->getCurrentPlatform() . ')(\||$)/i';
+			
+			if( preg_match( '/^- /', $platform ) ) {
+				if (preg_match ( $regex, substr( $platform, 2 ) ) ) {
+					logMsg( 'Platform ' . $platform . ' is NOT supported' );
+					return FALSE;
+				}
+			} else {
+				if( !preg_match ( $regex, $platform ) ) {
+					logMsg( 'Platform ' . $platform . ' is NOT supported' );
+					return FALSE;
+				}
+			}
 		}
+		
+		logMsg( 'Platform ' . $platform . ' is supported' );
+		return TRUE;
 	}
 	
 	/**
@@ -1887,7 +2534,8 @@ class adoSchema {
 	}
 	
 	/**
-	* Gets the SQL array in the specified format.
+	* Gets the SQL array in the specified format (sequences are not included
+	* in it).
 	*
 	* @param string $format Format
 	* @return mixed SQL
@@ -1915,6 +2563,58 @@ class adoSchema {
 	}
 	
 	/**
+	* Adds a SequenceInfo into the SequenceInfo array.
+	*
+	* @param object $sequenceInfo SequenceInfo to be added to the array. 
+	*
+	* @access private
+	*/	
+	function addSequence( $sequenceInfo = NULL ) {
+		if(is_a($sequenceInfo, 'SequenceInfo')){
+			$this->sequenceArray[] = $sequenceInfo;
+			return true;
+		} else { return false; }
+	} // addSequence
+	
+	/**
+	* Create sequences in the database.
+	*
+	* @param object $sequenceArray 	Array of SequenceInfo 
+	* @param bool $continueOnErr	Continue even when an error occures?
+	* @return bool True if successfull, false if failed/some errors.
+	* @author Jakub Holy
+	*
+	* @access private
+	*/	
+	function createSequences( $sequenceArray, $continueOnErr = FALSE ) {
+		$isSuccess = true;
+		foreach($sequenceArray as $seqInfo) {
+			$doDrop = $seqInfo->getDrop();
+			$result = $seqInfo->createOrDrop($this->db); // create the sequence
+			
+			// On error notify the user
+			if($result === FALSE) {
+				// $errorNo = $this->db->ErrorNo(); // For postgres it returns the error message
+				$errorMsg = $this->db->ErrorMsg();
+				$message = ($doDrop? 'Dropping':'Creation') . ' of the sequence '.$seqInfo->name.' failed! ';
+				if((!empty($errorMsg))) { 
+					$message .= 'An error occured; reason: '.$errorMsg;
+				} else {
+					$message .= 'It\'s likely that sequences are not supported by the ADOdb ' .
+							'driver for your database.';
+				}
+				logMsg($message,'ERROR '.($doDrop? 'DROPPING':'CREATING').' A SEQUENCE');
+				$isSuccess = false;
+				if(! $continueOnErr) { return false; } 
+			} else {
+				logMsg($seqInfo->name,'SUCCESS '.($doDrop? 'DROPPING':'CREATING').' A SEQUENCE');
+			} // if-else creation failed
+		} // for each sequence info
+		
+		return $isSuccess;
+	}
+	
+	/**
 	* Destroys an adoSchema object.
 	*
 	* Call this method to clean up after an adoSchema object that is no longer in use.
@@ -1931,15 +2631,15 @@ class adoSchema {
 *
 * @access private
 */
-function logMsg( $msg, $title = NULL ) {
-	if( XMLS_DEBUG ) {
+function logMsg( $msg, $title = NULL, $force = FALSE ) {
+	if( XMLS_DEBUG or $force ) {
 		echo '<pre>';
 		
 		if( isset( $title ) ) {
 			echo '<h3>' . htmlentities( $title ) . '</h3>';
 		}
 		
-		if( is_object( $this ) ) {
+		if( @is_object( $this ) ) {
 			echo '[' . get_class( $this ) . '] ';
 		}
 		

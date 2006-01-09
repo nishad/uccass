@@ -204,7 +204,10 @@ class UCCASS_AccessControl extends UCCASS_Main
         $query = "SELECT u.uid, u.name, u.email, u.username, u.password, u.take_priv, u.results_priv,
                   u.edit_priv, u.status, u.status_date, MAX(cs.completed) AS completed, COUNT(u.uid) AS num_completed, u.invite_code
                   FROM {$this->CONF['db_tbl_prefix']}users u LEFT JOIN {$this->CONF['db_tbl_prefix']}completed_surveys cs ON u.uid = cs.uid
-                  WHERE u.sid = $sid GROUP BY u.uid ORDER BY u.name, u.username";
+                  WHERE u.sid = $sid GROUP BY u.uid
+                  , u.name, u.email, u.username, u.password, u.take_priv, u.results_priv
+                  , u.edit_priv, u.status, u.status_date, u.invite_code
+                  ORDER BY u.name, u.username";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
         { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }

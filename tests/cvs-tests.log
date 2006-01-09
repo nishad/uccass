@@ -1,0 +1,2333 @@
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/activatesurvey_web_test.php,v
+Working file: activatesurvey_web_test.php
+head: 1.5
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.5
+	OK_ON_JAKUBHOLY_NET: 1.5
+	MERGED_WITH_CVS-TESTS_OK: 1.3
+	CHANGES_PORTED2CVS: 1.2
+	BEFORE_MERGE2CVS: 1.2
+	TESTS_DONE_2: 1.2
+	TESTS_DONE: 1.2
+	TEST_TAKE_SURVEY_OK: 1.2
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 5;	selected revisions: 5
+description:
+----------------------------
+revision 1.5
+date: 2005-12-12 22:38:02 +0000;  author: aja;  state: Exp;  lines: +1 -1
+drobne ci vynulovane upravy
+----------------------------
+revision 1.4
+date: 2005-12-12 22:35:05 +0000;  author: aja;  state: Exp;  lines: +3 -3
+false -> '0'
+----------------------------
+revision 1.3
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.2
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +1 -1
+view as table: check presence of questions
+----------------------------
+revision 1.1
+date: 2005-12-08 13:43:15 +0000;  author: aja;  state: Exp;
+test activate survey ok
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/addnewquestion_web_test.php,v
+Working file: addnewquestion_web_test.php
+head: 1.5
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.5
+	OK_ON_JAKUBHOLY_NET: 1.5
+	MERGED_WITH_CVS-TESTS_OK: 1.5
+	CHANGES_PORTED2CVS: 1.5
+	BEFORE_MERGE2CVS: 1.5
+	TESTS_DONE_2: 1.5
+	TESTS_DONE: 1.5
+	TEST_TAKE_SURVEY_OK: 1.5
+	TEST_ACTIVATE_SURVEY_OK: 1.3
+keyword substitution: kv
+total revisions: 5;	selected revisions: 5
+description:
+----------------------------
+revision 1.5
+date: 2005-12-09 23:33:30 +0000;  author: aja;  state: Exp;  lines: +24 -6
+1.napraveno add question; take s.: ziskani jmena pole
+----------------------------
+revision 1.4
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +4 -14
+view as table: check presence of questions
+----------------------------
+revision 1.3
+date: 2005-12-08 13:25:19 +0000;  author: aja;  state: Exp;  lines: +3 -8
++ goto_EditsurveyPage
+----------------------------
+revision 1.2
+date: 2005-12-08 12:18:05 +0000;  author: aja;  state: Exp;  lines: +3 -1
++ comments
+----------------------------
+revision 1.1
+date: 2005-12-08 12:14:46 +0000;  author: aja;  state: Exp;
+tests split into multiple files and classes
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/answertypes_test.php,v
+Working file: answertypes_test.php
+head: 1.5
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.4
+	OK_ON_JAKUBHOLY_NET: 1.4
+	MERGED_WITH_CVS-TESTS_OK: 1.4
+	CHANGES_PORTED2CVS: 1.4
+	BEFORE_MERGE2CVS: 1.4
+	TESTS_DONE_2: 1.4
+	TESTS_DONE: 1.4
+	TEST_TAKE_SURVEY_OK: 1.4
+	TEST_ACTIVATE_SURVEY_OK: 1.4
+	TEST_SURVEY_PROPERTIES_OK: 1.4
+	TEST_CREATESURVEY_OK: 1.4
+keyword substitution: kv
+total revisions: 5;	selected revisions: 5
+description:
+----------------------------
+revision 1.5
+date: 2005-12-13 21:51:53 +0000;  author: aja;  state: Exp;  lines: +8 -7
++ prefixes
+----------------------------
+revision 1.4
+date: 2005-12-05 16:57:11 +0000;  author: aja;  state: Exp;  lines: +1 -1
+web tests: + vytvoreni i smazani test. uzivatele
+----------------------------
+revision 1.3
+date: 2005-12-05 15:04:02 +0000;  author: aja;  state: Exp;  lines: +0 -2
+drobne modifikace includu ap
+----------------------------
+revision 1.2
+date: 2005-12-05 14:03:33 +0000;  author: aja;  state: Exp;  lines: +21 -12
+pouziti GroupTest, instanciace z predane tridy Mock objektu
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/createsurvey_web_test.php,v
+Working file: createsurvey_web_test.php
+head: 1.24
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.24
+	OK_ON_JAKUBHOLY_NET: 1.24
+	MERGED_WITH_CVS-TESTS_OK: 1.21
+	CHANGES_PORTED2CVS: 1.20
+	BEFORE_MERGE2CVS: 1.20
+	TESTS_DONE_2: 1.20
+	TESTS_DONE: 1.20
+	TEST_TAKE_SURVEY_OK: 1.20
+	TEST_ACTIVATE_SURVEY_OK: 1.18
+	TEST_SURVEY_PROPERTIES_OK: 1.15
+	TEST_CREATESURVEY_OK: 1.13
+keyword substitution: kv
+total revisions: 24;	selected revisions: 24
+description:
+----------------------------
+revision 1.24
+date: 2005-12-12 22:38:02 +0000;  author: aja;  state: Exp;  lines: +5 -4
+drobne ci vynulovane upravy
+----------------------------
+revision 1.23
+date: 2005-12-12 16:07:40 +0000;  author: aja;  state: Exp;  lines: +5 -5
+be more verbose
+----------------------------
+revision 1.22
+date: 2005-12-12 16:05:34 +0000;  author: aja;  state: Exp;  lines: +10 -7
+be more verbose
+----------------------------
+revision 1.21
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.20
+date: 2005-12-10 01:17:16 +0000;  author: aja;  state: Exp;  lines: +1 -1
+take survey done, vse ok
+----------------------------
+revision 1.19
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +3 -5
+view as table: check presence of questions
+----------------------------
+revision 1.18
+date: 2005-12-08 12:14:46 +0000;  author: aja;  state: Exp;  lines: +0 -227
+tests split into multiple files and classes
+----------------------------
+revision 1.17
+date: 2005-12-07 23:28:04 +0000;  author: aja;  state: Exp;  lines: +17 -8
+create more questions
+----------------------------
+revision 1.16
+date: 2005-12-07 23:15:26 +0000;  author: aja;  state: Exp;  lines: +36 -2
++ add new question
+----------------------------
+revision 1.15
+date: 2005-12-07 22:39:17 +0000;  author: aja;  state: Exp;  lines: +61 -0
+merged edit & create survey; test set s. properties ok
+----------------------------
+revision 1.14
+date: 2005-12-07 20:11:47 +0000;  author: aja;  state: Exp;  lines: +16 -13
+setUp: restart browser
+----------------------------
+revision 1.13
+date: 2005-12-07 19:47:44 +0000;  author: aja;  state: Exp;  lines: +5 -3
+delete survey ok
+----------------------------
+revision 1.12
+date: 2005-12-07 19:37:55 +0000;  author: aja;  state: Exp;  lines: +103 -79
+prepsano; + test_delete_...
+----------------------------
+revision 1.11
+date: 2005-12-07 16:36:04 +0000;  author: aja;  state: Exp;  lines: +54 -12
+removed smarty/ from cvs - smarty doesnt like to see the directory CVS/
+----------------------------
+revision 1.10
+date: 2005-12-07 00:16:49 +0000;  author: aja;  state: Exp;  lines: +41 -14
+1.oprava ziskavani sid ankety ke smazani; 2. pridano smazani i vsech zavislych entit
+----------------------------
+revision 1.9
+date: 2005-12-06 23:39:06 +0000;  author: aja;  state: Exp;  lines: +35 -13
+create survey - subtest2 konecne funguje po oprave bugu v SimpleTest ('' bylo konvert. na 1, viz SimpleOptionTag:getDefault a getAttribute)
+----------------------------
+revision 1.8
+date: 2005-12-06 18:27:34 +0000;  author: aja;  state: Exp;  lines: +41 -12
+test create & delete survey OK
+----------------------------
+revision 1.7
+date: 2005-12-06 14:45:34 +0000;  author: aja;  state: Exp;  lines: +64 -1
+done subtest1_login2newsurvey; implemented but not called subtest2_...
+----------------------------
+revision 1.6
+date: 2005-12-05 22:45:07 +0000;  author: aja;  state: Exp;  lines: +1 -0
++assertField('survey_name')
+----------------------------
+revision 1.5
+date: 2005-12-05 17:26:44 +0000;  author: aja;  state: Exp;  lines: +2 -1
+get new_survey.php ok
+----------------------------
+revision 1.4
+date: 2005-12-05 17:02:08 +0000;  author: aja;  state: Exp;  lines: +2 -2
+web tests: + call parent constr
+----------------------------
+revision 1.3
+date: 2005-12-05 16:57:11 +0000;  author: aja;  state: Exp;  lines: +4 -2
+web tests: + vytvoreni i smazani test. uzivatele
+----------------------------
+revision 1.2
+date: 2005-12-05 15:20:48 +0000;  author: aja;  state: Exp;  lines: +9 -3
+uccass web test case: take adoconn. param + test is open
+----------------------------
+revision 1.1
+date: 2005-12-05 15:04:02 +0000;  author: aja;  state: Exp;
+drobne modifikace includu ap
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/deletesurvey_web_test.php,v
+Working file: deletesurvey_web_test.php
+head: 1.3
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.3
+	OK_ON_JAKUBHOLY_NET: 1.3
+	MERGED_WITH_CVS-TESTS_OK: 1.3
+	CHANGES_PORTED2CVS: 1.3
+	BEFORE_MERGE2CVS: 1.3
+	TESTS_DONE_2: 1.3
+	TESTS_DONE: 1.3
+	TEST_TAKE_SURVEY_OK: 1.3
+	TEST_ACTIVATE_SURVEY_OK: 1.2
+keyword substitution: kv
+total revisions: 3;	selected revisions: 3
+description:
+----------------------------
+revision 1.3
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +3 -5
+view as table: check presence of questions
+----------------------------
+revision 1.2
+date: 2005-12-08 13:25:19 +0000;  author: aja;  state: Exp;  lines: +1 -5
++ goto_EditsurveyPage
+----------------------------
+revision 1.1
+date: 2005-12-08 12:14:46 +0000;  author: aja;  state: Exp;
+tests split into multiple files and classes
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/Attic/editsurvey_web_test.php,v
+Working file: editsurvey_web_test.php
+head: 1.4
+branch:
+locks: strict
+access list:
+symbolic names:
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 4;	selected revisions: 4
+description:
+----------------------------
+revision 1.4
+date: 2005-12-07 22:39:17 +0000;  author: aja;  state: dead;  lines: +0 -0
+merged edit & create survey; test set s. properties ok
+----------------------------
+revision 1.3
+date: 2005-12-07 21:08:10 +0000;  author: aja;  state: Exp;  lines: +19 -10
+test of createsurvey OK, test of edit doesnt work - creation of the test survey
+----------------------------
+revision 1.2
+date: 2005-12-07 20:11:47 +0000;  author: aja;  state: Exp;  lines: +8 -2
+setUp: restart browser
+----------------------------
+revision 1.1
+date: 2005-12-07 19:37:55 +0000;  author: aja;  state: Exp;
+prepsano; + test_delete_...
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/editsurveyproperties_web_test.php,v
+Working file: editsurveyproperties_web_test.php
+head: 1.6
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.6
+	OK_ON_JAKUBHOLY_NET: 1.6
+	MERGED_WITH_CVS-TESTS_OK: 1.5
+	CHANGES_PORTED2CVS: 1.4
+	BEFORE_MERGE2CVS: 1.4
+	TESTS_DONE_2: 1.4
+	TESTS_DONE: 1.4
+	TEST_TAKE_SURVEY_OK: 1.4
+	TEST_ACTIVATE_SURVEY_OK: 1.3
+keyword substitution: kv
+total revisions: 6;	selected revisions: 6
+description:
+----------------------------
+revision 1.6
+date: 2005-12-12 22:33:44 +0000;  author: aja;  state: Exp;  lines: +3 -2
+false -> '0'
+----------------------------
+revision 1.5
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.4
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +3 -5
+view as table: check presence of questions
+----------------------------
+revision 1.3
+date: 2005-12-08 13:25:19 +0000;  author: aja;  state: Exp;  lines: +1 -8
++ goto_EditsurveyPage
+----------------------------
+revision 1.2
+date: 2005-12-08 12:18:05 +0000;  author: aja;  state: Exp;  lines: +3 -0
++ comments
+----------------------------
+revision 1.1
+date: 2005-12-08 12:14:46 +0000;  author: aja;  state: Exp;
+tests split into multiple files and classes
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/newanswertype_web_test.php,v
+Working file: newanswertype_web_test.php
+head: 1.2
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.2
+	OK_ON_JAKUBHOLY_NET: 1.2
+	MERGED_WITH_CVS-TESTS_OK: 1.2
+	CHANGES_PORTED2CVS: 1.2
+	BEFORE_MERGE2CVS: 1.2
+	TESTS_DONE_2: 1.2
+	TESTS_DONE: 1.2
+keyword substitution: kv
+total revisions: 2;	selected revisions: 2
+description:
+----------------------------
+revision 1.2
+date: 2005-12-10 23:05:51 +0000;  author: aja;  state: Exp;  lines: +15 -10
+only 1 answer for test a. type; use in take survey
+----------------------------
+revision 1.1
+date: 2005-12-10 22:07:55 +0000;  author: aja;  state: Exp;
+add answer type: spravne nastaveni hodnot pro vice odpovedi
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/takesurvey_web_test.php,v
+Working file: takesurvey_web_test.php
+head: 1.7
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.7
+	OK_ON_JAKUBHOLY_NET: 1.7
+	MERGED_WITH_CVS-TESTS_OK: 1.7
+	CHANGES_PORTED2CVS: 1.6
+	BEFORE_MERGE2CVS: 1.6
+	TESTS_DONE_2: 1.6
+	TESTS_DONE: 1.6
+	TEST_TAKE_SURVEY_OK: 1.5
+keyword substitution: kv
+total revisions: 7;	selected revisions: 7
+description:
+----------------------------
+revision 1.7
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +2 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.6
+date: 2005-12-10 23:05:51 +0000;  author: aja;  state: Exp;  lines: +8 -8
+only 1 answer for test a. type; use in take survey
+----------------------------
+revision 1.5
+date: 2005-12-10 01:17:16 +0000;  author: aja;  state: Exp;  lines: +3 -2
+take survey done, vse ok
+----------------------------
+revision 1.4
+date: 2005-12-09 23:43:18 +0000;  author: aja;  state: Exp;  lines: +26 -15
+take survey: + set answers
+----------------------------
+revision 1.3
+date: 2005-12-09 23:33:30 +0000;  author: aja;  state: Exp;  lines: +137 -11
+1.napraveno add question; take s.: ziskani jmena pole
+----------------------------
+revision 1.2
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +3 -5
+view as table: check presence of questions
+----------------------------
+revision 1.1
+date: 2005-12-08 15:10:03 +0000;  author: aja;  state: Exp;
+hrube testovani hotovo
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/ucasswebtestcase.class.php,v
+Working file: ucasswebtestcase.class.php
+head: 1.21
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.21
+	OK_ON_JAKUBHOLY_NET: 1.21
+	MERGED_WITH_CVS-TESTS_OK: 1.20
+	CHANGES_PORTED2CVS: 1.20
+	BEFORE_MERGE2CVS: 1.20
+	TESTS_DONE_2: 1.20
+	TESTS_DONE: 1.20
+	TEST_TAKE_SURVEY_OK: 1.19
+	TEST_ACTIVATE_SURVEY_OK: 1.14
+	TEST_SURVEY_PROPERTIES_OK: 1.12
+	TEST_CREATESURVEY_OK: 1.10
+keyword substitution: kv
+total revisions: 21;	selected revisions: 21
+description:
+----------------------------
+revision 1.21
+date: 2005-12-12 16:33:36 +0000;  author: aja;  state: Exp;  lines: +6 -4
+assert EditPage: be more verbose
+----------------------------
+revision 1.20
+date: 2005-12-10 23:05:51 +0000;  author: aja;  state: Exp;  lines: +6 -2
+only 1 answer for test a. type; use in take survey
+----------------------------
+revision 1.19
+date: 2005-12-10 01:17:16 +0000;  author: aja;  state: Exp;  lines: +12 -11
+take survey done, vse ok
+----------------------------
+revision 1.18
+date: 2005-12-09 23:33:30 +0000;  author: aja;  state: Exp;  lines: +5 -3
+1.napraveno add question; take s.: ziskani jmena pole
+----------------------------
+revision 1.17
+date: 2005-12-08 20:12:48 +0000;  author: aja;  state: Exp;  lines: +10 -3
+added questions to test survey
+----------------------------
+revision 1.16
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +13 -1
+view as table: check presence of questions
+----------------------------
+revision 1.15
+date: 2005-12-08 15:10:03 +0000;  author: aja;  state: Exp;  lines: +11 -0
+hrube testovani hotovo
+----------------------------
+revision 1.14
+date: 2005-12-08 13:25:19 +0000;  author: aja;  state: Exp;  lines: +21 -1
++ goto_EditsurveyPage
+----------------------------
+revision 1.13
+date: 2005-12-07 23:15:26 +0000;  author: aja;  state: Exp;  lines: +22 -1
++ add new question
+----------------------------
+revision 1.12
+date: 2005-12-07 20:11:47 +0000;  author: aja;  state: Exp;  lines: +3 -0
+setUp: restart browser
+----------------------------
+revision 1.11
+date: 2005-12-07 19:50:37 +0000;  author: aja;  state: Exp;  lines: +2 -1
+correct error()
+----------------------------
+revision 1.10
+date: 2005-12-07 19:37:55 +0000;  author: aja;  state: Exp;  lines: +65 -0
+prepsano; + test_delete_...
+----------------------------
+revision 1.9
+date: 2005-12-07 16:36:04 +0000;  author: aja;  state: Exp;  lines: +37 -0
+removed smarty/ from cvs - smarty doesnt like to see the directory CVS/
+----------------------------
+revision 1.8
+date: 2005-12-06 18:28:03 +0000;  author: aja;  state: Exp;  lines: +49 -5
+uprava error, nove pomocne fce
+----------------------------
+revision 1.7
+date: 2005-12-06 16:09:27 +0000;  author: aja;  state: Exp;  lines: +1 -1
+rewritten error to prevent infinite loop; + <p>
+----------------------------
+revision 1.6
+date: 2005-12-06 16:08:07 +0000;  author: aja;  state: Exp;  lines: +49 -5
+rewritten error to prevent infinite loop
+----------------------------
+revision 1.5
+date: 2005-12-06 13:06:17 +0000;  author: aja;  state: Exp;  lines: +26 -15
+1.Create the test user iff it doesn't exist yet; 2.Shortened insert (use defaults)
+----------------------------
+revision 1.4
+date: 2005-12-05 17:26:44 +0000;  author: aja;  state: Exp;  lines: +16 -3
+get new_survey.php ok
+----------------------------
+revision 1.3
+date: 2005-12-05 16:57:11 +0000;  author: aja;  state: Exp;  lines: +76 -4
+web tests: + vytvoreni i smazani test. uzivatele
+----------------------------
+revision 1.2
+date: 2005-12-05 15:20:48 +0000;  author: aja;  state: Exp;  lines: +11 -2
+uccass web test case: take adoconn. param + test is open
+----------------------------
+revision 1.1
+date: 2005-12-05 15:04:02 +0000;  author: aja;  state: Exp;
+drobne modifikace includu ap
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/viewsurveyresults_web_test.php,v
+Working file: viewsurveyresults_web_test.php
+head: 1.4
+branch:
+locks: strict
+access list:
+symbolic names:
+	CZ_ON_JAKUBHOLY_OK: 1.4
+	OK_ON_JAKUBHOLY_NET: 1.4
+	MERGED_WITH_CVS-TESTS_OK: 1.3
+	CHANGES_PORTED2CVS: 1.3
+	BEFORE_MERGE2CVS: 1.3
+	TESTS_DONE_2: 1.3
+	TESTS_DONE: 1.2
+	TEST_TAKE_SURVEY_OK: 1.2
+keyword substitution: kv
+total revisions: 4;	selected revisions: 4
+description:
+----------------------------
+revision 1.4
+date: 2005-12-12 16:27:18 +0000;  author: aja;  state: Exp;  lines: +2 -1
+be more verbose
+----------------------------
+revision 1.3
+date: 2005-12-10 23:22:07 +0000;  author: aja;  state: Exp;  lines: +2 -2
+odkoment.1testu, uprava textu
+----------------------------
+revision 1.2
+date: 2005-12-08 19:59:06 +0000;  author: aja;  state: Exp;  lines: +14 -9
+view as table: check presence of questions
+----------------------------
+revision 1.1
+date: 2005-12-08 15:10:03 +0000;  author: aja;  state: Exp;
+hrube testovani hotovo
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/HELP_MY_TESTS_DONT_WORK_ANYMORE,v
+Working file: simpletest/HELP_MY_TESTS_DONT_WORK_ANYMORE
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/LICENSE,v
+Working file: simpletest/LICENSE
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/README,v
+Working file: simpletest/README
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/VERSION,v
+Working file: simpletest/VERSION
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/authentication.php,v
+Working file: simpletest/authentication.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/browser.php,v
+Working file: simpletest/browser.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/dumper.php,v
+Working file: simpletest/dumper.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/encoding.php,v
+Working file: simpletest/encoding.php
+head: 1.3
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.3
+	CZ_ON_JAKUBHOLY_OK: 1.3
+	OK_ON_JAKUBHOLY_NET: 1.3
+	MERGED_WITH_CVS-TESTS_OK: 1.2
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 3;	selected revisions: 3
+description:
+----------------------------
+revision 1.3
+date: 2005-12-12 22:38:02 +0000;  author: aja;  state: Exp;  lines: +2 -2
+drobne ci vynulovane upravy
+----------------------------
+revision 1.2
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/errors.php,v
+Working file: simpletest/errors.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/expectation.php,v
+Working file: simpletest/expectation.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/form.php,v
+Working file: simpletest/form.php
+head: 1.2
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.2
+	CZ_ON_JAKUBHOLY_OK: 1.2
+	OK_ON_JAKUBHOLY_NET: 1.2
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 2;	selected revisions: 2
+description:
+----------------------------
+revision 1.2
+date: 2005-12-12 22:38:02 +0000;  author: aja;  state: Exp;  lines: +3 -3
+drobne ci vynulovane upravy
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/frames.php,v
+Working file: simpletest/frames.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/http.php,v
+Working file: simpletest/http.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/mock_objects.php,v
+Working file: simpletest/mock_objects.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/options.php,v
+Working file: simpletest/options.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/page.php,v
+Working file: simpletest/page.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/parser.php,v
+Working file: simpletest/parser.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/remote.php,v
+Working file: simpletest/remote.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/reporter.php,v
+Working file: simpletest/reporter.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/runner.php,v
+Working file: simpletest/runner.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/scorer.php,v
+Working file: simpletest/scorer.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/shell_tester.php,v
+Working file: simpletest/shell_tester.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/simple_test.php,v
+Working file: simpletest/simple_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/socket.php,v
+Working file: simpletest/socket.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/tag.php,v
+Working file: simpletest/tag.php
+head: 1.3
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.3
+	CZ_ON_JAKUBHOLY_OK: 1.3
+	OK_ON_JAKUBHOLY_NET: 1.3
+	MERGED_WITH_CVS-TESTS_OK: 1.2
+	CHANGES_PORTED2CVS: 1.2
+	BEFORE_MERGE2CVS: 1.2
+	TESTS_DONE_2: 1.2
+	TESTS_DONE: 1.2
+	TEST_TAKE_SURVEY_OK: 1.2
+	TEST_ACTIVATE_SURVEY_OK: 1.2
+	TEST_SURVEY_PROPERTIES_OK: 1.2
+	TEST_CREATESURVEY_OK: 1.2
+keyword substitution: kv
+total revisions: 3;	selected revisions: 3
+description:
+----------------------------
+revision 1.3
+date: 2005-12-12 22:38:02 +0000;  author: aja;  state: Exp;  lines: +3 -2
+drobne ci vynulovane upravy
+----------------------------
+revision 1.2
+date: 2005-12-06 23:26:56 +0000;  author: aja;  state: Exp;  lines: +6 -2
+SimpleOptionTag:getDefault: return "", not true, when value=""
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/unit_tester.php,v
+Working file: simpletest/unit_tester.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/url.php,v
+Working file: simpletest/url.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/user_agent.php,v
+Working file: simpletest/user_agent.php
+head: 1.2
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.2
+	CZ_ON_JAKUBHOLY_OK: 1.2
+	OK_ON_JAKUBHOLY_NET: 1.2
+	MERGED_WITH_CVS-TESTS_OK: 1.2
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 2;	selected revisions: 2
+description:
+----------------------------
+revision 1.2
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/web_tester.php,v
+Working file: simpletest/web_tester.php
+head: 1.2
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.2
+	CZ_ON_JAKUBHOLY_OK: 1.2
+	OK_ON_JAKUBHOLY_NET: 1.2
+	MERGED_WITH_CVS-TESTS_OK: 1.2
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 2;	selected revisions: 2
+description:
+----------------------------
+revision 1.2
+date: 2005-12-12 13:15:13 +0000;  author: aja;  state: Exp;  lines: +1 -1
+MERGED INTO CVS: some files removed
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/xml.php,v
+Working file: simpletest/xml.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/acceptance_test.php,v
+Working file: simpletest/test/acceptance_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/adapter_test.php,v
+Working file: simpletest/test/adapter_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/all_tests.php,v
+Working file: simpletest/test/all_tests.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/authentication_test.php,v
+Working file: simpletest/test/authentication_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/browser_test.php,v
+Working file: simpletest/test/browser_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/dumper_test.php,v
+Working file: simpletest/test/dumper_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/encoding_test.php,v
+Working file: simpletest/test/encoding_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/errors_test.php,v
+Working file: simpletest/test/errors_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/expectation_test.php,v
+Working file: simpletest/test/expectation_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/form_test.php,v
+Working file: simpletest/test/form_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/frames_test.php,v
+Working file: simpletest/test/frames_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/http_test.php,v
+Working file: simpletest/test/http_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/live_test.php,v
+Working file: simpletest/test/live_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/options_test.php,v
+Working file: simpletest/test/options_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/page_test.php,v
+Working file: simpletest/test/page_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/parse_error_test.php,v
+Working file: simpletest/test/parse_error_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/parser_test.php,v
+Working file: simpletest/test/parser_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/real_sites_test.php,v
+Working file: simpletest/test/real_sites_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/remote_test.php,v
+Working file: simpletest/test/remote_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/shell_test.php,v
+Working file: simpletest/test/shell_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/shell_tester_test.php,v
+Working file: simpletest/test/shell_tester_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/simple_mock_test.php,v
+Working file: simpletest/test/simple_mock_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/socket_test.php,v
+Working file: simpletest/test/socket_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/tag_test.php,v
+Working file: simpletest/test/tag_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/test_with_parse_error.php,v
+Working file: simpletest/test/test_with_parse_error.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/unit_tester_test.php,v
+Working file: simpletest/test/unit_tester_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/unit_tests.php,v
+Working file: simpletest/test/unit_tests.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/url_test.php,v
+Working file: simpletest/test/url_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/user_agent_test.php,v
+Working file: simpletest/test/user_agent_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/visual_test.php,v
+Working file: simpletest/test/visual_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/web_tester_test.php,v
+Working file: simpletest/test/web_tester_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================
+
+RCS file: /var/lib/cvs/ajarepository/uccass/tests/simpletest/test/xml_test.php,v
+Working file: simpletest/test/xml_test.php
+head: 1.1
+branch:
+locks: strict
+access list:
+symbolic names:
+	FINAL_SENT_TO_UCCASS: 1.1
+	CZ_ON_JAKUBHOLY_OK: 1.1
+	OK_ON_JAKUBHOLY_NET: 1.1
+	MERGED_WITH_CVS-TESTS_OK: 1.1
+	CHANGES_PORTED2CVS: 1.1
+	BEFORE_MERGE2CVS: 1.1
+	TESTS_DONE_2: 1.1
+	TESTS_DONE: 1.1
+	TEST_TAKE_SURVEY_OK: 1.1
+	TEST_ACTIVATE_SURVEY_OK: 1.1
+	TEST_SURVEY_PROPERTIES_OK: 1.1
+	TEST_CREATESURVEY_OK: 1.1
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+----------------------------
+revision 1.1
+date: 2005-12-04 19:18:21 +0000;  author: aja;  state: Exp;
+Pridani SimpleTest frameworku
+=============================================================================

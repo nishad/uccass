@@ -200,8 +200,8 @@ class UCCASS_Results extends UCCASS_Main
 
         $this->smarty->assign_by_ref('output',$output);
     }
-
-    function _loadBarGraph(&$survey,&$data=array(),$qid_array=array())
+	
+    function _loadBarGraph(&$survey,&$data,$qid_array=array()) // syntax &$data=array() doesn't work in php 4.4.0
     {
         $q_num = 1;
         $qid_list = '';
@@ -210,17 +210,18 @@ class UCCASS_Results extends UCCASS_Main
         { $qid_list = ' AND q.qid IN (' . implode(',',$qid_array) . ') '; }
 
         //retrieve questions
+        // where clause: check that a question hasn't both results and results_text (=has one or the other or none)
         $sql = "SELECT q.qid, q.question, q.num_required, q.aid, a.type, a.label, COUNT(r.qid) AS r_total, COUNT(rt.qid) AS rt_total
                 FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results r
                   ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid,
                   {$this->CONF['db_tbl_prefix']}answer_types a
                 WHERE q.sid = {$survey['sid']} and q.aid = a.aid
-                  and ((q.qid = r.qid AND NOT ".$this->db->IfNull('rt.qid',0).") OR (q.qid = rt.qid AND NOT ".$this->db->IfNull('r.qid',0).")
-                  OR (NOT ".$this->db->IfNull('r.qid',0)." AND NOT ".$this->db->IfNull('rt.qid',0)."))
+                  and ((q.qid = r.qid AND 0=".$this->db->IfNull('rt.qid',0).") OR (q.qid = rt.qid AND 0=".$this->db->IfNull('r.qid',0).")
+                  OR (0=".$this->db->IfNull('r.qid',0)." AND 0=".$this->db->IfNull('rt.qid',0)."))
                   {$qid_list} {$survey['hide_show_where']} {$_SESSION['filter_total'][$survey['sid']]}
                 GROUP BY q.qid
+				,q.question, q.num_required, q.aid, a.type, a.label, q.oid,q.page
                 ORDER BY q.page, q.oid";
-echo $sql;
 
         $rs = $this->db->Execute($sql);
         if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
@@ -342,7 +343,7 @@ echo $sql;
     function _loadReports(&$survey)
     {
         $query = "SELECT r.report_id, r.report_name FROM {$this->CONF['db_tbl_prefix']}reports r, {$this->CONF['db_tbl_prefix']}report_questions rq
-                  WHERE sid = {$survey['sid']} AND r.report_id = rq.report_id GROUP BY r.report_id ORDER BY r.report_name ASC";
+                  WHERE sid = {$survey['sid']} AND r.report_id = rq.report_id GROUP BY r.report_id, r.report_name ORDER BY r.report_name ASC";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
         { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }

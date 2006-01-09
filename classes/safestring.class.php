@@ -85,6 +85,10 @@
   into the database using the ADOdb Quote-> method. The
   string is escaped regardless of the magic_quotes_gpc
   setting
+  
+  SAFE_STRING_JAVASCRIPT: prepares the string for inclusion
+  in a JavaScript string: ',",\ are escaped (regardles of
+  magic_quotes_gpc)
 ======================================================*/
 
 define('SAFE_STRING_TEXT',0);
@@ -92,6 +96,7 @@ define('SAFE_STRING_LIMHTML',1);
 define('SAFE_STRING_FULLHTML',2);
 define('SAFE_STRING_DB',3);
 define('SAFE_STRING_ESC',4);
+define('SAFE_STRING_JAVASCRIPT',5);	// escape ' and " by \ so that it may be put into a JavaScript string
 
 class SafeString
 {
@@ -155,6 +160,9 @@ class SafeString
                     $str = str_replace(array('{$images_html}','{$html}'),array($this->images_html,$this->html),$str);
                 break;
 
+                case SAFE_STRING_JAVASCRIPT:	// prepare for use in a JavaScript string
+                	$str = addcslashes ($str, '\'"\\');	// espace ', ", \
+                break;
                 case SAFE_STRING_TEXT:
                 default:
                     $str = nl2br(htmlentities($str,ENT_QUOTES,$this->charset));

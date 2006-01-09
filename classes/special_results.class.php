@@ -30,7 +30,7 @@ class UCCASS_Special_Results extends UCCASS_Main
 
         //Increase time limit of script to 2 minutes to ensure
         //very large results can be shown or exported
-        set_time_limit(120);
+        @set_time_limit(120);	// suppress warning because if disabled set_time_limit in the safe mode
     }
 
     function showResultsTable($sid)
@@ -84,13 +84,20 @@ class UCCASS_Special_Results extends UCCASS_Main
         { $this->smarty->assign_by_ref('filter_text',$_SESSION['filter_text'][$sid]); }
         else
         { $_SESSION['filter'][$sid] = ''; }
-
-        $query = "SELECT GREATEST(rt.qid, r.qid) AS qid, GREATEST(rt.sequence, r.sequence) AS seq,
+		// 'greatest' is MySQL's proprietary extension hence not portable
+        $query = "SELECT (CASE WHEN rt.qid > r.qid THEN rt.qid ELSE r.qid END) AS qid, " .
+        		"(CASE WHEN rt.sequence > r.sequence THEN rt.sequence ELSE r.sequence END) AS seq, " .
+        		"(CASE WHEN rt.entered > r.entered THEN rt.entered ELSE r.entered END) AS entered, " .
+        		"q.question, av.value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
+                  r ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid LEFT JOIN
+                  {$this->CONF['db_tbl_prefix']}answer_values av ON r.avid = av.avid WHERE q.sid = $sid {$_SESSION['filter'][$sid]}
+                  ORDER BY seq, q.page, q.oid";
+        /*$query = "SELECT GREATEST(rt.qid, r.qid) AS qid, GREATEST(rt.sequence, r.sequence) AS seq,
                   GREATEST(rt.entered,r.entered) AS entered,
                   q.question, av.value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
                   r ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid LEFT JOIN
                   {$this->CONF['db_tbl_prefix']}answer_values av ON r.avid = av.avid WHERE q.sid = $sid {$_SESSION['filter'][$sid]}
-                  ORDER BY seq, q.page, q.oid";
+                  ORDER BY seq, q.page, q.oid";*/
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
@@ -183,13 +190,20 @@ class UCCASS_Special_Results extends UCCASS_Main
         else
         { $_SESSION['filter'][$sid] = ''; }
 
-
-        $query = "SELECT GREATEST(rt.qid, r.qid) AS qid, GREATEST(rt.sequence, r.sequence) AS seq,
+		// 'greatest' is a nonstandard function of mysql
+        $query = "SELECT (CASE WHEN rt.qid > r.qid THEN rt.qid ELSE r.qid END) AS qid, " .
+        		"(CASE WHEN rt.sequence > r.sequence THEN rt.sequence ELSE r.sequence END) AS seq, " .
+        		"(CASE WHEN rt.entered > r.entered THEN rt.entered ELSE r.entered END) AS entered, " .
+				"q.question, av.value, av.numeric_value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
+                  r ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid LEFT JOIN
+                  {$this->CONF['db_tbl_prefix']}answer_values av ON r.avid = av.avid WHERE q.sid = $sid {$_SESSION['filter'][$sid]}
+                  ORDER BY seq, q.page, q.oid";
+        /*$query = "SELECT GREATEST(rt.qid, r.qid) AS qid, GREATEST(rt.sequence, r.sequence) AS seq,
                   GREATEST(rt.entered, r.entered) AS entered,
                   q.question, av.value, av.numeric_value, rt.answer FROM {$this->CONF['db_tbl_prefix']}questions q LEFT JOIN {$this->CONF['db_tbl_prefix']}results
                   r ON q.qid = r.qid LEFT JOIN {$this->CONF['db_tbl_prefix']}results_text rt ON q.qid = rt.qid LEFT JOIN
                   {$this->CONF['db_tbl_prefix']}answer_values av ON r.avid = av.avid WHERE q.sid = $sid {$_SESSION['filter'][$sid]}
-                  ORDER BY seq, q.page, q.oid";
+                  ORDER BY seq, q.page, q.oid";*/
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)

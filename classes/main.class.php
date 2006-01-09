@@ -143,14 +143,14 @@ class UCCASS_Main
         //Load ADOdb files
         $adodb_file = $this->CONF['adodb_path'] . '/adodb.inc.php';
         if(file_exists($adodb_file))
-        { require($this->CONF['adodb_path'] . '/adodb.inc.php'); }
+        { require_once($this->CONF['adodb_path'] . '/adodb.inc.php'); }
         else
         { $this->error($this->lang['file_not_found'] . ': ' . $adodb_file); return; }
 
         //Load Smarty Files
         $smarty_file = $this->CONF['smarty_path'] . '/Smarty.class.php';
         if(file_exists($smarty_file))
-        { require($this->CONF['smarty_path'] . '/Smarty.class.php'); }
+        { require_once($this->CONF['smarty_path'] . '/Smarty.class.php'); }
         else
         { $this->error($this->lang['file_not_found'] . ': ' . $smarty_file); return; }
 
@@ -172,13 +172,23 @@ class UCCASS_Main
 
         //Establish Connection to database
         $this->db = NewADOConnection($this->CONF['db_type']);
+        //$this->db->debug = true; // Print all the queries. FIXME: debug only, delete
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
         $conn = $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
         if(!$conn)
         { $this->error($this->lang['db_connect_error'] . $this->db->ErrorMsg()); return; }
+        // MySQL: It's very important that both database tables and the client (php) use 
+        // the same encoding - if they were different, MySQL would convert from one to the other.
+        // The client encoding is determined by php - by default it's latin1 but may be changed;
+        // you can find out you current encoding - call mysql_client_encoding().
+        // This holds even if you've set utf-8 in uccass config - it doesn't matter (I hope) that
+        // the data is in utf-8 and the DB believes it's in latin1 - the important point is that
+        // MySQL doesn't perform any destructive conversions.    
+        if( strcasecmp($this->CONF['db_type'], 'mysql') == 0 )
+        { $this->db->Execute("SET NAMES 'latin1'"); /*Expect/send data in latin1 == don't perform any conversions.*/ }
 
         //Create SafeString object for escaping user text
-        require($this->CONF['path'] . '/classes/safestring.class.php');
+        require_once($this->CONF['path'] . '/classes/safestring.class.php');
         $this->SfStr = new SafeString($this->CONF['db_type'],$this->CONF['charset']);
 
         //Set template, html and image paths/directories into configuration
@@ -613,7 +623,7 @@ class UCCASS_Main
     function _checkUsernamePassword($sid,$priv,$numallowed=0,$numseconds=0)
     {
         $retval = FALSE;
-
+		
         if(isset($_REQUEST['username']) && isset($_REQUEST['password']))
         {
             if($sid != 0)
@@ -630,7 +640,6 @@ class UCCASS_Main
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
-
             if($r = $rs->FetchRow($rs))
             {
                 //Case sensitive compare done in PHP
@@ -836,7 +845,7 @@ class UCCASS_Main
         return $retval;
     }
 
-    function showLogin($page, $hidden)
+    function showLogin($page, $hidden = array())
     {
         //If validation fails, but username data was present,
         //set an error message and show login form again.

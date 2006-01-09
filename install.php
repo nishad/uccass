@@ -48,10 +48,16 @@ if(count($_POST) > 0)
                 break;
 
                 case 'newinstallation':
-                    $sql_file = 'survey.sql';
-                    $error = $c->load_sql_file($sql_file) | $error;
-                    if(!$error)
-                    { echo $c->lang('install_v181_good'); }
+                    //$sql_file = 'survey.sql';
+                    //$error = $c->load_sql_file($sql_file) | $error;
+                    include('classes/databasecreator.class.php');
+                    $dbCreator = Uccass_DbCreator::createInstance();
+                    if($dbCreator)
+                    {
+                    	$success = $dbCreator->createDatabase($survey->CONF['db_tbl_prefix']);
+                    	if($success)
+                    	{ echo $c->lang('install_v181_good'); }
+                    }
                 break;
 
                 case 'updateconfigonly':

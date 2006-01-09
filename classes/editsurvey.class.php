@@ -832,9 +832,10 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
                 if($r['type'] == ANSWER_TYPE_MS || $r['type'] == ANSWER_TYPE_MM)
                 {
-                    //Retrieve answer value in safe_text mode
-                    //so they can be shown in dependency <select>
-                    $temp = $this->get_answer_values($r['aid'],BY_AID,SAFE_STRING_TEXT);
+                    //Retrieve answer value in SAFE_STRING_JAVASCRIPT mode
+                    //so they can be shown in dependency <select>; html entities will be replaced  
+                    // by JavaScript itself in the constructor of Option
+                    $temp = $this->get_answer_values($r['aid'],BY_AID,SAFE_STRING_JAVASCRIPT);
                     $this->data['dep_avid'][$r['qid']] = $temp['avid'];
                     $this->data['dep_value'][$r['qid']] = $temp['value'];
                 }
@@ -1178,7 +1179,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 if(empty($error))
                 {
 
-                    $dep_insert = '';
+                    $dep_insert = array();
                     $dep_require_pagebreak = 0;
 
                     //check for dependencies
@@ -1232,13 +1233,19 @@ class UCCASS_EditSurvey extends UCCASS_Main
                             //Create dependencies in database and create page break, if required
                             if(!empty($dep_insert))
                             {
-                                $dep_query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id,sid,qid,dep_qid,dep_aid,dep_option) VALUES " . substr($dep_insert,0,-2);
-                                $dep_query = str_replace('%%',$qid,$dep_query);
-
-                                $rs = $this->db->Execute($dep_query);
-                                if($rs === FALSE)
-                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
-
+                                $dep_query_start = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id,sid,qid,dep_qid,dep_aid,dep_option) VALUES ";
+                                // Insert each dependency; if one fails try the others anyway
+                                foreach($dep_insert as $single_dependency)
+                                {
+                                	$single_dependency = str_replace('%%',$qid,$single_dependency);
+                                	$dep_query = $dep_query_start . $single_dependency;
+                                	$rs = $this->db->Execute($dep_query);
+	                                
+	                                if($rs === FALSE)
+	                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
+                                } // insert each dependency
+                                
+								
                                 if($dep_require_pagebreak)
                                 {
                                     $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND

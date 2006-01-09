@@ -1,0 +1,73 @@
+
+	UCCASS - CHANGELOG by Jakub Holy
+
+FILES
+install.php - use Uccass_DbCreator
+ADOdb/xmlschema.dtd - modified (comments, sequence)
+ADOdb/adodb-xmlschema.inc.php - largely modified (support for sequences, bugs resolved)
+
+
+CLASSES
+
+classes/main.class.php:
+- replaced require by require_once to prevent possible problems
+(especially when the unit test answertypes_test.php is run)
+- Added "SET NAMES 'utf8'" for MySQL & utf-8 to get it really working.
+
+classes/editsurvey.class.php:
+corrected sql in _processAddQuestion: MySQL proprietary multiple insert 'values (...),(...),...' replaced by several standard single inserts
+
+classes/survey.class.php:
+corrected sql in take_survey: all columns in the select clause must either be parameters of aggregation functions or appear in the group by clause
+- twice corrected sql in process_answers: MySQL proprietary multiple insert 'values (...),(...),...' replaced by several standard single inserts 
+
+classes/special_results.class.php:
+-corrected sql in results_table, results_csv: greatest(int1,int1) isn't standard sql => replaced by standard case int1 > int2 then int1 else int2 end
+- added '@' to set_time_limit to prevent warning in the safe mode that prevented us from setting the header (output already sent)
+
+classes/answertypes.class.php:
+corrected sql in edit_answer: MySQL proprietary multiple insert 'values (...),(...),...' replaced by several standard single inserts
+
+classes/newsurvey.class.php:
+added 'return' in front of $this->showLogin('new_survey.php');
+
+classes/results.class.php:
+function _loadBarGraph(&$survey,&$data-array(),$qid_array=array()) 
+ changed to:
+function _loadBarGraph(&$survey,&$data,$qid_array=array()) 
+ bercause the syntax &$data=array() doesn't work in php 4.4.0
+sql 'retrieve questions': group by
+not 0 => not 0=0 (ifNull())
+
+ADDED:
+classes/databasecreator.class.ini - create tables etc. from adodb-xmlschema
+tests/
+tests/tag.php: modified SimpleRadioGroup::getValue, ?
+unit_tests.php
+survey-adodb_schema.xml
+
+###############################################################################################################
+CHANGES 2:
+ templates/Default/display_answers.tpl
+ - added <meta http-equiv="content-type" content="text/html; charset={$conf.charset}">
+ 
+classes/safestring.class.php:
+ - added SAFE_STRING_JAVASCRIPT that only escapes ',",\
+
+classes/editsurvey.class.php:
+ - correction: the mode SAFE_STRING_JAVASCRIPT used instead of SAFE_STRING_TEXT for escaping of answer 
+ values shown in a <selcet> when defining a new dependency
+ (the string was escaped twice: for the 2nd time by JavaScript in Option's constructor)
+
+survey.ini.php:
+ + comments
+
+language.default.php:
+ - modified install_v181_good: + info that tables created
+
+classes/results.class.php:
+  - _loadReports: corrected sql - r.report_name added to the group by clause
+
+classes/accesscontrol.class.php:
+ - _loadUsers: sql corrected - all required columns added to the  GROUP BY clause
+
