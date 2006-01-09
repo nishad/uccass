@@ -27,6 +27,7 @@ NOTE ON MYSQL 'CHARACTER SET latin1'
 <sequence name="users_sequence" drop="true"/>
 <sequence name="report_questions_sequence" drop="true"/>
 <sequence name="reports_sequence" drop="true"/>
+<sequence name="sequence" drop="true"/>
 <!-- -->
   
 <table name="answer_types">
@@ -1402,17 +1403,8 @@ Please click on "Finish" below to save your answers.]]></f><f>169</f><f>5</f><f>
 </table>
   
 <sequence name="results_text_sequence" initialValue="177"/>
-  
-<table name="sequence">
-    <field name="id" type="I">
-      <KEY/>
-      <DEFAULT value="0"/>
-    </field>
-    <opt platform="mysql">type=MyISAM</opt>
-	<data>
-      <row><f>400</f></row>
-    </data>
-  </table>
+
+<sequence name="sequence" initialValue="400"/>  
   
 <table name="surveys">
     <field name="sid" type="I">
