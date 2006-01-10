@@ -120,4 +120,14 @@ $lang['invalid_new_username'] = 'Username field is required. ';
 $lang['invalid_new_password'] = 'Password field is required. ';
 $lang['default_copy_name'] = 'None - Start with blank survey';
 $lang['survey_created'] = 'Survey successfully created. ';
+
+//Take survey
+$lang['take.bttn.quit'] = 'Quit Survey - Do not save answers';
+$lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Previous Page';
+$lang['take.bttn.next'] = 'Next Page&nbsp;&gt;&gt;';
+$lang['take.bttn.finish'] = 'Finish';
+$lang['take.msg.already_completed'] = 'You have already completed the requested survey.';
+$lang['take.err.required'] = 'Required questions were not answered.';
+$lang['take.err.time_limit.hdr'] = 'Time Limit Exceeded';
+$lang['take.err.time_limit.msg'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
 ?>
