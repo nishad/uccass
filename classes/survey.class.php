@@ -107,7 +107,8 @@ class UCCASS_Survey extends UCCASS_Main
             if($check === ALREADY_COMPLETED || ($ac_control != AC_USERNAMEPASSWORD && $ac_control != AC_INVITATION))
             {
                 $this->setMessageRedirect("index.php");
-                $this->setMessage('Notice','You have already completed the requested survey.',MSGTYPE_NOTICE); // L10N
+                //$this->setMessage('Notice','You have already completed the requested survey.',MSGTYPE_NOTICE); // L10N 'take.msg.already_completed'
+                $this->setMessage($this->lang('notice'), $this->lang('take.msg.already_completed'));
             }
             else
             {
@@ -202,7 +203,7 @@ class UCCASS_Survey extends UCCASS_Main
                 //Check for no answers submitted or less than required
                 if(!isset($_REQUEST['answer'][$qid]))
                 {
-                    $error = "Required questions were not answered."; // L10N
+                    $error = $this->lang('take.err.required'); //"Required questions were not answered."; // L10N 'take.err.required'
                     $stay_on_same_page = 1;
                 }
                 else
@@ -227,7 +228,7 @@ class UCCASS_Survey extends UCCASS_Main
 
                     if($num_answered < $num_required)
                     {
-                        $error = 'Required questions were not answered.'; // L10N
+                        $error = $this->lang('take.err.required'); //'Required questions were not answered.'; // L10N 'take.err.required'
                         $stay_on_same_page = 1;
                     }
                 }
@@ -287,7 +288,8 @@ class UCCASS_Survey extends UCCASS_Main
         if($survey['time_limit'] && ($now > $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5))
         {
             $_SESSION['take_survey']['page'] = $survey['total_pages']+1;
-            $this->setMessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');	// L10N
+            //$this->setMessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');	// L10N 'take.err.time_limit.hdr', 'take.err.time_limit.msg'
+            $this->setMessage($this->lang('take.err.time_limit.hdr'), $this->lang('take.err.time_limit.msg'));
         }
 
         //////////////////////
@@ -347,7 +349,7 @@ class UCCASS_Survey extends UCCASS_Main
 
             //Questions
             case $survey['total_pages']:
-                $button['next'] = 'Finish';
+                $button['next'] = $this->lang('take.bttn.finish'); //'Finish'; // L10N 'take.bttn.finish'
 
             default:
                 $show['question'] = TRUE;
@@ -374,7 +376,7 @@ class UCCASS_Survey extends UCCASS_Main
                         q.page = $qpage";
                 $rs = $this->db->Execute($sql);
                 if($rs === FALSE)
-                { $this->error("Error retrieving dependencies: " . $this->db->ErrorMsg()); return; }	// L10N
+                { $this->error("Error retrieving dependencies: " . $this->db->ErrorMsg()); return; }
 
                 if($r = $rs->FetchRow($rs))
                 {
@@ -397,7 +399,7 @@ class UCCASS_Survey extends UCCASS_Main
                         where q.sid = $sid and q.aid = a.aid and q.page=$qpage order by q.oid ASC";
 
                 $rs = $this->db->Execute($sql);
-                if($rs === FALSE) { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); return(FALSE);}	// L10N
+                if($rs === FALSE) { $this->error("Error selecting questions: " . $this->db->ErrorMsg()); return(FALSE);}
                 $x = 0;
                 $no_counts = 0;
                 $question_text = '';
@@ -643,8 +645,16 @@ class UCCASS_Survey extends UCCASS_Main
         if(isset($_SESSION['take_survey']['page']))
         { $survey['page'] = $_SESSION['take_survey']['page']; }
 
-        if(isset($button))
-        { $this->smarty->assign("button",$button); }
+        //if(isset($button))
+        {
+        	if(!isset($button))
+        	{ $button = array(); }
+        	if (!isset($button['next']))			// may be set earlier to 'Finish'
+        	{ $button['next'] = $this->lang('take.bttn.next'); }
+        	$button['previous'] = $this->lang('take.bttn.previous'); 
+        	$button['quit'] = $this->lang('take.bttn.quit');
+        	$this->smarty->assign("button",$button); 
+        }
 
         $this->smarty->assign("survey",$survey);
         $this->smarty->assign("show",$show);
