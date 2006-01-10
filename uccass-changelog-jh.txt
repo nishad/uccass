@@ -71,3 +71,16 @@ classes/results.class.php:
 classes/accesscontrol.class.php:
  - _loadUsers: sql corrected - all required columns added to the  GROUP BY clause
 
+
+###############################################################################################################
+CHANGES 2:
+ templates/: added Czech/, something in Czech/language.tpl translated, some Czech/take_survey_question_*.tpl translated
+ templates/Default/language.tpl: added the section Take survey
+ 
+classes/editsurvey.class.php:
+ - correction: $lang[...] -> $this->lang(...)
+ 
+classes/survey.class.php:
+ - used the new language keys instead of hard-wired values (button lables, error messages)
+
+ 
