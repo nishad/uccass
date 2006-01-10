@@ -26,14 +26,14 @@
         {*NUMBER OF PAGES*}
         {section name="page" loop=1 show=$show.page_num}
           <div>
-            Page {$survey.page} of {$survey.total_pages}
+            Stránka {$survey.page} z {$survey.total_pages}
           </div>
         {/section}
 
         {*TIME LIMIT*}
         {section name="time_limit" loop=1 show=$survey.time_limit}
           <div>
-            Time Limit: {$survey.time_limit} minutes. Approximate Elapsed Time: {$survey.elapsed_minutes}:{$survey.elapsed_seconds}
+            Časový limit: {$survey.time_limit} minut. Přibližný uplynulý čas: {$survey.elapsed_minutes}:{$survey.elapsed_seconds}
           </div>
         {/section}
 
@@ -57,7 +57,7 @@
         {*QUIT SURVEY MESSAGE*}
         {section name="quit" loop=1 show=$show.quit|default:FALSE}
           <div>
-            You have quit answering this survey. Your answers were not saved.
+            Ukončil(a) jste vyplňování ankety. Vaše odpovědi nebyly uloženy.
           </div>
         {/section}
 
@@ -65,24 +65,24 @@
         {section name="main_url" loop=1 show=$show.main_url|default:FALSE}
           <div style="text-align:center">
             <br />
-            [ <a href="{$conf.html}/index.php">Return to Main Menu</a> ]
+            [ <a href="{$conf.html}/index.php">Návrat na hlavní stránku</a> ]
           </div>
         {/section}
 
         {*BUTTONS*}
           <div style="text-align:right">
             {section name="quit" loop=1 show=$show.quit_button}
-              <input type="submit" name="quit" value="{$button.quit|default:"Quit Survey - Do not save answers"}">
+              <input type="submit" name="quit" value="{$button.quit}">
             {/section}
 
             {section name="previous" loop=1 show=$show.previous_button}
               &nbsp;
-              <input type="submit" name="previous" value="{$button.previous|default:"&lt;&lt;&nbsp;Previous Page"}">
+              <input type="submit" name="previous" value="{$button.previous}">
             {/section}
 
             {section name="next" loop=1 show=$show.next_button}
               &nbsp;
-              <input type="submit" name="next" value="{$button.next|default:"Next Page&nbsp;&gt;&gt;"}">
+              <input type="submit" name="next" value="{$button.next}">
             {/section}
           </div>
       </td>
