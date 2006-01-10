@@ -1166,7 +1166,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 $aid = (int)$_REQUEST['answer'];
 
                 if($num_required > $num_answers)
-                { $error[] = $lang['to_many_required']; }
+                { $error[] = $this->lang('to_many_required'); }
 
                 if(in_array($_REQUEST['orientation'],$this->CONF['orientation']))
                 { $orientation = $this->SfStr->getSafeString($_REQUEST['orientation'],SAFE_STRING_DB); }
