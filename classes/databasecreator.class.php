@@ -109,7 +109,7 @@ class Uccass_DbCreator {
 		$schema = new adoSchema( $this->adoConnection );
 		if($schema->SetPrefix($name_prefix, false) !== TRUE)
 		{ 
-			echo "<h3>ERROR - Uccass_DbCreator.createDatabase: SetPrefix failed (perhaps too long?).</h3>";
+			echo "<h3>ERROR - Uccass_DbCreator.createDatabase: SetPrefix failed (perhaps too long or invalid format [start with a letter, contain only chars/numbers/_]?).</h3>";
 			return FALSE;
 		}
 		$schema->ParseSchema( $schemaFile );
