@@ -50,6 +50,9 @@ class Uccass_DbCreator {
 	/** Print an info message. */
 	function msg($msg){ echo "<h5 style='color: green'>$msg</h5>"; }
 	
+	/** an adoSchema */
+		var $schema;
+	
 	/**
 	 * Static function: Create an instance of Uccass_DbCreator with an
 	 * adoconnection set.
@@ -93,7 +96,12 @@ class Uccass_DbCreator {
 	 */
 	function Uccass_DbCreator(&$adoConnection) {
 		$this->adoConnection = &$adoConnection;
+		$this->schema = new adoSchema( $this->adoConnection );
 	} // UccassDbCreator
+	
+	/** See adoSchema->SetUpgradeMethod */
+	function SetUpgradeMethod($method)
+	{ return $this->schema->SetUpgradeMethod($method); }
 	
 	/**
 	 * Connect to the DB and create tables, sequences, insert initial data.
@@ -106,7 +114,7 @@ class Uccass_DbCreator {
 		
 		// 1. CREATE TABLES + INDICES via adodb-xmlschema, insert data
 		error_reporting(E_ALL ^ E_NOTICE);	// ignore notices about ' Only variable references should be returned by reference' etc.
-		$schema = new adoSchema( $this->adoConnection );
+		$schema = &$this->schema;
 		if($schema->SetPrefix($name_prefix, false) !== TRUE)
 		{ 
 			echo "<h3>ERROR - Uccass_DbCreator.createDatabase: SetPrefix failed (perhaps too long or invalid format [start with a letter, contain only chars/numbers/_]?).</h3>";
