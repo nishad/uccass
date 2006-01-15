@@ -16,13 +16,16 @@
  * classes can find their files (such as survey.ini.php and ADOdb/).
  * 
  */
-//define('TEST_DIRECTORY', 'tests/');
+define('TEST_DIRECTORY', 'tests/');
 
 if (! defined('SIMPLE_TEST')) {
-	define('SIMPLE_TEST', 'tests/simpletest/');
+	define('SIMPLE_TEST', TEST_DIRECTORY . 'simpletest/');
 }
+
+define('TEST_SCHEMA_FILE', 'tests/test_tables_schema.xml');
+
 require_once(SIMPLE_TEST . 'unit_tester.php');
-require_once(SIMPLE_TEST . 'reporter.php');
+require_once(TEST_DIRECTORY . 'body_html_reporter.php');
 require_once(SIMPLE_TEST . 'mock_objects.php');
 
 require_once('classes/main.class.php');
@@ -40,6 +43,8 @@ require_once('tests/viewsurveyresults_web_test.php');
 
 require_once('tests/deletesurvey_web_test.php');
 
+require_once('tests/tanswertype_test.php');
+
 
 // Parameters for test cases -------------------------
 // Mock objects
@@ -50,47 +55,157 @@ Mock::generate('ADOConnection', 'MockADOConnection'); // def. the class MockADOC
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Prepares and runs uccass unit tests.
- * For the purpose of tests a test uccass user and a test survey are created.
- * Both are deleted unless a grave php error occures.
- * Note: The same user is used to create a test survey and as a default user
- * of the survey, which will strip her privileges - this could cause problems if
- * the user is not deleted before the next run of the tests [incorrect
- * login/password].
+ * Prepares and runs uccass unit tests using special test tables that it
+ * creates.
+ * 
  */
-class UCCASS_UnitTestsGroup extends GroupTest
+class TestDatabaseTests extends GroupTest
 {
-	function UCCASS_UnitTestsGroup($name = 'UCCASS Unit tests')
-	{ parent::GroupTest($name); }
+	var $uccassMain;
+	
+	function TestDatabaseTests($name = 'Test DB unit tests')
+	{ 
+		global $uccassMain;
+		parent::GroupTest($name);
+		 $this->uccassMain = $uccassMain;
+	}
 	
 	function run()
 	{
-		global $uccassMain;
+		// Set the prefix of test tables
+		// Note: We cannot reset the prefix back unless the tests are run.
+		$this->changeTablePrefix();		// this will apply to all test cases added above
+		// create the test tables + data if they don't exist
+		$this->generateTestTablesIfNone();
+		
 		// ADD UNIT TESTS TO PERFORM
-		// FUNCTIONAL TESTS:
-		$this->addTestCase( new TestOfAnswerTypes($uccassMain, 'MockADOConnection') );
-		//*/ WEB TESTS:
-		$this->addTestCase( new TestOfCreateSurvey($uccassMain) );
+		// Note: we must add them after we've changed the prefix of $this->uccassMain
+		$this->addTestCase( new TestOfTAnswerType($this->uccassMain) );
 		
-		$this->addTestCase( new TestOfEditSurveyProperties($uccassMain) );
-		$this->addTestCase( new TestOfNewAnswerType($uccassMain) );
-		$this->addTestCase( new TestOfActivateSurvey($uccassMain, false) );	// may be ommited
-		$this->addTestCase( new TestOfAddNewQuestion($uccassMain) );
-		$this->addTestCase( new TestOfActivateSurvey($uccassMain, true) );
-		// todo: ? Edit Answer Type, ?Preview Survey, ? Access Control
-		$this->addTestCase( new TestOfTakeSurvey($uccassMain) );	// may be ommited
-		$this->addTestCase( new TestOfViewSurveyResults($uccassMain) );	// may be ommited
+		// run the tests -----------------------------------------------------------
+		parent::run(new BodyHtmlReporter());
 		
-		$this->addTestCase( new TestOfDeleteSurvey($uccassMain) );
-		//*/
-		
-		// run the tests
-		error_reporting(E_ALL ^ E_NOTICE);	// ignore notices
-		ini_set("memory_limit","16M");
-		parent::run(new HtmlReporter());
+		$this->resetTablePrefix();
 	}
 	
-} // UCCASS_UnitTestsGroup
+	/** Stores the old prefix of uccass tables when we change it. */
+	var $oldPrefix = '';
+	
+	/**
+	 * Change the table prefix defined in uccass init file.
+	 */
+	function changeTablePrefix($prefix = 'test_7_')
+	{
+		$this->oldPrefix = $this->uccassMain->CONF['db_tbl_prefix'];
+		$this->uccassMain->CONF['db_tbl_prefix'] = $prefix;
+		
+		// Replace the prefix string
+		$file = 'survey.ini.php';
+		if(file_exists($file))
+        {
+            $fp = fopen($file,"r");
+            $ini_file = fread($fp,filesize($file));
+            fclose($fp);
+
+            if($fp = fopen($file,"w"))
+            {
+                
+               $ini_file = preg_replace("/^db_tbl_prefix\s?=.*$/m","db_tbl_prefix = \"$prefix\"",$ini_file);
+
+                if(!fwrite($fp,$ini_file))
+                { $this->uccassMain->error($this->uccassMain->lang['config_not_write']); return false; }
+
+                fclose($fp);
+                echo "<p>Notice: The prefix of uccass tables changed to $prefix.</p>";
+            }
+            else
+            { $this->uccassMain->error($this->uccassMain->lang['config_not_write']); return false; }
+        }
+        else
+        { $this->uccassMain->error($this->uccassMain->lang['config_not_found']); return false; }
+	}
+	
+	/** Reset the uccass table prefix to the original one.*/
+	function resetTablePrefix()
+	{
+		if(!empty($this->oldPrefix))
+		{
+			$this->changeTablePrefix($this->oldPrefix);
+			$this->oldPrefix = '';
+		}
+	}
+	
+	/**
+	 * Create and fill with data tables for test if they don't exist.
+	 */
+	function generateTestTablesIfNone()
+	{
+		// Test that the tables don't exist
+		$query = "SELECT count(*) FROM {$this->uccassMain->CONF['db_tbl_prefix']}dyna_answer_type_details";
+        $rs = $this->uccassMain->db->GetOne($query);
+        if($rs === FALSE)
+        { 
+        	// Table doesn't exist
+        	echo '<p>Creating the test tables...</p>';
+        	require_once('classes/databasecreator.class.php');
+	        $dbCreator = Uccass_DbCreator::createInstance();
+	        if($dbCreator)
+	        {
+	        	$dbCreator->SetUpgradeMethod('REPLACE');
+	        	$success = $dbCreator->createDatabase($this->uccassMain->CONF['db_tbl_prefix'], TEST_SCHEMA_FILE);
+	        	if(!$success)
+	        	{ 
+	        		echo '<p style="color:red">Table creation failed!'.$this->uccassMain->db->ErrorMsg().'</p>';
+	        		return false; 
+	        	} // else { echo "<hr><h2>The Executed SQL:</h2><pre>$success</pre><hr>";}
+	        } // if $dbCreator instantiated without an error
+        } // if the table doesn't exist (select failed)
+        	
+        return true;
+	}
+	
+} // TestDatabaseTests
+
+/**
+ * Prepares and runs uccass unit tests on the normal database tables used by
+ * uccass. For the purpose of tests a test uccass user and a test survey are
+ * created. Both are deleted unless a grave php error occures. Note: The same
+ * user is used to create a test survey and as a default user of the survey,
+ * which will strip her privileges - this could cause problems if the user is
+ * not deleted before the next run of the tests [incorrect login/password].
+ */
+class NormalDatabaseTests extends GroupTest
+{
+	var $uccassMain;
+	
+	function NormalDatabaseTests($name = 'Normal DB/Web tests')
+	{ 
+		global $uccassMain;
+		parent::GroupTest($name);
+		 $this->uccassMain = $uccassMain;
+		 
+		 // ADD UNIT TESTS TO PERFORM
+		// FUNCTIONAL TESTS:
+		$this->addTestCase( new TestOfAnswerTypes($this->uccassMain, 'MockADOConnection') );
+		//*/ WEB TESTS:
+		$this->addTestCase( new TestOfCreateSurvey($this->uccassMain) );
+		
+		$this->addTestCase( new TestOfEditSurveyProperties($this->uccassMain) );
+		$this->addTestCase( new TestOfNewAnswerType($this->uccassMain) );
+		$this->addTestCase( new TestOfActivateSurvey($this->uccassMain, false) );	// may be ommited
+		$this->addTestCase( new TestOfAddNewQuestion($this->uccassMain) );
+		$this->addTestCase( new TestOfActivateSurvey($this->uccassMain, true) );
+		// todo: ? Edit Answer Type, ?Preview Survey, ? Access Control
+		$this->addTestCase( new TestOfTakeSurvey($this->uccassMain) );	// may be ommited
+		$this->addTestCase( new TestOfViewSurveyResults($this->uccassMain) );	// may be ommited
+		
+		$this->addTestCase( new TestOfDeleteSurvey($this->uccassMain) );
+		//*/
+	}
+	
+	function run()
+	{ parent::run(new BodyHtmlReporter()); }
+} // NormalDatabaseTests
 /*
 // ADOdb schema files -------------------------------
 $adodb_dir = $uccassMain->CONF['adodb_path'];	
@@ -181,6 +296,13 @@ sufficient but 16MB should be ok (I'll try to increase it by ini_set("memory_lim
 <ul>
  <li>Dependencies: add a dependency that's satisfied for 2 or more values to a question</li>
 </ul>
+<h4>If there are problems with SimpleTest in WebTests:</h4>
+<p>If it seems that the SimpleTest's internal browser doesn't set a field correctly:
+1.Check that the field is set in the page representation (debug the method setValue of the 
+appropriate tag class in tests/simpletest/tag.php) 2.Check whether the value is encoded and 
+sent correctly upon submition: see getValue of the same tag and SimpleForm::_getEncoding in 
+form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.php). The encoding
+ is sent in SimpleHttpRequest::_dispatchRequest (http.php).</p>
 
 <form action="<?php echo($_SERVER['PHP_SELF']); ?>" method="post" style="text-align:center">
 	<input type="submit" name="run_tests" value="Run Tests">
@@ -196,9 +318,20 @@ ini_set("memory_limit","16M");
 $test->run(new HtmlReporter());
 //db_recreate_schema();
 */
-	$test = new UCCASS_UnitTestsGroup();
-	$test->run();
-	echo '<hr>';
+	$bodyHtmlReporter = new BodyHtmlReporter();
+	$bodyHtmlReporter->paintPageHeader('UCCASS Unit tests');
+	
+	$normalDbTtests = new NormalDatabaseTests();
+	$testDatabaseTests = new TestDatabaseTests();
+	
+	error_reporting(E_ALL ^ E_NOTICE);	// ignore notices
+	ini_set("memory_limit","16M");
+	
+	$normalDbTtests->run();
+	$testDatabaseTests->run();
+	
+	$bodyHtmlReporter->paintPageFooter();
+	
 }
 ?>
 
