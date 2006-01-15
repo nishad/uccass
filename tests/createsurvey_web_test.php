@@ -134,7 +134,8 @@ class TestOfCreateSurvey extends UCCASS_WebTestCase
     	
     	// Check the result of the submition
     	$this->assertTrue( $edit_survey_page !== FALSE, 'Submitting the survey name and user failed.' );
-    	$this->assertWantedText($this->uccassMain->lang['survey_created']);
+    	if( !$this->assertWantedText($this->uccassMain->lang['survey_created'], 'Success notification missing (%s).'))
+    	{ $this->showSource(); }
     	$this->assertNoUnwantedPattern('/ class="error"/', 'uccass returned an error notification, it seems: %s');	// check that no error occured
     	// echo '<pre>'.htmlentities($edit_survey_page).'</pre>';
     	return $edit_survey_page;
