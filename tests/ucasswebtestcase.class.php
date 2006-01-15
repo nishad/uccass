@@ -83,7 +83,7 @@ class UCCASS_WebTestCase extends WebTestCase
     	// Process arguments
     	if($survey_name)
     	{ $this->testSurveyName = $survey_name; }
-    	$this->uccassMain		= $uccassMain;
+    	$this->uccassMain		=& $uccassMain;
     	$this->adoConnection 	=& $this->uccassMain->db;
     	if( $this->adoConnection->Time() === false )
     	{ $this->myerror("It seems that the ADOConnection isn't connected to a database as required."); }
