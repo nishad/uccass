@@ -52,7 +52,7 @@ class TestOfEditSurveyProperties extends UCCASS_WebTestCase
     	$this->assertResponse(200);
     	$this->assert_MainPage();
     	// Select a survey
-		$this->assertTrue( $this->setField('sid', $survey_name) );		// what survey to edit
+		$this->assertTrue( $this->setField('sid', $survey_name), "Failed to select the survey $survey_name for editing." );		// what survey to edit
     	// Submit to edit the selected survey
     	$this->assertTrue( $this->clickSubmitByName('submit') );
     	
@@ -82,6 +82,7 @@ class TestOfEditSurveyProperties extends UCCASS_WebTestCase
     	$this->assertField('active', '0', "A new survey should be inactive [it has no questions yet]%s");  // L10N
     	$this->assertField('start');				// start date
     	$this->assertField('end');
+    	$this->assertField('template');
     	$this->assertField('redirect_page');
     	$this->assertField('redirect_page_text');	// if redirect = custom url
     	$this->assertField('date_format');
@@ -94,6 +95,8 @@ class TestOfEditSurveyProperties extends UCCASS_WebTestCase
     	$this->assertTrue( $this->setField('active','0'), 'set active failed' );
     	$this->assertTrue( $this->setField('start',date(UCCASS_DATE_FORMAT)), 'set start failed' );
     	$this->assertTrue( $this->setField('end',date(UCCASS_DATE_FORMAT, time() + 7*24*60*60)), 'set end failed' ); // next week
+    	$template = 'Default';
+    	$this->assertTrue( $this->setField('template', $template), "Failed to set the survey template to $template.");
     	$this->assertTrue( $this->setField('redirect_page', 'index') ); // value of the input tag
     	// $this->setField('redirect_page_text', 'http://example.url.eu/');
     	$this->assertTrue( $this->setField('time_limit', 30) );
@@ -106,6 +109,7 @@ class TestOfEditSurveyProperties extends UCCASS_WebTestCase
     	$this->assertNoUnwantedPattern('/ class="error"/', 'uccass returned an error notification, it seems: %s');	// check that no error occured
     	if( !$this->assertWantedText($this->uccassMain->lang['properties_updated']) )
     	{ $this->showSource(); }
+    	$this->assertField('template', $template, "It seems that we failed to set the template to $template.(%s)");
     }
 
 } // TestOfEditSurveyProperties
