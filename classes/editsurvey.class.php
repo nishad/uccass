@@ -779,7 +779,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 }
             }
 
-            sort($this->data['templates']);
+            asort($this->data['templates']);	// preserve the correspondence of keys to values!
         }
         else
         { $this->error($this->lang['survey_not_exist']); return; }
