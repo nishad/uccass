@@ -43,7 +43,7 @@ require_once('tests/viewsurveyresults_web_test.php');
 
 require_once('tests/deletesurvey_web_test.php');
 
-require_once('tests/tanswertype_test.php');
+//require_once('tests/tanswertype_test.php');
 
 
 // Parameters for test cases -------------------------
@@ -80,7 +80,7 @@ class TestDatabaseTests extends GroupTest
 		
 		// ADD UNIT TESTS TO PERFORM
 		// Note: we must add them after we've changed the prefix of $this->uccassMain
-		$this->addTestCase( new TestOfTAnswerType($this->uccassMain) );
+		// $this->addTestCase( new TestOfTAnswerType($this->uccassMain) );
 		
 		// run the tests -----------------------------------------------------------
 		parent::run(new BodyHtmlReporter());
@@ -298,11 +298,11 @@ sufficient but 16MB should be ok (I'll try to increase it by ini_set("memory_lim
 </ul>
 <h4>If there are problems with SimpleTest in WebTests:</h4>
 <p>If it seems that the SimpleTest's internal browser doesn't set a field correctly:
-1.Check that the field is set in the page representation (debug the method setValue of the 
+1.Check that the field is set on the internal representation of the page (debug the method setValue of the 
 appropriate tag class in tests/simpletest/tag.php) 2.Check whether the value is encoded and 
 sent correctly upon submition: see getValue of the same tag and SimpleForm::_getEncoding in 
 form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.php). The encoding
- is sent in SimpleHttpRequest::_dispatchRequest (http.php).</p>
+ is sent most likely in SimpleHttpRequest::_dispatchRequest (http.php).</p>
 
 <form action="<?php echo($_SERVER['PHP_SELF']); ?>" method="post" style="text-align:center">
 	<input type="submit" name="run_tests" value="Run Tests">
