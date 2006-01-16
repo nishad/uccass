@@ -43,7 +43,8 @@ require_once('tests/viewsurveyresults_web_test.php');
 
 require_once('tests/deletesurvey_web_test.php');
 
-//require_once('tests/tanswertype_test.php');
+//require_once('tests/dynamicanswertype_test.php');
+require_once('tests/survey_class_test.php');
 
 
 // Parameters for test cases -------------------------
@@ -80,7 +81,8 @@ class TestDatabaseTests extends GroupTest
 		
 		// ADD UNIT TESTS TO PERFORM
 		// Note: we must add them after we've changed the prefix of $this->uccassMain
-		// $this->addTestCase( new TestOfTAnswerType($this->uccassMain) );
+		//$this->addTestCase( new TestOfDynamicAnswerType($this->uccassMain) );
+		$this->addTestCase( new TestOfSurveyClass() );
 		
 		// run the tests -----------------------------------------------------------
 		parent::run(new BodyHtmlReporter());
