@@ -103,6 +103,10 @@ class Uccass_DbCreator {
 	function SetUpgradeMethod($method)
 	{ return $this->schema->SetUpgradeMethod($method); }
 	
+	/** See adoSchema->SetIgnoreData */
+	function SetIgnoreData($doIgnore = true)
+	{ $this->schema->SetIgnoreData($doIgnore); }
+	
 	/**
 	 * Connect to the DB and create tables, sequences, insert initial data.
 	 * NOTE: Include 'adodb-datadict.inc.php', 'adodb-xmlschema.inc.php'.

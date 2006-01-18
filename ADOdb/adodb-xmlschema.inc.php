@@ -12,7 +12,7 @@
  *
  * Last Editor: $Author: malyvelky $
  * @author Richard Tango-Lowy & Dan Cech
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  *
  * @package axmls
  * @tutorial getting_started.pkg
@@ -939,6 +939,10 @@ class dbData extends dbObject {
 	* @return array Array containing index creation SQL
 	*/
 	function create( &$xmls ) {
+		
+		// If data is ignored stop processing
+		if( $xmls->ignoreData === true) { return array(); }
+		
 		$table = $xmls->dict->TableName($this->parent->name);
 		$table_field_count = count($this->parent->fields);
 		$tables = $xmls->db->MetaTables(); 
@@ -1334,20 +1338,56 @@ class SequenceInfo {
 	 * true the sequence is dropped otherwise it's created.
 	 * @param object adoConnection An ADOConnection connected to the target
 	 * database.
+	 * @param string $mode 'UPDATE' (don't replace an existing sequence by one
+	 * with a lower nextval) or 'REPLACE' (drop any existing sequence and
+	 * create the given one) - only applies to creation.
 	 * @return The result of $adoConnection->CreateSequence (likely false on
 	 * failure).
 	 */
-	function createOrDrop($adoConnection){
+	function createOrDrop(&$adoConnection, $mode = 'UPDATE'){//REPLACE
 		if(!$this->getDrop()){
-			if($this->initialValue == NULL) {
-				return $adoConnection->CreateSequence($this->name);
+			
+			if($mode == 'UPDATE') {
+				return $this->updateSequence($adoConnection);
 			} else {
-				return $adoConnection->CreateSequence($this->name, $this->initialValue);
-			}//if-else initialValue
-		} else {
+				return $this->replaceSequence($adoConnection);
+			} // if-else update mode
+			
+		} else {	// DROP SEQUENCE
 			return $adoConnection->DropSequence($this->name);
 		} // if-else doDrop	
 	} // createOrDrop
+	
+	function replaceSequence(&$adoConnection) {
+		$params = array($this->name);
+		if( is_numeric($this->initialValue) ) 
+		{ $params[] = $this->initialValue; }
+			
+		$adoConnection->DropSequence($this->name);	// note: the sequence may happen not to exist
+		return call_user_func_array(array(&$adoConnection, "CreateSequence"), $params);
+	}
+	
+	/**
+	 * If the given sequence exists, only ensure that its nextval is greater or
+	 * equal then the initialValue of this (new) sequence.
+	 */
+	function updateSequence(&$adoConnection) {
+		$params = array($this->name);
+		if( is_numeric($this->initialValue) ) 
+		{ $params[] = $this->initialValue; }
+			
+		// GenID creates the sequence if it doesn't exist yet
+		$nextId = call_user_func_array(array(&$adoConnection, "GenID"), $params);
+		if($nextId === false) { return false; }		// DB doesn't support sequences
+		
+		// Ensure that nextval >= $this->initialValue
+		if(is_numeric($this->initialValue)) {
+			if($nextId < $this->initialValue) {
+				return $this->replaceSequence($adoConnection);
+			}	
+		}
+		return true;
+	}
 	
 	/**
 	 * Drop the corresponding sequence from the database instead of creating it.
@@ -1472,7 +1512,7 @@ class dbSequence extends dbObject {
 * @tutorial getting_started.pkg
 *
 * @author Richard Tango-Lowy & Dan Cech
-* @version $Revision: 1.8 $
+* @version $Revision: 1.9 $
 *
 * @package axmls
 */
@@ -1566,6 +1606,12 @@ class adoSchema {
 	var $existingData;
 	
 	/**
+	 * @var bool Should I insert any given data into the DB (false) or should I
+	 * ignore them?
+	 */
+	 var $ignoreData = false; 
+	
+	/**
 	* Creates an adoSchema object
 	*
 	* Creating an adoSchema object is the first step in processing an XML schema.
@@ -1590,6 +1636,14 @@ class adoSchema {
 		$this->continueOnError( XMLS_CONTINUE_ON_ERROR );
 		$this->existingData( XMLS_EXISTING_DATA );
 		$this->setUpgradeMethod();
+	}
+	
+	/**
+	 * Should I insert any given data into the DB (false) or should I ignore
+	 * them?
+	 */
+	function SetIgnoreData($doIgnore = true) {
+		$this->ignoreData = $doIgnore;
 	}
 	
 	/**
