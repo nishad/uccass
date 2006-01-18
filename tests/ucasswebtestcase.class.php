@@ -309,7 +309,7 @@ class UCCASS_WebTestCase extends WebTestCase
     
     /** Print info about the test beeing run; call at the beginning of each test_* method. */
     function printinfo($test_name)
-    { echo "<h5>Running $test_name...</h5>"; }
+    { $this->sendMessage("Running $test_name..."); }
     
     ////////////////////////////////////////////////////////////////////////////////////
     

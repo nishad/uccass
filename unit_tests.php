@@ -43,7 +43,7 @@ require_once('tests/viewsurveyresults_web_test.php');
 
 require_once('tests/deletesurvey_web_test.php');
 
-//require_once('tests/dynamicanswertype_test.php');
+require_once('tests/dynamicanswertype_test.php');
 require_once('tests/survey_class_test.php');
 
 
@@ -81,7 +81,7 @@ class TestDatabaseTests extends GroupTest
 		
 		// ADD UNIT TESTS TO PERFORM
 		// Note: we must add them after we've changed the prefix of $this->uccassMain
-		//$this->addTestCase( new TestOfDynamicAnswerType($this->uccassMain) );
+		$this->addTestCase( new TestOfDynamicAnswerType($this->uccassMain) );
 		$this->addTestCase( new TestOfSurveyClass() );
 		
 		// run the tests -----------------------------------------------------------
@@ -143,7 +143,7 @@ class TestDatabaseTests extends GroupTest
 	function generateTestTablesIfNone()
 	{
 		// Test that the tables don't exist
-		$query = "SELECT count(*) FROM {$this->uccassMain->CONF['db_tbl_prefix']}dyna_answer_type_details";
+		$query = "SELECT count(*) FROM {$this->uccassMain->CONF['db_tbl_prefix']}surveys";
         $rs = $this->uccassMain->db->GetOne($query);
         if($rs === FALSE)
         { 
@@ -305,6 +305,20 @@ appropriate tag class in tests/simpletest/tag.php) 2.Check whether the value is 
 sent correctly upon submition: see getValue of the same tag and SimpleForm::_getEncoding in 
 form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.php). The encoding
  is sent most likely in SimpleHttpRequest::_dispatchRequest (http.php).</p>
+
+
+<h4>If the tests fail</h4>
+
+  <ul>
+    <li>Check that you really use the database/tables (prefix) you think you do - see survey.ini.php
+    </li>
+    <li>If you get any "duplicate value of a pkey" error message, check every sequence's nextval &gt; 
+    max(id field of the table).
+    </li>
+    <li>Call <code>$this->showSource()</code> at the problematic place.</li>
+  </ul>
+  
+  
 
 <form action="<?php echo($_SERVER['PHP_SELF']); ?>" method="post" style="text-align:center">
 	<input type="submit" name="run_tests" value="Run Tests">
