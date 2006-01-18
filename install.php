@@ -46,7 +46,7 @@ if(count($_POST) > 0)
                     if(!$error)
                     { echo $c->lang('install_v180_v181_good'); }
                 break;
-                
+
                 case 'upgrade_181': //upgrade from 1.8.1 to 1.8.2
                 	// TODO: implement - add this option to the select tag and language.default.php
                 case 'upgrade_182': // upgrade from 1.8.2 to any higher
