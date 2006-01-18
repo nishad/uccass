@@ -4,6 +4,8 @@ $lang = array();
 
 $lang['error'] = 'Error';
 $lang['notice'] = 'Notice';
+$lang['yes'] = 'Yes';
+$lang['no'] = 'No';
 
 //Orientation Modes
 $lang['vertical'] = 'Vertical';
@@ -23,7 +25,7 @@ $lang['show'] = 'Show';
 $lang['selector'] = 'Get selector';
 
 //Database Messages
-$lang['db_query_error'] = 'Error executing datbase query: ';
+$lang['db_query_error'] = 'Error executing database query: ';
 $lang['db_table_error'] = 'Error deleting data from table: ';
 
 //User/Invitee Errors
@@ -122,7 +124,38 @@ $lang['invalid_new_password'] = 'Password field is required. ';
 $lang['default_copy_name'] = 'None - Start with blank survey';
 $lang['survey_created'] = 'Survey successfully created. ';
 
-//Take survey
+//Access Control
+$lang['survey_times'] = 'Number of times for survey limit is required if number of units is supplied';
+$lang['survey_units'] = 'Number of units for survey limit is required if number of times is supplied';
+$lang['access_updated'] = 'Access controls sucessfully updated.';
+$lang['no_username'] = 'Username cannot be empty.';
+$lang['no_password'] = 'Password can not be empty.';
+$lang['user_updated'] = 'User information updated sucessfully.';
+$lang['users_deleted'] = ' users deleted.';
+$lang['users_emailed'] = ' users emailed.';
+$lang['users_moved'] = ' users moved.';
+$lang['users_invited'] = ' users sent invitations.';
+$lang['send_email'] = 'Unable to send email to';
+$lang['no_email'] = 'Username does not have a valid email address';
+$lang['email_subject'] = 'Survey Information';
+$lang['invitee_email'] = 'Email address is required for invitee.';
+$lang['invitee_bad_email'] = 'Incorrect email address format.';
+$lang['invitee_added'] = 'Invitees added/updated';
+$lang['invite_no_send'] = 'Unable to send invitation to invitee';
+$lang['invite_no_code'] = 'Unable to get invitation template and/or code for inviteee';
+
+//Administration Section
+$lang['delete_admin'] = 'You cannot delete all admin users.';
+$lang['one_admin'] = 'Must have at least one administrator.';
+$lang['dup_username'] = 'Username is already in use';
+$lang['admin_updated'] = 'Admin users updated/added.';
+
+//Taking Survey
+$lang['already_taken'] = 'You have already taken the requested survey.';
+$lang['not_active'] = 'The requested survey is not active at this time.';
+$lang['empty_survey'] = 'The requested survey does not exist or does not have any questions.';
+$lang['req_answers'] = 'Required questions were not answered.';
+$lang['time_limit'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
 $lang['take.bttn.quit'] = 'Quit Survey - Do not save answers';
 $lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Previous Page';
 $lang['take.bttn.next'] = 'Next Page&nbsp;&gt;&gt;';
