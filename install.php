@@ -46,17 +46,26 @@ if(count($_POST) > 0)
                     if(!$error)
                     { echo $c->lang('install_v180_v181_good'); }
                 break;
-
+                
+                case 'upgrade_181': //upgrade from 1.8.1 to 1.8.2
+                	// TODO: implement - add this option to the select tag and language.default.php
+                case 'upgrade_182': // upgrade from 1.8.2 to any higher
+                	$successMsg = $c->lang('upgrade_182_good');
+                	$ignoreData = true;
                 case 'newinstallation':
-                    //$sql_file = 'survey.sql';
-                    //$error = $c->load_sql_file($sql_file) | $error;
-                    include('classes/databasecreator.class.php');
-                    $dbCreator = Uccass_DbCreator::createInstance();
+                	require('classes/databasecreator.class.php');
+                	$dbCreator = Uccass_DbCreator::createInstance();
+                	if(isset($ignoreData))
+                	{ $dbCreator->SetIgnoreData($ignoreData); }
                     if($dbCreator)
                     {
                     	$success = $dbCreator->createDatabase($survey->CONF['db_tbl_prefix']);
                     	if($success)
-                    	{ echo $c->lang('install_v181_good'); }
+                    	{
+                    		if(!isset($successMsg))
+                    		{ $successMsg = $c->lang('install_v181_good'); } 
+                    		echo $successMsg; 
+                    	}
                     }
                 break;
 
