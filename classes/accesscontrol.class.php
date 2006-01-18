@@ -30,6 +30,7 @@ define('USERSTATUS_NONE',0);
 define('USERSTATUS_INVITEE',1);
 define('USERSTATUS_INVITED',2);
 define('USERSTATUS_SENTLOGIN',3);
+define('NEW_CODE', 'x');
 
 //String to seperate headers from
 //body in email templates
@@ -38,8 +39,12 @@ define('HEADER_SEPERATOR','<!-- HEADER SEPERATOR - DO NOT REMOVE -->');
 //Invitation code types
 define('INVITECODE_ALPHANUMERIC','alphanumeric');
 define('INVITECODE_WORDS','words');
+define('INVITECODE_NUMERIC','numeric');
+
 define('ALPHANUMERIC_MAXLENGTH',20);
 define('ALPHANUMERIC_DEFAULTLENGTH',10);
+define('NUMERIC_MAXLENGTH',10);
+define('NUMERIC_DEFAULTLENGTH',4);
 define('WORDCODE_SEPERATOR','-');
 define('WORDCODE_NUMWORDS',2);
 
@@ -72,7 +77,6 @@ class UCCASS_AccessControl extends UCCASS_Main
         //Show links at top of page
         $this->data['show']['links'] = TRUE;
         $this->data['content'] = MODE_ACCESSCONTROL;
-        //$this->data['mode'] = MODE_PROPERTIES;
         $this->data['sid'] = $sid;
 
         $qid = (int)@$_REQUEST['qid'];
@@ -166,18 +170,25 @@ class UCCASS_AccessControl extends UCCASS_Main
                     $this->data['show']['invite'] = TRUE;
                     $this->data['show']['clear_completed'] = TRUE;
 
-                    if(isset($_SESSION['invite_code_type']) && $_SESSION['invite_code_type'] == INVITECODE_WORDS)
-                    { $this->data['invite_code_type'][INVITECODE_WORDS] = FORM_CHECKED; }
+                    if(isset($_SESSION['invite_code_type']))
+                    { $this->data['invite_code_type'][$_SESSION['invite_code_type']] = FORM_CHECKED; }
                     else
                     { $this->data['invite_code_type'][INVITECODE_ALPHANUMERIC] = FORM_CHECKED; }
 
-                    if(isset($_SESSION['invite_code_length']) && $_SESSION['invite_code_length'] > 0 && $_SESSION['invite_code_length'] <= ALPHANUMERIC_MAXLENGTH)
-                    { $this->data['invite_code_length'] = (int)$_SESSION['invite_code_length']; }
+                    if(isset($_SESSION['invite_alphcode_length']) && $_SESSION['invite_alphcode_length'] > 0 && $_SESSION['invite_alphcode_length'] <= ALPHANUMERIC_MAXLENGTH)
+                    { $this->data['invite_alphcode_length'] = (int)$_SESSION['invite_alphcode_length']; }
                     else
-                    { $this->data['invite_code_length'] = ALPHANUMERIC_DEFAULTLENGTH; }
+                    { $this->data['invite_alphcode_length'] = ALPHANUMERIC_DEFAULTLENGTH; }
+
+                    if(isset($_SESSION['invite_numcode_length']) && $_SESSION['invite_numcode_length'] > 0 && $_SESSION['invite_alphcode_length'] <= NUMERIC_MAXLENGTH)
+                    { $this->data['invite_numcode_length'] = (int)$_SESSION['invite_numcode_length']; }
+                    else
+                    { $this->data['invite_numcode_length'] = NUMERIC_DEFAULTLENGTH; }
 
                     $this->data['alphanumeric']['maxlength'] = ALPHANUMERIC_MAXLENGTH;
                     $this->data['alphanumeric']['defaultlength'] = ALPHANUMERIC_DEFAULTLENGTH;
+                    $this->data['numeric']['maxlength'] = NUMERIC_MAXLENGTH;
+                    $this->data['numeric']['defaultlength'] = NUMERIC_DEFAULTLENGTH;
                 break;
 
                 case AC_NONE:
@@ -188,7 +199,7 @@ class UCCASS_AccessControl extends UCCASS_Main
             }
         }
         else
-        { $this->error($lang['survey_not_exist']); exit(); }
+        { $this->error($this->lang['survey_not_exist']); exit(); }
     }
 
     function _loadUsers($sid,$access_control,$date_format)
@@ -228,7 +239,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     { $this->data[$key][$num]['invite_code'] = NBSP; }
 
                     if($r['status'] == USERSTATUS_INVITEE)
-                    { $this->data[$key][$num]['status_date'] = 'N'; }
+                    { $this->data[$key][$num]['status_date'] = $this->lang['no']; }
                     elseif($r['status'] == USERSTATUS_INVITED)
                     { $this->data[$key][$num]['status_date'] = date($date_format,$r['status_date']); }
 
@@ -246,14 +257,14 @@ class UCCASS_AccessControl extends UCCASS_Main
                     if($access_control == AC_USERNAMEPASSWORD && $r['status'] == USERSTATUS_SENTLOGIN)
                     { $this->data[$key][$num]['status_date'] = date($date_format,$r['status_date']); }
                     else
-                    { $this->data[$key][$num]['status_date'] = 'N'; }
+                    { $this->data[$key][$num]['status_date'] = $this->lang['no']; }
 
                     if($r['take_priv'])
-                    { $this->data[$key][$num]['take_priv'] = ' checked'; }
+                    { $this->data[$key][$num]['take_priv'] = FORM_CHECKED; }
                     if($r['results_priv'])
-                    { $this->data[$key][$num]['results_priv'] = ' checked'; }
+                    { $this->data[$key][$num]['results_priv'] = FORM_CHECKED; }
                     if($r['edit_priv'])
-                    { $this->data[$key][$num]['edit_priv'] = ' checked'; }
+                    { $this->data[$key][$num]['edit_priv'] = FORM_CHECKED; }
 
                 }
 
@@ -287,13 +298,13 @@ class UCCASS_AccessControl extends UCCASS_Main
         //users and invitees that can be used to create new users or invitees.
         for($z=0;$z<5;$z++)
         {
-            $this->data['invite'][$y]['uid'] = 'x'.$z;
-            $this->data['invite'][$y]['status_date'] = '&nbsp;';
-            $this->data['invite'][$y]['invite_code'] = '&nbsp;';
-            $this->data['invite'][$y++]['num_completed'] = '-';
-            $this->data['users'][$x]['num_completed'] = '-';
-            $this->data['users'][$x]['status_date'] = '&nbsp;';
-            $this->data['users'][$x++]['uid'] = 'x'.$z;
+            $this->data['invite'][$y]['uid'] = NEW_CODE.$z;
+            $this->data['invite'][$y]['status_date'] = NBSP;
+            $this->data['invite'][$y]['invite_code'] = NBSP;
+            $this->data['invite'][$y++]['num_completed'] = 0;
+            $this->data['users'][$x]['num_completed'] = 0;
+            $this->data['users'][$x]['status_date'] = NBSP;
+            $this->data['users'][$x++]['uid'] = NEW_CODE.$z;
         }
 
         //Remove any error messages that were set for users and invitees
@@ -353,9 +364,9 @@ class UCCASS_AccessControl extends UCCASS_Main
             }
 
             if(empty($_REQUEST['survey_limit_times']) && !empty($_REQUEST['survey_limit_number']))
-            { $error[] = 'Number of times for survey limit is required if number of units is supplied'; }
+            { $error[] = $this->lang['survey_times']; }
             elseif(empty($_REQUEST['survey_limit_number']) && !empty($_REQUEST['survey_limit_times']) && $_REQUEST['survey_limit_unit'] != SL_EVER)
-            { $error[] = 'Number of units for survey limit is required if number of times is supplied'; }
+            { $error[] = $this->lang['survey_units']; }
         }
         else
         {
@@ -378,7 +389,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     WHERE sid = {$sid}";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $error[] = 'Error updating access control: ' . $this->db->ErrorMsg(); }
+            { $error[] = $this->lang['db_query_error']. $this->db->ErrorMsg(); }
         }
 
         //If user choses to reset the completed surveys tracking, then delete any references to
@@ -392,16 +403,16 @@ class UCCASS_AccessControl extends UCCASS_Main
                 $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}{$tbl} WHERE sid = $sid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
-                { $error[] = "Error resetting completed surveys within table $tbl: " . $this->db->ErrorMsg(); }
+                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
             }
         }
 
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
 
         if(empty($error))
-        { $this->setMessage('Notice','Access controls sucessfully updated.',MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$this->lang['access_updated'],MSGTYPE_NOTICE); }
         else
-        { $this->setMessage('Error',implode(BR,$error),MSGTYPE_ERROR); }
+        { $this->setMessage($this->lang['error'],implode(BR,$error),MSGTYPE_ERROR); }
     }
 
     // PROCESS UPDATING USER LIST //
@@ -416,7 +427,7 @@ class UCCASS_AccessControl extends UCCASS_Main
         $query = "SELECT access_control, public_results FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid=$sid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $error[2] = 'Unable to retrieve survey access control information: ' . $this->db->ErrorMsg(); }
+        { $error[2] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
         else
         {
             $r = $rs->FetchRow($rs);
@@ -427,7 +438,7 @@ class UCCASS_AccessControl extends UCCASS_Main
             //begins with an 'x', then the data is for a new user
             foreach($_REQUEST['name'] as $uid=>$name)
             {
-                if($uid{0} != 'x' || ($uid{0}=='x' && (!empty($_REQUEST['name'][$uid]) || !empty($_REQUEST['email'][$uid]) || !empty($_REQUEST['username'][$uid]) || !empty($_REQUEST['password'][$uid]))))
+                if($uid{0} != NEW_CODE || ($uid{0}==NEW_CODE && (!empty($_REQUEST['name'][$uid]) || !empty($_REQUEST['email'][$uid]) || !empty($_REQUEST['username'][$uid]) || !empty($_REQUEST['password'][$uid]))))
                 {
                     $input = array();
                     //Validate name, email, username and password.
@@ -435,14 +446,14 @@ class UCCASS_AccessControl extends UCCASS_Main
                     $input['email'] = $this->SfStr->getSafeString($_REQUEST['email'][$uid],SAFE_STRING_DB);
                     if(empty($_REQUEST['username'][$uid]))
                     {
-                        $error[0] = 'Username can not be empty.';
+                        $error[0] = $this->lang['no_username'];
                         $erruid[$uid] = 1;
                     }
                     else
                     { $input['username'] = $this->SfStr->getSafeString($_REQUEST['username'][$uid],SAFE_STRING_DB); }
                     if(empty($_REQUEST['password'][$uid]))
                     {
-                        $error[1] = 'Password can not be empty.';
+                        $error[1] = $this->lang['no_password'];
                         $erruid[$uid] = 1;
                     }
                     else
@@ -477,9 +488,8 @@ class UCCASS_AccessControl extends UCCASS_Main
                     //Insert or Update new user data
                     if(!isset($erruid[$uid]))
                     {
-                        if($uid{0} == 'x')
+                        if($uid{0} == NEW_CODE)
                         {
-                            $keyword = 'inserting';
                             $uid = $this->db->GenID($this->CONF['db_tbl_prefix'].'users_sequence');
                             $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}users
                                       (uid, sid, name, email, username, password, take_priv, results_priv, edit_priv) VALUES
@@ -488,7 +498,6 @@ class UCCASS_AccessControl extends UCCASS_Main
                         }
                         else
                         {
-                            $keyword = 'updating';
                             $uid = (int)$uid;
                             $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET name = {$input['name']}, email = {$input['email']},
                                       username = {$input['username']}, password = {$input['password']}, take_priv = {$input['take_priv']},
@@ -499,7 +508,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
                         {
-                            $error[] = "Error $keyword user information: " . $this->db->ErrorMsg();
+                            $error[] = $this->lang['db_query_error']. $this->db->ErrorMsg();
                             $erruid[$uid] = 1;
                         }
                     }
@@ -510,11 +519,11 @@ class UCCASS_AccessControl extends UCCASS_Main
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
 
         if(empty($error))
-        { $this->setMessage('Notice','User information updated sucessfully.',MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$this->lang['user_updated'],MSGTYPE_NOTICE); }
         else
         {
             $_SESSION['update_users']['erruid'] = $erruid;
-            $this->setMessage('Error',implode(BR,$error),MSGTYPE_ERROR);
+            $this->setMessage($this->lang['error'],implode(BR,$error),MSGTYPE_ERROR);
         }
     }
 
@@ -539,8 +548,6 @@ class UCCASS_AccessControl extends UCCASS_Main
             case 'saveall':
             default:
                 $this->_processUpdateUsers($sid);
-                //$this->setMessageRedirect("edit_survey.php?sid=$sid&mode=access_control");
-                //$this->setMessage('Notice','Please choose an action from the dropdown to perform.',MSGTYPE_NOTICE);
             break;
         }
     }
@@ -567,7 +574,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}users WHERE uid=$uid AND sid=$sid";
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
-                    { $error[] = "Unable to delete user (uid:$uid): " . $this->db->ErrorMsg(); }
+                    { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                     else
                     { $numdeleted++; }
                 }
@@ -579,9 +586,9 @@ class UCCASS_AccessControl extends UCCASS_Main
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
 
         if(empty($error))
-        { $this->setMessage('Notice',"{$numdeleted} of {$numtodelete} users deleted.",MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'], $numdeleted . $this->lang['users_deleted'], MSGTYPE_NOTICE); }
         else
-        { $this->setMessage('Error',"{$numdeleted} of {$numtodelete} users deleted. <br />" . implode(BR,$error),MSGTYPE_ERROR); }
+        { $this->setMessage($this->lang['error'], $numdeleted . $this->lang['users_deleted'] . BR . implode(BR,$error),MSGTYPE_ERROR); }
     }
 
     // SEND USERNAME AND PASSWORD INFORMATION TO USER //
@@ -600,7 +607,7 @@ class UCCASS_AccessControl extends UCCASS_Main
             $query = "SELECT * FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid=$sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $error[] = 'Unable to retrieve survey information: ' . $this->db->ErrorMsg(); }
+            { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
             elseif($survey = $rs->FetchRow($rs))
             {
                 //Set variables to be used in mail templates
@@ -618,7 +625,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                 //Loop through each user and create reminder email.
                 foreach($users as $uid=>$val)
                 {
-                    if($uid{0} != 'x')
+                    if($uid{0} != NEW_CODE)
                     {
                         $uid = (int)$uid;
 
@@ -626,7 +633,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                         $query = "SELECT * FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND uid=$uid";
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
-                        { $error[] = "Unable to get user information (uid:$uid): " . $this->db->ErrorMsg(); }
+                        { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                         elseif($user = $rs->FetchRow($rs))
                         {
                             //Ensure user has an email set
@@ -652,14 +659,14 @@ class UCCASS_AccessControl extends UCCASS_Main
                                         $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET status = ".USERSTATUS_SENTLOGIN.", status_date = {$now} WHERE uid=$uid AND sid=$sid";
                                         $rs = $this->db->Execute($query);
                                         if($rs === FALSE)
-                                        { $error[] = "Unable to update user status (uid:$uid): " . $this->db->ErrorMsg(); }
+                                        { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                                     }
                                     else
-                                    { $error[] = "Unable to send email to &quot;{$user['name']}&quot; at &quot;{$user['email']}&quot; for unknown reason."; }
+                                    { $error[] = $this->lang['send_email'] . $user['name'] . ' - ' . $user['email']; }
                                 }
                             }
                             else
-                            { $error[] = "Username &quot;{$user['username']}&quot; does not have an email address."; }
+                            { $error[] = $this->lang['no_email'] . ' - ' . $user['username']; }
                         }
                     }
                     else
@@ -667,16 +674,16 @@ class UCCASS_AccessControl extends UCCASS_Main
                 }
             }
             else
-            { $error[] = 'Invalid survey.'; }
+            { $error[] = $this->lang['invalid_survey']; }
         }
 
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
-        $msg = "{$numemailed} of {$numtoemail} users emailed. ";
+        $msg = $numemailed . $this->lang['users_emailed'];
 
         if(empty($error))
-        { $this->setMessage('Notice',$msg,MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$msg,MSGTYPE_NOTICE); }
         else
-        { $this->setMessage('Error',$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
+        { $this->setMessage($this->lang['error'],$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
     }
 
     // PARSE EMAIL TEMPLATE //
@@ -715,7 +722,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                 $retval['headers'] = preg_replace("/^Subject:.*\r?\n/im",'',$retval['headers']);
             }
             else
-            { $retval['subject'] = 'Survey Information'; }
+            { $retval['subject'] = $this->lang['email_subject']; }
         }
 
         return $retval;
@@ -745,7 +752,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET status=$status WHERE uid=$uid AND sid=$sid";
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
-                    { $error[] = "Unable to move user (uid:$uid): " . $this->db->ErrorMsg(); }
+                    { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                     else
                     { $nummoved++; }
                 }
@@ -755,12 +762,12 @@ class UCCASS_AccessControl extends UCCASS_Main
         }
 
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
-        $msg = "{$nummoved} of {$numtomove} users moved. ";
+        $msg = $nummoved . $this->lang['users_moved'];
 
         if(empty($error))
-        { $this->setMessage('Notice',$msg,MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$msg,MSGTYPE_NOTICE); }
         else
-        { $this->setMessage('Error',$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
+        { $this->setMessage($this->lang['error'],$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
     }
 
     // PROCESS CHANGES TO INVITEE LIST //
@@ -769,26 +776,23 @@ class UCCASS_AccessControl extends UCCASS_Main
         $error = array();
         $erruid = array();
 
-        $_SESSION['invite_code_type'] = $_REQUEST['invite_code_type'];
-        $_SESSION['invite_code_length'] = $_REQUEST['invite_code_length'];
-
         //Loop through invitees and validate data. If the first character
         //of UID is 'x', then the information is for a new invitee
         if(!empty($_REQUEST['invite_name']))
         {
             foreach($_REQUEST['invite_name'] as $uid=>$name)
             {
-                if($uid{0} != 'x' || ($uid{0} == 'x' && (!empty($_REQUEST['invite_name'][$uid]) || !empty($_REQUEST['invite_email'][$uid]))))
+                if($uid{0} != NEW_CODE || ($uid{0} == NEW_CODE && (!empty($_REQUEST['invite_name'][$uid]) || !empty($_REQUEST['invite_email'][$uid]))))
                 {
                     //Validate email address (required)
                     if(empty($_REQUEST['invite_email'][$uid]))
                     {
-                        $error[1] = 'Email address is required for invitee.';
+                        $error[1] = $this->lang['invitee_email'];
                         $erruid[$uid] = 1;
                     }
                     elseif(strlen($_REQUEST['invite_email'][$uid])<5 || strpos($_REQUEST['invite_email'][$uid],'@')===FALSE)
                     {
-                        $error[2] = 'Incorrect email address format.';
+                        $error[2] = $this->lang['invitee_bad_email'];
                         $erruid[$uid] = 1;
                     }
                     else
@@ -806,7 +810,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     //If there were no errors, INSERT or UPDATE invitee information
                     if(!isset($erruid[$uid]))
                     {
-                        if($uid{0}=='x')
+                        if($uid{0}==NEW_CODE)
                         {
                             $uid = $this->db->GenID($this->CONF['db_tbl_prefix'].'users_sequence');
                             $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}users (uid, sid, name, email, status, results_priv)
@@ -822,7 +826,7 @@ class UCCASS_AccessControl extends UCCASS_Main
 
                         $rs = $this->db->Execute($query);
                         if($rs === FALSE)
-                        { $error[] = 'Error updating/inserting invitee: ' . $this->db->ErrorMsg(); }
+                        { $error[] = $this->land['db_query_error'] . $this->db->ErrorMsg(); }
                     }
                 }
             }
@@ -831,11 +835,11 @@ class UCCASS_AccessControl extends UCCASS_Main
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
 
         if(empty($error))
-        { $this->setMessage('Notice','Invitees added/updated',MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$this->lang['invitee_added'],MSGTYPE_NOTICE); }
         else
         {
             $_SESSION['invite']['erruid'] = $erruid;
-            $this->setMessage('Error',implode(BR,$error),MSGTYPE_ERROR);
+            $this->setMessage($this->lang['error'],implode(BR,$error),MSGTYPE_ERROR);
         }
     }
 
@@ -843,10 +847,6 @@ class UCCASS_AccessControl extends UCCASS_Main
     function _processInviteAction($sid)
     {
         $sid = (int)$sid;
-
-        $_SESSION['invite_code_type'] = $_REQUEST['invite_code_type'];
-        $_SESSION['invite_code_length'] = $_REQUEST['invite_code_length'];
-
 
         switch($_REQUEST['invite_selection'])
         {
@@ -882,13 +882,17 @@ class UCCASS_AccessControl extends UCCASS_Main
         $numtoemail = 0;
         $numemailed = 0;
 
+        $_SESSION['invite_code_type'] = $_REQUEST['invite_code_type'];
+        $_SESSION['invite_alphcode_length'] = $_REQUEST['invite_alphcode_length'];
+        $_SESSION['invite_numcode_length'] = $_REQUEST['invite_numcode_length'];
+
         //Loop through invitees
         if(!empty($users))
         {
             $query = "SELECT * FROM {$this->CONF['db_tbl_prefix']}surveys WHERE sid=$sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $error[] = 'Unable to retrieve survey information: ' . $this->db->ErrorMsg(); }
+            { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
             elseif($survey = $rs->FetchRow($rs))
             {
                 //Create variables to be used in email template
@@ -905,7 +909,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                 $uid_list = '';
                 foreach($users as $uid=>$val)
                 {
-                    if($uid{0} != 'x')
+                    if($uid{0} != NEW_CODE)
                     { $uid_list .= (int)$uid . ','; }
                     else
                     { $numtoemail--; }
@@ -919,7 +923,7 @@ class UCCASS_AccessControl extends UCCASS_Main
                     $query = "SELECT * FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND uid IN ($uid_list) AND (status = " . USERSTATUS_INVITEE . ' OR status = ' . USERSTATUS_INVITED . ')';
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
-                    { $error[] = 'Unable to get invitee information: ' . $this->db->ErrorMsg(); }
+                    { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                     else
                     {
                         $now = time();
@@ -933,7 +937,7 @@ class UCCASS_AccessControl extends UCCASS_Main
 
                                 //Retreive random code for user to access survey
                                 //and set URL to take survey to be used in email
-                                $user['code'] = $this->_getInviteCode($sid,$user['uid'],$_REQUEST['invite_code_type'],$_REQUEST['invite_code_length']);
+                                $user['code'] = $this->_getInviteCode($sid,$user['uid'],$_REQUEST['invite_code_type']);
                                 $user['take_url'] = $survey['take_url'] . '&invite_code=' . urlencode($user['code']);
 
                                 //Retrieve email template
@@ -943,41 +947,42 @@ class UCCASS_AccessControl extends UCCASS_Main
                                 {
                                     //Send email and update invitee status to INVITED
                                     $send = @mail($mail['to'],$mail['subject'],$mail['message'],$mail['headers']);
+                                    $send = 1;
                                     if($send)
                                     {
                                         $numemailed++;
                                         $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET take_priv = 1, status = ".USERSTATUS_INVITED.", status_date = {$now} WHERE uid={$user['uid']} AND sid=$sid";
                                         $rs2 = $this->db->Execute($query);
                                         if($rs2 === FALSE)
-                                        { $error[] = "Unable to update invitee status (uid:{$user['uid']}): " . $this->db->ErrorMsg(); }
+                                        { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                                     }
                                     else
-                                    { $error[] = "Unable to send invitation to &quot;{$user['name']}&quot; at &quot;{$user['email']}&quot; for unknown reason."; }
+                                    { $error[] = $this->lang['invite_no_send'] . ' - ' . $user['name'] . ' ' . $user['email']; }
                                 }
                                 else
-                                { $error[] = "Unable to get invitation template and/or code for inviteee (uid:{$user['uid']})."; }
+                                { $error[] = $this->lang['invite_no_code'] . ' - ' . $user['uid']; }
                             }
                             else
-                            { $error[] = "Username &quot;{$user['username']}&quot; does not have an email address."; }
+                            { $error[] = $this->lang['no_emaill'] . ' - ' . $user['username']; }
                         }
                     }
                 }
             }
             else
-            { $error[] = 'Invalid survey.'; }
+            { $error[] = $this->lang['invalid_survey']; }
         }
 
         $this->setMessageRedirect("access_control.php?sid=$sid&mode=access_control");
-        $msg = "{$numemailed} of {$numtoemail} users sent invitations.";
+        $msg = $numemailed . $this->lang['users_invited'];
 
         if(empty($error))
-        { $this->setMessage('Notice',$msg,MSGTYPE_NOTICE); }
+        { $this->setMessage($this->lang['notice'],$msg,MSGTYPE_NOTICE); }
         else
-        { $this->setMessage('Error',$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
+        { $this->setMessage($this->lang['error'],$msg.BR.implode(BR,$error),MSGTYPE_ERROR); }
     }
 
     // GENERATE RANDOM INVITATION CODE FOR INVITEES //
-    function _getInviteCode($sid,$uid,$type,$length)
+    function _getInviteCode($sid,$uid,$type)
     {
         static $recursion_level = 0;
         $recursion_limit = 10;
@@ -994,10 +999,14 @@ class UCCASS_AccessControl extends UCCASS_Main
                 case INVITECODE_WORDS:
                     $code = $this->_getWordCode();
                 break;
+                case INVITECODE_NUMERIC:
+                    $code = $this->_getNumericCode($_REQUEST['invite_numcode_length']);
+                break;
                 case INVITECODE_ALPHANUMERIC:
                 default:
-                    $code = $this->_getAlphanumericCode($length);
+                    $code = $this->_getAlphanumericCode($_REQUEST['invite_alphcode_length']);
                 break;
+
             }
 
             //Ensure code is not already being used in this survey.
@@ -1007,10 +1016,9 @@ class UCCASS_AccessControl extends UCCASS_Main
                 $query = "SELECT invite_code FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND invite_code={$dbcode}";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
-                { $this->error('Error checking for duplicate code: ' . $this->db->ErrorMsg()); return FALSE; }
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
                 elseif($r = $rs->FetchRow($rs))
                 {
-                    fwrite($this->fp,"Code {$code} already in use ($sid:$uid)\r\n");
                     $code = FALSE;
                     $recursion_level++;
                 }
@@ -1025,7 +1033,7 @@ class UCCASS_AccessControl extends UCCASS_Main
             $query = "UPDATE {$this->CONF['db_tbl_prefix']}users SET invite_code = {$dbcode} WHERE sid=$sid AND uid=$uid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error("Error updating invitation code for invitee (uid:$uid): " . $this->db->ErrorMsg()); return FALSE; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
         }
 
         return $code;
@@ -1045,13 +1053,30 @@ class UCCASS_AccessControl extends UCCASS_Main
         //Create code from the values in $str for the requested length
         if(empty($values))
         {
-            $str = "23456789abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ";
+            //note: Some letters and numbers were left out to avoid confusiong between 1 (one) and I (capital letter I) and l (lowercase letter l), for example.
+            $str = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
             $values = preg_split('//', $str, -1, PREG_SPLIT_NO_EMPTY);
             $numvalues = count($values);
         }
 
         for($x=0;$x<$length;$x++)
-        { $retval .= $values[mt_rand(0,$numvalues)]; }
+        { $retval .= $values[mt_rand(0,$numvalues-1)]; }
+
+        return $retval;
+    }
+
+    // Generate numeric code a certain number of digits long
+    function _getNumericCode($length)
+    {
+        $retval = 0;
+
+        $length = (int)$length;
+        if($length <= 0 || $length > NUMERIC_MAXLENGTH)
+        { $length = NUMERIC_DEFAULTLENGTH; }
+
+        $max = pow(10,$length);
+        $retval = mt_rand(1,$max);
+        $retval = str_pad($retval,$length,'0',STR_PAD_LEFT);
 
         return $retval;
     }
