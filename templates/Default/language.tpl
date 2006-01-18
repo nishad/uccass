@@ -151,16 +151,13 @@ $lang['dup_username'] = 'Username is already in use';
 $lang['admin_updated'] = 'Admin users updated/added.';
 
 //Taking Survey
-$lang['already_taken'] = 'You have already taken the requested survey.';
 $lang['not_active'] = 'The requested survey is not active at this time.';
 $lang['empty_survey'] = 'The requested survey does not exist or does not have any questions.';
-$lang['req_answers'] = 'Required questions were not answered.';
-$lang['time_limit'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
 $lang['take.bttn.quit'] = 'Quit Survey - Do not save answers';
 $lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Previous Page';
 $lang['take.bttn.next'] = 'Next Page&nbsp;&gt;&gt;';
 $lang['take.bttn.finish'] = 'Finish';
-$lang['take.msg.already_completed'] = 'You have already completed the requested survey.';
+$lang['take.msg.already_completed'] = 'You have already taken the requested survey.';
 $lang['take.err.required'] = 'Required questions were not answered.';
 $lang['take.err.time_limit.hdr'] = 'Time Limit Exceeded';
 $lang['take.err.time_limit.msg'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
