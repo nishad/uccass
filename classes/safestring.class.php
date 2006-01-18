@@ -96,7 +96,8 @@ define('SAFE_STRING_LIMHTML',1);
 define('SAFE_STRING_FULLHTML',2);
 define('SAFE_STRING_DB',3);
 define('SAFE_STRING_ESC',4);
-define('SAFE_STRING_JAVASCRIPT',5);	// escape ' and " by \ so that it may be put into a JavaScript string
+define('SAFE_STRING_TEXTAREA',5);
+define('SAFE_STRING_JAVASCRIPT',6);	// escape ' and " by \ so that it may be put into a JavaScript string
 
 class SafeString
 {
@@ -160,9 +161,14 @@ class SafeString
                     $str = str_replace(array('{$images_html}','{$html}'),array($this->images_html,$this->html),$str);
                 break;
 
+                case SAFE_STRING_TEXTAREA:
+                    $str = htmlentities($str,ENT_QUOTES,$this->charset);
+                break;
+
                 case SAFE_STRING_JAVASCRIPT:	// prepare for use in a JavaScript string
                 	$str = addcslashes ($str, '\'"\\');	// espace ', ", \
                 break;
+
                 case SAFE_STRING_TEXT:
                 default:
                     $str = nl2br(htmlentities($str,ENT_QUOTES,$this->charset));
