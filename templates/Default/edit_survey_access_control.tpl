@@ -152,11 +152,19 @@
         <div class="whitebox" style="margin-top:10px">Invitation Code Type <a href="{$conf.html}/docs/index.html#ac_invite_code">[?]</a></div>
         <div class="indented_cell">
           <p style="margin-top:1px; margin-bottom:1px">
+            <input type="radio" id="numeric" name="invite_code_type" value="numeric"{$data.invite_code_type.numeric}>
+            <label for="numeric">Numeric</label>
+            <input type="text" name="invite_numcode_length" value="{$data.invite_numcode_length}" size="3" maxlength="2"> digits
+            <em>(i.e. 1234 or 45643, etc., max {$data.numeric.maxlength} digits, default {$data.numeric.defaultlength} digits)</em>
+          </p>
+
+          <p style="magin-top:1px; margin-bottom:1px">
             <input type="radio" id="alphanumeric" name="invite_code_type" value="alphanumeric"{$data.invite_code_type.alphanumeric}>
             <label for="alphanumeric">Alphanumeric</label>
-            <input type="text" name="invite_code_length" value="{$data.invite_code_length}" size="3" maxlength="2"> characters
+            <input type="text" name="invite_alphcode_length" value="{$data.invite_alphcode_length}" size="3" maxlength="2"> characters
             <em>(i.e &quot;5ta2ST7aE2&quot; or &quot;2jiW72sut97Y&quot;, max {$data.alphanumeric.maxlength} characters, default {$data.alphanumeric.defaultlength} characters)</em>
           </p>
+
           <p style="margin-top:1px; margin-bottom:1px">
             <input type="radio" id="words" name="invite_code_type" value="words"{$data.invite_code_type.words}>
             <label for="words">Words</label> <em>(i.e &quot;buffalo-candy&quot; or &quot;interesting-something&quot;)</em>
