@@ -107,7 +107,6 @@ class UCCASS_Survey extends UCCASS_Main
             if($check === ALREADY_COMPLETED || ($ac_control != AC_USERNAMEPASSWORD && $ac_control != AC_INVITATION))
             {
                 $this->setMessageRedirect("index.php");
-                //$this->setMessage('Notice','You have already completed the requested survey.',MSGTYPE_NOTICE); // L10N 'take.msg.already_completed'
                 $this->setMessage($this->lang('notice'), $this->lang('take.msg.already_completed'));
             }
             else
@@ -203,7 +202,7 @@ class UCCASS_Survey extends UCCASS_Main
                 //Check for no answers submitted or less than required
                 if(!isset($_REQUEST['answer'][$qid]))
                 {
-                    $error = $this->lang('take.err.required'); //"Required questions were not answered."; // L10N 'take.err.required'
+                    $error = $this->lang('take.err.required');
                     $stay_on_same_page = 1;
                 }
                 else
@@ -228,7 +227,7 @@ class UCCASS_Survey extends UCCASS_Main
 
                     if($num_answered < $num_required)
                     {
-                        $error = $this->lang('take.err.required'); //'Required questions were not answered.'; // L10N 'take.err.required'
+                        $error = $this->lang('take.err.required');
                         $stay_on_same_page = 1;
                     }
                 }
@@ -239,41 +238,7 @@ class UCCASS_Survey extends UCCASS_Main
         //save answers into session if time limit hasn't
         //been passed
         if(isset($_REQUEST['answer']) && ($survey['time_limit']==0 || ($now < $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5)))
-        {
-            foreach($_REQUEST['answer'] as $qid=>$value)
-            {
-                $qid = (int)$qid;
-
-                if(isset($_SESSION['take_survey']['answer'][$qid]))
-                { unset($_SESSION['take_survey']['answer'][$qid]); }
-                if(!empty($value))
-                {
-                    foreach($value as $answernum=>$avid)
-                    {
-                        $cnt = 0;
-                        if(is_array($avid)) // MM question: avid = array(avid1, avid2, ...) (html name: answer[qid][blocknumber][])
-                        {
-                            foreach($avid as $answernum2=>$avid2) // MM question - $answernum2 is an avid's index assigned by php 
-                            {
-                                if(strlen($avid2) > 0)
-                                {
-                                    $_SESSION['take_survey']['answer'][$qid][$answernum][$answernum2] = $avid2;
-                                    $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid2;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if(strlen($avid) > 0)
-                            {
-                                $_SESSION['take_survey']['answer'][$qid][$answernum] = $avid;
-                                $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        { $this->save_answers2session(); } 
 
 		// UPDATE PAGE NUMBER
         if(!$stay_on_same_page)
@@ -288,7 +253,6 @@ class UCCASS_Survey extends UCCASS_Main
         if($survey['time_limit'] && ($now > $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5))
         {
             $_SESSION['take_survey']['page'] = $survey['total_pages']+1;
-            //$this->setMessage('Time Limit Exceeded','You exceeded the time limit set for the survey. Your last page of results were not saved.');	// L10N 'take.err.time_limit.hdr', 'take.err.time_limit.msg'
             $this->setMessage($this->lang('take.err.time_limit.hdr'), $this->lang('take.err.time_limit.msg'));
         }
 
@@ -349,7 +313,7 @@ class UCCASS_Survey extends UCCASS_Main
 
             //Display Questions onthe current page
             case $survey['total_pages']:
-                $button['next'] = $this->lang('take.bttn.finish'); //'Finish'; // L10N 'take.bttn.finish'
+                $button['next'] = $this->lang('take.bttn.finish');
 
             default:
                 $show['question'] = TRUE;
@@ -412,78 +376,31 @@ class UCCASS_Survey extends UCCASS_Main
                     $hide_question = 0;
                     $require_question = 0;
                     $show_question = 0;
-                    $q = array();
 
-                    //Check if current question has any dependencies & decide what to do
+                    // Check if current question has any dependencies & decide what to do
+                    // Note: if the question is of a dynamic answer type we must check the 
+                    //	dependencies (if its selector depends on an answer to a previous question)
                     if($check_dependencies)
                     { 
                     	$dependencyActions = $this->check_dependencies($r['qid'], $depend_keys, $depend);
-                    	$hide_question 		= $dependencyActions['Hide'];
-                    	$require_question 	= $dependencyActions['Require'];
-                    	$show_question 		= $dependencyActions['Show']; 
+                    	$hide_question 		= $dependencyActions[DEPEND_MODE_HIDE];
+                    	$require_question 	= $dependencyActions[DEPEND_MODE_REQUIRE];
+                    	$show_question 		= $dependencyActions[DEPEND_MODE_SHOW]; 
                     }
                     
-                    /*{
-                        //current question has dependencies, so loop
-                        //through the dependent question
-                        foreach($depend[$r['qid']]['dep_qid'] as $key => $dep_qid)
-                        {
-                            //and see if user has given an answer for each
-                            //dependant question
-                            if(isset($_SESSION['take_survey']['answer'][$dep_qid]))
-                            {
-                                //user has given answer, so see if dependant answer
-                                //is present in the answers the user chose
-                                //First check if answer saved in session is an
-                                //array or not (it should always be an array of answer blocks [usually only one])
-                                if(is_array($_SESSION['take_survey']['answer'][$dep_qid]))
-                                {
-                                    //Answer is an array (such as MM). Loop through
-                                    //answer array and look for matching dependant answer
-                                    foreach($_SESSION['take_survey']['answer'][$dep_qid] as $aid) // more excatly: as $answerblocknum=>$avid; see line 251
-                                    {
-                                        if(is_array($aid))
-                                        {
-                                            if(in_array($depend[$r['qid']]['dep_aid'][$key],$aid))
-                                            {
-                                                switch($depend[$r['qid']]['dep_option'][$key])
-                                                {
-                                                    case 'Hide':
-                                                        $hide_question = 1; break;
-                                                    case 'Require':
-                                                        $require_question = 1; break;
-                                                    case 'Show':
-                                                        $show_question = 1; break;
-                                                }
-                                            }
-                                        }
-                                        elseif($aid == $depend[$r['qid']]['dep_aid'][$key])
-                                        {
-                                            switch($depend[$r['qid']]['dep_option'][$key])
-                                            {
-                                                case 'Hide':
-                                                    $hide_question = 1; break;
-                                                case 'Require':
-                                                    $require_question = 1; break;
-                                                case 'Show':
-                                                    $show_question = 1; break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    */
-
                     if($hide_question && !$show_question)
                     { unset($_SESSION['take_survey']['answer'][$r['qid']]); }
                     else
                     {
+                    	//////////////////////////////////////////////////
+                    	//		PREPARE THE QUESTION FOR DISPLAY		//
+                    	//////////////////////////////////////////////////
+                    	// Define a variable to hold the question's info
+						$q = array();
+					
                         $q['qid'] = $r['qid'];
 
                         //Look for lookback text within the question
-                        // TODO: Get the selector's value if this is a dynamic answer type 
                         if(strpos($r['question'],LOOKBACK_START_DELIMITER.LOOKBACK_TEXT)!== FALSE)
                         { $q['question'] = $this->_process_Lookback($r['question'],$survey['survey_text_mode'],$survey['user_text_mode']); }
                         else
@@ -507,6 +424,9 @@ class UCCASS_Survey extends UCCASS_Main
 
                         $q['label'] = $this->SfStr->getSafeString($r['label'],$survey['survey_text_mode']);
 
+                        //
+                        //		Prepare text-answer questions
+                        //
                         if($r['type'] == ANSWER_TYPE_T || $r['type'] == ANSWER_TYPE_S || $r['type'] == ANSWER_TYPE_N)
                         {
                             $q[$r['type']][$x] = TRUE;
@@ -525,13 +445,24 @@ class UCCASS_Survey extends UCCASS_Main
                         }
                         else
                         {
+                        	//
+                        	//		Prepare selection-answer questions
+                        	//
+                        	
                             //Get arrays of answers values and answer avid numbers
                             //Answer values are returned properly escaped according
                             //to the survey_text_mode setting for the survey
-                            // TODO: apply a selector (from a lookback?) if this is a dynamic question
-                            //		Also I should somewhere change ANSWER_TYPE_DYNAMIC to 
-                            //		dyna_answer_type_details.type (some other ANSWER_TYPE_*)
-                            $tmp = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode']);
+                           
+                            // 1. Get a value for the selector if this is a dynamic question
+                            $selector = isset($dependencyActions[DEPEND_MODE_SELECTOR])? 
+                            	$dependencyActions[DEPEND_MODE_SELECTOR]
+                            	: false;
+                            // FIXME: if it's a dynamic answer type and we got no value for the selector throw an error
+                            // TODO: Make it possible to get the selector's value also from other sources, e.g.
+                            // 	the respondent's credentials (id from an invitation mail...)
+
+                            // 2. Load the answers
+                            $tmp = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode'], $selector);
                             $q['value'] = $tmp['value'];
                             $q['avid'] = $tmp['avid'];
 
@@ -912,6 +843,7 @@ class UCCASS_Survey extends UCCASS_Main
     /**
      * Check whether dependencies of this question are satisfied 
      * and what action should be taken (hide/show/require).
+     * 
      * @param integer 	$qid id of the question under control.
      * @param array 	$depend_keys array of qids of questions that have a
      * dependancy (keys of $depend)
@@ -922,16 +854,17 @@ class UCCASS_Survey extends UCCASS_Main
      *  	'dep_aid'=>array($dep_aid1,...),
      *  	'dep_option'=>array($dep_option1,...) ))
      * 
-     * @return array array('Hide'=>0/1, 'Require'=>0/1, 'Show'=>0/1) (0 = false,
-     * 1 = true).
+     * @return array array(DEPEND_MODE_HIDE=>0/1, DEPEND_MODE_REQUIRE=>0/1, 
+     * DEPEND_MODE_SHOW=>0/1, DEPEND_MODE_SELECTOR=>array of avids or false)
+     *   - 0  = false, 1 = true; the array of avids = answers given to
+     * the question we depend upon.
      * 
      * @access private
      */
 	function check_dependencies($qid, &$depend_keys, &$depend)
 	{
-		$hide_question 		= 0;
-        $require_question	= 0;
-        $show_question 		= 0;
+		$answer_actions = array(DEPEND_MODE_HIDE=>0, DEPEND_MODE_REQUIRE=>0
+			, DEPEND_MODE_SHOW=>0, DEPEND_MODE_SELECTOR => false);		
         
         // Has the question any dependencies?
         if( in_array($qid,$depend_keys) )
@@ -947,48 +880,103 @@ class UCCASS_Survey extends UCCASS_Main
 	                //user has given answer, so see if dependant answer
 	                //is present in the answers the user chose
 	                //First check if answer saved in session is an
-	                //array or not (it should always be an array of answer blocks [usually only one])
+	                //array or not (it should always be an array of answer blocks [usually only one]
+	                // - unless we're on the 1st page and no answers were given yet )
 	                if(is_array($_SESSION['take_survey']['answer'][$dep_qid]))
 	                {
 	                    //Answer is an array (such as MM). Loop through
 	                    //answer array and look for matching dependant answer
 	                    foreach($_SESSION['take_survey']['answer'][$dep_qid] as $aid) // more excatly: as $answerblocknum=>$avid; see line 251
 	                    {
-	                        if(is_array($aid))
-	                        {
-	                            if(in_array($depend[$qid]['dep_aid'][$key],$aid))
-	                            {
-	                                switch($depend[$qid]['dep_option'][$key])
-	                                {
-	                                    case 'Hide':
-	                                        $hide_question = 1; break;
-	                                    case 'Require':
-	                                        $require_question = 1; break;
-	                                    case 'Show':
-	                                        $show_question = 1; break;
-	                                }
-	                            }
-	                        }
-	                        elseif($aid == $depend[$qid]['dep_aid'][$key])
-	                        {
-	                            switch($depend[$qid]['dep_option'][$key])
-	                            {
-	                                case 'Hide':
-	                                    $hide_question = 1; break;
-	                                case 'Require':
-	                                    $require_question = 1; break;
-	                                case 'Show':
-	                                    $show_question = 1; break;
-	                            }
-	                        }	// if-else there's an array of answers (avids)
+	                    	$dep_option = $depend[$qid]['dep_option'][$key];	// key: 1st,2nd.. dependency
+	                    	// $aid may be a single avid or an array of avids => unify:
+	                    	$avid_array =  is_array($aid)? $aid : array($aid);
+	                    	
+	                    	// If this option signifies that the question's answer type is dynamic and 
+	                    	// a value for its selector is obtained from the question it depends upon then 
+	                    	// get & store answers to the question.
+	                    	// Otherwise process normaly - decide whether to hide/show/require:
+	                    	if($dep_option == DEPEND_MODE_SELECTOR)
+	                    	{ $answer_actions[$dep_option] = $avid_array; }	// store the answers
+	                    	elseif( in_array($depend[$qid]['dep_aid'][$key], $avid_array) )
+                            { $answer_actions[$dep_option] = 1; }			// set the action to true 
 	                    }	// foreach answer block of the dependant question
 	                } // if answers to the question this one depends upon form an array
 	            } // if user has answered the question this one depends upon
 	        } // loop through the questions this question depends upon
         } // if the given question has some dependencies defined
         
-        return array('Hide'=>$hide_question, 'Require'=>$require_question, 'Show'=>$show_question);
-	} 	// function checkDe	pendency
+        return $answer_actions;
+	} 	// function check_dependency
+	
+	/* *
+	 * Find a value for the given dynamic answer type's selector.
+	 * The selector's value is taken from some of the previous answers so we go
+	 * through the previous questions and get the proper answer.
+	 * @param int Id of the dynamic answer type.
+	 * @return array Either answers to the question the selector shall be taken
+	 * from or an empty array if no answer is found.
+	 * 
+	 * @access private
+	 * /
+	function get_selector_value($aid)
+	{
+		// 1. Find out on what question does the dynamic answer type depend.
+		
+		  
+		// 2. Find the answers
+		$answers = array();
+		if( isset($_SESSION['take_survey']['lookback'][$qid]) )
+		{ $answers = $_SESSION['take_survey']['lookback'][$qid]; }
+		
+		return $answers;
+	}*/
+	
+	/**
+	 * Save answers from request to session - call when user submits a survey's
+	 * page.
+	 * The answers are stored into 
+	 * $_SESSION['take_survey']['answer'][$qid][$answer_block_num] and 
+	 * $_SESSION['take_survey']['lookback'] [$qid].
+	 * 
+	 * @access private
+	 */
+	function save_answers2session()
+	{
+        foreach($_REQUEST['answer'] as $qid=>$value)
+        {
+            $qid = (int)$qid;
+
+            if(isset($_SESSION['take_survey']['answer'][$qid]))
+            { unset($_SESSION['take_survey']['answer'][$qid]); }
+            if(!empty($value))
+            {
+                foreach($value as $answernum=>$avid)
+                {
+                    $cnt = 0;
+                    if(is_array($avid)) // MM question: avid = array(avid1, avid2, ...) (html name: answer[qid][blocknumber][])
+                    {
+                        foreach($avid as $answernum2=>$avid2) // MM question - $answernum2 is an avid's index assigned by php 
+                        {
+                            if(strlen($avid2) > 0)
+                            {
+                                $_SESSION['take_survey']['answer'][$qid][$answernum][$answernum2] = $avid2;
+                                $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid2;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(strlen($avid) > 0)
+                        {
+                            $_SESSION['take_survey']['answer'][$qid][$answernum] = $avid;
+                            $_SESSION['take_survey']['lookback'][$qid][$cnt++] = $avid;
+                        }
+                    }
+                }
+            }
+        }
+	} // save_answers2session
 
 }
 
