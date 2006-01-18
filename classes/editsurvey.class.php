@@ -794,6 +794,13 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
         $this->data['sid'] = $sid;
 
+        if(!empty($_SESSION['add_question']))
+        {
+            $_POST = $_SESSION['add_question'];
+            // $this->print_array($_POST); // debug only?
+            unset($_SESSION['add_question']);
+        }
+
         //load all questions for this survey
         $query = "SELECT q.qid, q.aid, q.question, q.page, a.type, q.oid, s.survey_text_mode
                   FROM {$this->CONF['db_tbl_prefix']}questions q,
@@ -829,7 +836,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 }
                 $this->data['qid'][$x] = $r['qid'];
                 $this->data['question'][$x] = $this->SfStr->getSafeString($r['question'],$survey_text_mode);
-				
+
 				// Prepare possible answers to question we depend upon  
 				$this->_prepare_data4dependencies($r);
 
@@ -906,7 +913,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         if(isset($this->data['dep_avid']) && count($this->data['dep_avid']))
         {
             $this->data['js'] = '';
-			
+
             foreach($this->data['dep_avid'] as $qid=>$avid_array)
             {
                 foreach($avid_array as $key=>$avid)
@@ -920,23 +927,34 @@ class UCCASS_EditSurvey extends UCCASS_Main
             }
         }
 
-        //Set "insert question after..." select box to last element
-        if(isset($this->data['qnum2_selected']))
+        //Set "insert question after..." select box to selected element or last element
+        if(isset($_POST['insert_after']))
+        {
+            $key = array_search($_POST['insert_after'], $this->data['page_oid']);
+            if($key !== FALSE)
+            {
+                $this->data['qnum2_selected'][$key] = FORM_SELECTED;
+            }
+        }
+        elseif(isset($this->data['qnum2_selected']))
         { $this->data['qnum2_selected'][count($this->data['qnum2_selected'])-1] = FORM_SELECTED; }
 
         $this->data['num_answers'] = array();
         for($i=1;$i<=NUM_ANSWERS;$i++)
         { $this->data['num_answers'][] = $i; }
         $this->data['num_answers_selected'] = array_fill(0,NUM_ANSWERS,'');
-        if(isset($_REQUEST['num_answers']))
-        { $this->data['num_answers_selected'][(int)$_REQUEST['num_answers']-1] = FORM_SELECTED; }
+        if(isset($_POST['num_answers']))
+        { $this->data['num_answers_selected'][(int)$_POST['num_answers']-1] = FORM_SELECTED; }
 
         $this->data['num_required'] = array();
         for($i=0;$i<NUM_ANSWERS+1;$i++)
         { $this->data['num_required'][] = $i; }
         $this->data['num_required_selected'] = array_fill(0,NUM_ANSWERS+1,"");
-        if(isset($_REQUEST['num_required']))
-        { $this->data['num_required_selected'][(int)$_REQUEST['num_required']] = FORM_SELECTED; }
+        if(isset($_POST['num_required']))
+        { $this->data['num_required_selected'][(int)$_POST['num_required']] = FORM_SELECTED; }
+
+        if(!empty($_POST['question']))
+        { $this->data['new_question'] = $this->SfStr->getSafeString($_POST['question'],SAFE_STRING_TEXTAREA); }
 
         //retrieve answer types from database
         $rs = $this->db->Execute("SELECT aid, name FROM {$this->CONF['db_tbl_prefix']}answer_types
@@ -946,6 +964,8 @@ class UCCASS_EditSurvey extends UCCASS_Main
         while ($r = $rs->FetchRow($rs))
         {
             $r['name'] = $this->SfStr->getSafeString($r['name'],SAFE_STRING_TEXT);
+            if(isset($_POST['answer']) && $_POST['answer'] == $r['aid'])
+            { $r['selected'] = FORM_SELECTED; }
             $this->data['answer'][] = $r;
         }
 
@@ -954,6 +974,25 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $key = array_search($_SESSION['answer_orientation'],$this->CONF['orientation']);
             $this->data['orientation']['selected'][$key] = FORM_SELECTED;
         }
+
+        for($x=1;$x<=3;$x++)
+        {
+            if(isset($_POST['option'][$x]))
+            {
+                $key = array_search($_POST['option'][$x], $this->CONF['dependency_modes']);
+                if($key !== FALSE)
+                { $this->data['option_selected'][$x-1][$key] = FORM_SELECTED; } // FIXME: key: not num but DEPEND_MODE_*
+            }
+            if(isset($_POST['dep_qid'][$x]))
+            {
+                $key = array_search($_POST['dep_qid'][$x], $this->data['dep_qid']);
+                if($key !== FALSE)
+                { $this->data['dep_qid_selected'][$x-1][$key] = FORM_SELECTED; }
+            }
+        }
+
+        // $this->print_array($this->data['option_selected']); // debug only?
+        // $this->print_array($this->data['dep_qid_selected']); // debug only?
     }
 
     // PROCESS MOVING A QUESTION  UP OR DOWN IN THE LIST //
@@ -1112,16 +1151,16 @@ class UCCASS_EditSurvey extends UCCASS_Main
         $notice = '';
 
         //Ensure new question is not blank
-        if(strlen($_REQUEST['question']) == 0)
+        if(strlen($_POST['question']) == 0)
         { $error[] = $this->lang['empty_question']; }
         else
         {
             //Determine what question to insert new question after
-            $x = explode('-',$_REQUEST['insert_after']);
+            $x = explode('-',$_POST['insert_after']);
             $page = (int)$x[0];
             $oid = (int)$x[1];
 
-            if(strcasecmp($_REQUEST['question'],$this->CONF['page_break'])==0)
+            if(strcasecmp($_POST['question'],$this->CONF['page_break'])==0)
             {
                 //Set error if there is an attempt to make a page break the first question in the survey
                 if($page == 0 && $oid == 0)
@@ -1155,20 +1194,20 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 //inserted "after" what was chosen
                 //Validate number of answers, number required and orientation for new question
                 $oid++;
-                $question = $this->SfStr->getSafeString($_REQUEST['question'],SAFE_STRING_DB);
-                $num_answers = (int)$_REQUEST['num_answers'];
-                $num_required = (int)$_REQUEST['num_required'];
+                $question = $this->SfStr->getSafeString($_POST['question'],SAFE_STRING_DB);
+                $num_answers = (int)$_POST['num_answers'];
+                $num_required = (int)$_POST['num_required'];
                 $aid = (int)$_REQUEST['answer'];
 
-                if($num_required > $num_answers)
+                if($num_required > $num_answers)               
                 { $error[] = $this->lang('to_many_required'); }
 
-                if(in_array($_REQUEST['orientation'],$this->CONF['orientation']))
-                { $orientation = $this->SfStr->getSafeString($_REQUEST['orientation'],SAFE_STRING_DB); }
+                if(in_array($_POST['orientation'],$this->CONF['orientation']))
+                { $orientation = $this->SfStr->getSafeString($_POST['orientation'],SAFE_STRING_DB); }
                 else
                 { $orientation = $thid->SfStr->getSafeString($this->lang['vertical'],SAFE_STRING_DB); }
 
-                $_SESSION['answer_orientation'] = $_REQUEST['orientation'];
+                $_SESSION['answer_orientation'] = $_POST['orientation'];
 
                 //If there is no error so far, attempt to process the requested dependencies
                 if(empty($error))
@@ -1178,14 +1217,14 @@ class UCCASS_EditSurvey extends UCCASS_Main
                     $dep_require_pagebreak = 0;
 
                     //check for dependencies
-                    if(isset($_REQUEST['option']))
+                    if(isset($_POST['option']))
                     {
-                        foreach($_REQUEST['option'] as $num=>$option)
+                        foreach($_POST['option'] as $num=>$option)
                         {
-                            if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_REQUEST['dep_aid'][$num])
+                            if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_POST['dep_aid'][$num])
                                && in_array($option,$this->CONF['dependency_modes']))
                             {
-                                $dep_qid = (int)$_REQUEST['dep_qid'][$num];
+                                $dep_qid = (int)$_POST['dep_qid'][$num];
 
                                 //Ensure dependencies are based on questions before the question being added
                                 $check_query = "SELECT page, oid FROM {$this->CONF['db_tbl_prefix']}questions WHERE qid = $dep_qid";
@@ -1197,14 +1236,14 @@ class UCCASS_EditSurvey extends UCCASS_Main
                                 while($r = $rs->FetchRow($rs))
                                 {
                                     if($r['page'] > $page || ($r['page'] == $page && $r['oid'] > $oid))
-                                    { $error[] = $lang['dep_order_error']; }
+                                    { $error[] = $this->lang['dep_order_error']; }
                                     elseif($r['page'] == $page)
                                     { $dep_require_pagebreak = 1; }
                                 }
 
                                 $option = $this->SfStr->getSafeString($option,SAFE_STRING_DB);
 
-                                foreach($_REQUEST['dep_aid'][$num] as $dep_aid)
+                                foreach($_POST['dep_aid'][$num] as $dep_aid)
                                 {
                                     $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
                                     $dep_insert .= "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option), ";
@@ -1235,12 +1274,11 @@ class UCCASS_EditSurvey extends UCCASS_Main
                                 	$single_dependency = str_replace('%%',$qid,$single_dependency);
                                 	$dep_query = $dep_query_start . $single_dependency;
                                 	$rs = $this->db->Execute($dep_query);
-	                                
-	                                if($rs === FALSE)
-	                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
+
+                                if($rs === FALSE)
+                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                                 } // insert each dependency
-                                
-								
+
                                 if($dep_require_pagebreak)
                                 {
                                     $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
@@ -1255,8 +1293,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         }
                     }
                 }
-                else
-                { $this->smarty->assign('question',$question); }
             }
         }
 
@@ -1270,7 +1306,10 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $this->setMessage($this->lang['notice'],$notice,MSGTYPE_NOTICE);
         }
         else
-        { $this->setMessage($this->lang['error'],implode(BR,$error),MSGTYPE_ERROR); }
+        {
+            $_SESSION['add_question'] = $_POST;
+            $this->setMessage($this->lang['error'],implode(BR,$error),MSGTYPE_ERROR);
+        }
     }
 
     // LOAD EXISTING DATA FOR QUESTION BEING EDITED //
@@ -1293,7 +1332,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
 
         $this->data['question_data'] = $rs->FetchRow($rs);
-        $this->data['question_data']['question'] = $this->SfStr->getSafeString($this->data['question_data']['question'],SAFE_STRING_TEXT);
+        $this->data['question_data']['question'] = $this->SfStr->getSafeString($this->data['question_data']['question'],SAFE_STRING_TEXTAREA);
 
         $key = array_search($this->data['question_data']['orientation'],$this->CONF['orientation']);
         if($key !== FALSE)
@@ -1423,6 +1462,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         	$this->data['dep_value'][$row['qid']][] = '[a text]'; // L10N: text_answer_label
         }
 	}
+
 
 }
 
