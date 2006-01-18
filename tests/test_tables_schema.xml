@@ -386,7 +386,7 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
   
 <sequence name="results_text_sequence" initialValue="177"/>
 
-<sequence name="sequence" initialValue="400"/>  
+<sequence name="_sequence" initialValue="400"/>  
   
 <table name="surveys">
     <field name="sid" type="I">
