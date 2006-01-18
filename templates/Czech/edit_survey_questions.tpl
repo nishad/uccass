@@ -87,7 +87,7 @@
           Enter Text of Question. Enter <a href="javascript:page_break();">{$conf.page_break}</a> as the text of the question
           in order to create a page break in your survey (answer type will be ignored).
           <br />
-          <textarea name="question" wrap="physical" cols="50" rows="6">{$question}</textarea>
+          <textarea name="question" wrap="physical" cols="50" rows="6">{$data.new_question}</textarea>
         </div>
 
         <div class="whitebox">
@@ -170,21 +170,21 @@
               button above after the question has been added to the survey.
             </span>
             <br />
-
+            
             {section name="dep" loop=3 show=TRUE}
               ({$smarty.section.dep.iteration})
               &nbsp;&nbsp;&nbsp;
               <select name="option[{$smarty.section.dep.iteration}]" size="1">
                 <option value=""></option>
                 {foreach key=mode_id item=mode_name from=$conf.dependency_modes}
-		          <option value="{$mode_id}">{$mode_name}</option>
+		          <option value="{$mode_id}" {$data.option_selected[dep][mode_id]}>{$mode_name}</option>
 				{/foreach}
               </select>
               if question
               <select name="dep_qid[{$smarty.section.dep.iteration}]" onchange="populate({$smarty.section.dep.iteration});">
                 <option value=""></option>
                 {section name="dep_qid" loop=$data.dep_qid show=TRUE}
-                  <option value="{$data.dep_qid[dep_qid]}">{$data.dep_qnum[dep_qid]}</option>
+                  <option value="{$data.dep_qid[dep_qid]}"{$data.dep_qid_selected[dep][dep_qid]}>{$data.dep_qnum[dep_qid]}</option>
                 {/section}
               </select>
               is answered with
