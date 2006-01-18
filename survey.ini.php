@@ -38,13 +38,13 @@
 
 ; File Path to UCCASS files
 ; ex: /home/user/name/public_html/uccass
+; ex: c:/program files/apache group/apache/htdocs/uccass
 ; (write . (dot) if you don't know the absolute path)
-path = "c:/program files/apache group/apache/htdocs/uccass"
+path =
 
 ; HTML Path to UCCASS installation
 ; ex: https://www.youdomain.com/subdir/uccass
-html = "http://grape/uccass"
-
+html = 
 ; Site Name
 ;
 ; Will appear in Title Bar and Main Page
@@ -216,7 +216,7 @@ db_database = uccass
 ; default table names.
 ; Max. length 20 characters (determined by 
 ; XMLS_PREFIX_MAXLEN in ADOdb/adodb-xmlschema.inc.php).
-db_tbl_prefix = "uc_"
+db_tbl_prefix =
 
 ; Database / HTML Character Set
 ;
