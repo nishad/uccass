@@ -16,10 +16,11 @@ $lang['text_only'] = 'Text Only';
 $lang['limited_html'] = 'Limited HTML';
 $lang['full_html'] = 'Full HTML';
 
-//Dependency Modes
+//Dependency Modes - labels
 $lang['hide'] = 'Hide';
 $lang['require'] = 'Require';
 $lang['show'] = 'Show';
+$lang['selector'] = 'Get selector';
 
 //Database Messages
 $lang['db_query_error'] = 'Error executing datbase query: ';

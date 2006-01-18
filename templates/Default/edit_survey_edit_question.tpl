@@ -1,3 +1,4 @@
+<!-- Template edit_survey_edit_question.tpl - BEGIN -->
   <form method="POST" action="{$conf.html}/edit_survey.php" name="qform">
     <input type="hidden" name="mode" value="{$data.mode}">
     <input type="hidden" name="sid" value="{$data.sid}">
@@ -92,9 +93,9 @@
       &nbsp;&nbsp;&nbsp;
       <select name="option[{$smarty.section.dep.iteration}]" size="1">
         <option value=""></option>
-        {section name="dep_mode" loop=$conf.dependency_modes show=TRUE}
-          <option value="{$conf.dependency_modes[dep_mode]}">{$conf.dependency_modes[dep_mode]}</option>
-        {/section}
+        {foreach key=mode_id item=mode_name from=$conf.dependency_modes}
+          <option value="{$mode_id}">{$mode_name}</option>
+		{/foreach}
       </select>
       if question
       <select name="dep_qid[{$smarty.section.dep.iteration}]" onchange="populate({$smarty.section.dep.iteration});">
@@ -143,3 +144,4 @@
       <input type="submit" name="edit_cancel" value="Cancel">
     </div>
   </form>
+<!-- Template edit_survey_edit_question.tpl - END -->
