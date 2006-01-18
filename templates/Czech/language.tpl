@@ -2,8 +2,10 @@
 // Czech translations (used encoding: UTF-8)
 $lang = array();
 
-$lang['error'] = 'Error';
+$lang['error'] = 'Problém';
 $lang['notice'] = 'Upozornění';
+$lang['yes'] = 'Ano';
+$lang['no'] = 'Ne';
 
 //Orientation Modes
 $lang['vertical'] = 'Vertical';
@@ -122,7 +124,35 @@ $lang['invalid_new_password'] = 'Password field is required. ';
 $lang['default_copy_name'] = 'None - Start with blank survey';
 $lang['survey_created'] = 'Survey successfully created. ';
 
-//Take survey
+//Access Control
+$lang['survey_times'] = 'Number of times for survey limit is required if number of units is supplied';
+$lang['survey_units'] = 'Number of units for survey limit is required if number of times is supplied';
+$lang['access_updated'] = 'Access controls sucessfully updated.';
+$lang['no_username'] = 'Username cannot be empty.';
+$lang['no_password'] = 'Password can not be empty.';
+$lang['user_updated'] = 'User information updated sucessfully.';
+$lang['users_deleted'] = ' users deleted.';
+$lang['users_emailed'] = ' users emailed.';
+$lang['users_moved'] = ' users moved.';
+$lang['users_invited'] = ' users sent invitations.';
+$lang['send_email'] = 'Unable to send email to';
+$lang['no_email'] = 'Username does not have a valid email address';
+$lang['email_subject'] = 'Survey Information';
+$lang['invitee_email'] = 'Email address is required for invitee.';
+$lang['invitee_bad_email'] = 'Incorrect email address format.';
+$lang['invitee_added'] = 'Invitees added/updated';
+$lang['invite_no_send'] = 'Unable to send invitation to invitee';
+$lang['invite_no_code'] = 'Unable to get invitation template and/or code for inviteee';
+
+//Administration Section
+$lang['delete_admin'] = 'You cannot delete all admin users.';
+$lang['one_admin'] = 'Must have at least one administrator.';
+$lang['dup_username'] = 'Username is already in use';
+$lang['admin_updated'] = 'Admin users updated/added.';
+
+//Taking Survey
+$lang['not_active'] = 'Požadovaná anketa v tuto chvíli není aktivní.';
+$lang['empty_survey'] = 'Požadovaná anketa neexistuje či neobsahuje žádné otázky.';
 $lang['take.bttn.quit'] = 'Ukončit anketu - neukládat odpovědi';
 $lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Předchozí stránka';
 $lang['take.bttn.next'] = 'Následující stránka&nbsp;&gt;&gt;';
