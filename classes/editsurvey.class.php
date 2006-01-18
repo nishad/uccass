@@ -829,16 +829,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 }
                 $this->data['qid'][$x] = $r['qid'];
                 $this->data['question'][$x] = $this->SfStr->getSafeString($r['question'],$survey_text_mode);
-
-                if($r['type'] == ANSWER_TYPE_MS || $r['type'] == ANSWER_TYPE_MM)
-                {
-                    //Retrieve answer value in SAFE_STRING_JAVASCRIPT mode
-                    //so they can be shown in dependency <select>; html entities will be replaced  
-                    // by JavaScript itself in the constructor of Option
-                    $temp = $this->get_answer_values($r['aid'],BY_AID,SAFE_STRING_JAVASCRIPT);
-                    $this->data['dep_avid'][$r['qid']] = $temp['avid'];
-                    $this->data['dep_value'][$r['qid']] = $temp['value'];
-                }
+				
+				// Prepare possible answers to question we depend upon  
+				$this->_prepare_data4dependencies($r);
 
                 if($r['type'] != ANSWER_TYPE_N)
                 {
@@ -847,7 +840,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
                     $this->data['qnum2'][] = $this->data['qnum'][$x];
                     $this->data['qnum2_selected'][] = '';
 
-                    if($r['type'] != ANSWER_TYPE_S && $r['type'] != ANSWER_TYPE_T)
+                    // Prepare data for possible dependencies 
+                    // MM + MS - normal dependencies, S - a selector dependency [for dynamic a.type question]
+                    if(/*$r['type'] != ANSWER_TYPE_S &&*/ $r['type'] != ANSWER_TYPE_T)
                     {
                         $this->data['dep_qid'][] = $r['qid'];
                         $this->data['dep_qnum'][] = $this->data['qnum'][$x];
@@ -911,7 +906,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         if(isset($this->data['dep_avid']) && count($this->data['dep_avid']))
         {
             $this->data['js'] = '';
-
+			
             foreach($this->data['dep_avid'] as $qid=>$avid_array)
             {
                 foreach($avid_array as $key=>$avid)
@@ -1401,7 +1396,33 @@ class UCCASS_EditSurvey extends UCCASS_Main
         }
     }
 
-
+	/**
+	 * Prepare arrays of possible answers to questions a question may depend
+	 * upon. Used later to construct the JavaScript that presents them to user 
+	 * when defining a new dependency.
+	 * Modifies $this->data['dep_avid'] and $this->data['dep_value'].
+	 * @param array $row Array of an elements of answer_types JOINed with
+	 * answer_values.
+	 * @access private
+	 */
+	function _prepare_data4dependencies(&$row)
+	{
+        if($row['type'] == ANSWER_TYPE_MS || $row['type'] == ANSWER_TYPE_MM)
+        {
+            //Retrieve answer value in SAFE_STRING_JAVASCRIPT mode
+            //so they can be shown in dependency <select>; html entities will be replaced  
+            // by JavaScript itself in the constructor of Option
+            $temp = $this->get_answer_values($row['aid'],BY_AID,SAFE_STRING_JAVASCRIPT);
+            $this->data['dep_avid'][$row['qid']] = $temp['avid'];
+            $this->data['dep_value'][$row['qid']] = $temp['value'];
+        }
+        elseif ($row['type'] == ANSWER_TYPE_S)
+        {
+        	// A selector dependancy of a dynamic answer type question also needs st. to display:
+        	$this->data['dep_avid'][$row['qid']][] = 0;	// dummy id
+        	$this->data['dep_value'][$row['qid']][] = '[a text]'; // L10N: text_answer_label
+        }
+	}
 
 }
 
