@@ -172,7 +172,7 @@ class UCCASS_Main
 
         //Ensure templates_c directory is writable
         if(!is_writable($this->smarty->compile_dir))
-        { $this->error($lang['template_path_writable_warning']); return; }
+        { $this->error($this->lang['template_path_writable_warning']); return; }
 
         //If SAFE_MODE is ON in PHP, turn off subdirectory use for Smarty
         if(ini_get('safe_mode'))
@@ -465,19 +465,19 @@ class UCCASS_Main
         	$selector_where_clause = " 1=1 ";	// a condition that is always true
         	$selector_join_av = " LEFT JOIN {$this->CONF['db_tbl_prefix']}dyna_answer_selectors avs ON (av.avid = avs.avid)";
         	if(is_array($selectors))
-        	{
+            {
         		$selector_join_atype = " ";
         		$operator = '=';
         		$selector_where_clause = "("; // will be: (avs.selector = val1 [OR ...] OR avs.selector is null))
         		
         		foreach($selectors as $selector_value)
-        		{
+            {
         			$selector_value = $this->SfStr->getSafeString($selector_value, SAFE_STRING_DB); 
         			$selector_where_clause .= "avs.selector $operator $selector_value OR "; 
-        		}
+            }
         		$selector_where_clause .= "avs.selector is null)";
         	}
-        	
+
         	// Create the query
     		$query = "SELECT av.avid, av.value, av.numeric_value, av.image, atype.is_dynamic 
     				  FROM {$this->CONF['db_tbl_prefix']}answer_values av $selector_join_av" .
@@ -666,7 +666,7 @@ class UCCASS_Main
     function _checkUsernamePassword($sid,$priv,$numallowed=0,$numseconds=0)
     {
         $retval = FALSE;
-		
+
         if(isset($_REQUEST['username']) && isset($_REQUEST['password']))
         {
             if($sid != 0)
@@ -683,6 +683,7 @@ class UCCASS_Main
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+
             if($r = $rs->FetchRow($rs))
             {
                 //Case sensitive compare done in PHP
