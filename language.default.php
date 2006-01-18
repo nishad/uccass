@@ -11,7 +11,7 @@ $lang['conf_form_begin'] = '<html><head><title>UCCASS Configuration</title></hea
                                <table cellpadding="4" border="1"><tr><td>
                                Install Type:
                                  <select name="installation_type" size="1">
-                                   <optionb value="">Choose...</option>
+                                   <option value="">Choose...</option>
                                    <option value="updateconfigonly">Update Configuration Only</option>
                                    <option value="newinstallation">New Installation</option>
                                    <option value="upgrade_104">Upgrade From v1.04</option>

@@ -18,6 +18,8 @@
 // Affero General Public License for more details.
 //======================================================
 
+define('NEW_CODE', 'x');
+
 class UCCASS_SurveyAdmin extends UCCASS_Main
 {
     function UCCASS_SurveyAdmin()
@@ -38,7 +40,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
             $template = 'login.tpl';
             if(isset($_REQUEST['password']))
             {
-                $data['message'] = 'Incorrect Username and/or Password';
+                $data['message'] = $this->lang['wrong_login_info'];
                 $data['username'] = $this->SfStr->getSafeString($_REQUEST['username'],SAFE_STRING_TEXT,1);
             }
             $data['page'] = 'admin.php';
@@ -61,7 +63,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
             $query = "SELECT sid, name FROM {$this->CONF['db_tbl_prefix']}surveys ORDER BY name ASC";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error("Error selecting surveys: " . $this->db->ErrorMsg()); }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
             while($r = $rs->FetchRow())
             {
                 $data['survey']['sid'][] = $r['sid'];
@@ -73,7 +75,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                       {$this->CONF['db_tbl_prefix']}users WHERE sid=0 ORDER BY username ASC";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
-            { $this->error('Unable to get user permissions: ' . $this->db->ErrorMsg()); return; }
+            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
             $x = 0;
             while($r = $rs->FetchRow($rs))
             {
@@ -83,9 +85,9 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                 $data['users'][$x]['username'] = $this->SfStr->getSafeString($r['username'],SAFE_STRING_TEXT);
                 $data['users'][$x]['password'] = $this->SfStr->getSafeString($r['password'],SAFE_STRING_TEXT);
                 if($r['admin_priv'])
-                { $data['users'][$x]['admin_selected'] = ' checked'; }
+                { $data['users'][$x]['admin_selected'] = FORM_CHECKED; }
                 if($r['create_priv'])
-                { $data['users'][$x]['create_selected'] = ' checked'; }
+                { $data['users'][$x]['create_selected'] = FORM_CHECKED; }
                 if(isset($erruid[$r['uid']]))
                 { $data['users'][$x]['erruid'] = 1; }
 
@@ -93,7 +95,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
             }
 
             for($y=0;$y<5;$y++)
-            { $data['users'][$x++]['uid'] ='x'.$y; }
+            { $data['users'][$x++]['uid'] = NEW_CODE.$y; }
         }
 
         $this->smarty->assign_by_ref('data',$data);
@@ -112,22 +114,22 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
         $erruid = array();
 
         if(!isset($_REQUEST['admin_priv']))
-        { $this->error('Must have at least one administrator.'); return; }
+        { $this->error($this->lang['one_admin']); return; }
         elseif(isset($_REQUEST['delete']))
         {
             $numadmins = array_diff(array_keys($_REQUEST['admin_priv']),array_keys($_REQUEST['delete']));
             if(is_array($numadmins) && count($numadmins) == 0)
-            { $this->error('Cannot delete all admin users'); return; }
+            { $this->error($this->lang['delete_admin']); return; }
 
             foreach($_REQUEST['delete'] as $uid => $val)
             {
-                if($uid{0}!='x')
+                if($uid{0}!= NEW_CODE)
                 {
                     $rs = $this->delete_user($uid);
                     if($rs === FALSE)
                     {
                         $username = $this->SfStr->getSafeString($_REQUEST['username'][$uid],SAFE_STRING_TEXT);
-                        $errmsg[0] = "Cannot delete $username: " . $this->db->ErrorMsg();
+                        $errmsg[0] = $this->lang['db_query_error'] . $this->db->ErrorMsg();
                         $erruid[] = $uid;
                     }
                 }
@@ -140,12 +142,12 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
         {
             if(empty($name) && empty($_REQUEST['email'][$uid]) && empty($_REQUEST['username'][$uid]) && empty($_REQUEST['password'][$uid]))
             {
-                if($uid{0}!='x')
+                if($uid{0}!= NEW_CODE)
                 {
                     $rs = $this->delete_user($uid);
                     if($rs === FALSE)
                     {
-                        $errmsg[0] = "Cannot delete user with uid: $uid. Reason: " . $this->db->ErrorMsg();
+                        $errmsg[0] = $this->lang['db_query_error'] . $this->db->ErrorMsg();
                         $erruid[$uid] = 1;
                     }
                 }
@@ -164,7 +166,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                     if($chkuid && $chkuid != $input['uid'])
                     {
                         $username = $this->SfStr->getSafeString($_REQUEST['username'][$uid],SAFE_STRING_TEXT);
-                        $errmsg[$uid] = "Username '{$username}' already in use.";
+                        $errmsg[$uid] = $this->lang['dup_username'] . ' - ' . $username;
                         $erruid[$uid] = 1;
                     }
                     else
@@ -172,7 +174,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                 }
                 else
                 {
-                    $errmsg[1] = 'Username cannot be blank.';
+                    $errmsg[1] = $this->lang['no_username'];
                     $erruid[$uid] = 1;
                 }
 
@@ -180,7 +182,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
                 { $input['password'] = $this->SfStr->getSafeString($_REQUEST['password'][$uid],SAFE_STRING_DB); }
                 else
                 {
-                    $errmsg[2] = 'Password cannot be blank.';
+                    $errmsg[2] = $this->lang['no_password'];
                     $erruid[$uid] = 1;
                 }
 
@@ -211,7 +213,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
 
                 if(!isset($erruid[$uid]))
                 {
-                    if($uid{0} == 'x')
+                    if($uid{0} == NEW_CODE)
                     {
                         $uid = $this->db->GenID($this->CONF['db_tbl_prefix'].'users_sequence');
                         $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}users
@@ -228,21 +230,22 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
 
                     $rs = $this->db->Execute($query);
                     if($rs === FALSE)
-                    { $errmsg[$uid] = 'Error updating/inserting user data: ' . $this->db->ErrorMsg(); }
+                    { $errmsg[$uid] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                 }
             }
         }
 
+        $this->setMessageRedirect('admin.php');
+
         if(!empty($errmsg))
         {
-            $this->setMessage('Error',implode('<br />',$errmsg),MSGTYPE_ERROR);
             $_SESSION['update_admin_users']['erruid'] = $erruid;
+            $this->setMessage($this->lang['error'],implode(BR,$errmsg),MSGTYPE_ERROR);
         }
-
-        header("Location: {$this->CONF['html']}/admin.php");
-        exit();
-
-        //return $erruid;
+        else
+        {
+            $this->setMessage($this->lang['notice'],$this->lang['admin_updated'],MSGTYPE_NOTICE);
+        }
     }
 
     //Delete user matching $uid from
@@ -274,7 +277,7 @@ class UCCASS_SurveyAdmin extends UCCASS_Main
         $query = "SELECT uid FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND username = {$username}";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('Error checking for existing username: ' . $this->db->ErrorMsg()); }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
         if($r = $rs->FetchRow($rs))
         { $retval = $r['uid']; }

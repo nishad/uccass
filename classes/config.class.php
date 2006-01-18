@@ -55,7 +55,7 @@ class UCCASS_Config
                 // form elements
                 $ini_file = fread($fp,filesize($file));
                 $ini_file = str_replace("\\","\\\\",$ini_file);
-                $ini_file = preg_replace('/^([a-z0-9_.-]+)\s?=\s?"?([^\r\n]+)?"?$/im',
+                $ini_file = preg_replace('/^([a-z0-9_.-]+)\s?=\s?"?([^\r\n]+)?"?/im',
                                          $this->lang['conf_field_replacement'],
                                          $ini_file);
 
@@ -103,7 +103,7 @@ class UCCASS_Config
 
                     if(preg_match("/[^a-z0-9]/i",$value))
                     { $value = '"' . $value . '"'; }
-                    $ini_file = preg_replace("/^".$key."\s?=.*$/m","$key = $value",$ini_file);
+                    $ini_file = preg_replace("/^".$key."\s?=.*/m","$key = $value",$ini_file);
                 }
 
                 if(!fwrite($fp,$ini_file))
