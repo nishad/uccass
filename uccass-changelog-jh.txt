@@ -83,4 +83,29 @@ classes/editsurvey.class.php:
 classes/survey.class.php:
  - used the new language keys instead of hard-wired values (button lables, error messages)
 
+###############################################################################################################
+DYNAMIC ANSWER TYPE - 13.1.2006
+classes/main.class.php:
+ + ANSWER_TYPE_DYNAMIC
  
+unit_tests.php:
+ + change/resetTablePrefix, generateTestTablesIfNone, + TestOfTAnswerType
+ 
++ tests/tanswertype_test.php
++ tests/test_tables_schema.xml
++ classes/tanswertype.class.php
+
+UPGRADE: install.php, databasecreator.class.php, adodb-xmlschema.inc.php: support for upgrades from 1.8.2 (do not insert data 
+	and replace existing sequences unless needed)
+
+------ + dependency mode 'Selector' ------
+classes/main.class.php:
+	+ constants DEPEND_MODE_* and their use as keys in the array $this->CONF['dependency_modes']
+classes/survey.class.php:	
+	Use the constants DEPEND_MODE_* instead od thestrings 'Hide' ...
+
+templates/*/edit_survey_edit_question.tpl, edit_survey_questions.tpl:
+	select with dependency modes: use array's keys for option= and values for its label 
+	(required to switch from section to foreach)
+
+templates/*/language.tpl: + $lang['selector']
