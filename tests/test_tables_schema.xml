@@ -1,0 +1,557 @@
+<?xml version="1.0"?>
+<!DOCTYPE adodb_schema PUBLIC "-//ADODB//DTD adodb_schema//EN" "ADOdb/xmlschema.dtd">
+<schema version="0.3">
+
+<!--
+test_tables_schema.xml: Schema + data for tests. Set uccass to use different prefix to 
+	avoid corrupting existing data.
+	The table definitions must be the same as in ../survey-adodb_schema.xml
+-->
+  
+<table name="answer_types">
+    <field name="aid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="name" type="C" size="50">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="type" type="C" size="5">
+      <NOTNULL/>
+      <DEFAULT value="T"/>
+    </field>
+    <field name="label" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="is_dynamic" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+	<opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+    <data>
+      <row><f>1</f><f>Dynamic answer type</f><f>DYN</f><f></f><f>1</f><f>1</f></row>
+      <row><f>2</f><f>StaTic answer type</f><f>MS</f><f></f><f>1</f><f>0</f></row>
+    </data>
+  </table>
+  
+<sequence name="answer_types_sequence" initialValue="3"/>
+  
+<table name="answer_values">
+    <field name="avid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="aid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="value" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="numeric_value" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="image" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <index name="idx_answer_values_aid">
+      <col>aid</col>
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+    <data>
+      <row><f>1</f><f>1</f><f>A blondie</f><f>1</f><f>bar.gif</f></row>
+      <row><f>2</f><f>1</f><f>A brunette</f><f>2</f><f>bar.gif</f></row>
+      <row><f>3</f><f>1</f><f>Empty</f><f>3</f><f>bar.gif</f></row>
+      <row><f>4</f><f>2</f><f>Static: Yes</f><f>1</f><f>bar.gif</f></row>
+      <row><f>5</f><f>2</f><f>Static: No</f><f>2</f><f>bar.gif</f></row>
+    </data>
+  </table>
+  
+<sequence name="answer_values_sequence" initialValue="3506"/>
+
+<!-- Assignment of selectors to answer values of dynamic answer types -->
+<table name="dyna_answer_selectors">
+    <field name="avid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="selector" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <index name="idx_dyna_answer_selectors_avid">
+      <col>avid</col>
+    </index>
+    <index name="idx_dyna_answer_selectors_selector">
+      <col>selector</col>
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+    <data>
+      <row><f>1</f><f>blondie</f></row>
+      <row><f>2</f><f>brunette</f></row>
+      <row><f>3</f><f></f></row>
+    </data>
+</table>
+
+
+<!-- Additional details of dynamic answer types that aren't be sored in answer_types - ->
+<table name="dyna_answer_type_details">
+   <field name="aid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+   </field>
+    <!- - Define where we get the value to match agains answer values' selectors (a name of a lookback...). - ->
+   <field name="compare_variable" type="C" size="30">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <!- - The type of the compare_variable - a lookback (default), the respondents id s/he got in an invitation... - ->
+    <field name="compare_variable_type" type="I">
+      <NOTNULL/>
+	  <DEFAULT value="1"/>
+    </field>
+   <!- - An operator used to compare with a selector (like, =, <,...). - ->
+   <field name="operator" type="C" size="4">
+      <NOTNULL/>
+	  <DEFAULT value="="/>
+- ->
+    </field>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+</table>-->
+  
+<table name="completed_surveys">
+    <field name="uid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="completed" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_completed_surveys_uid">
+      <col>uid</col>
+    </index>
+    <opt platform="mysql">type=MyISAM</opt>
+  </table>
+  
+<table name="dependencies">
+    <field name="dep_id" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="qid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="dep_qid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="dep_aid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="dep_option" type="C" size="10">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <index name="idx_dependencies_sid">
+      <UNIQUE/>
+      <col>sid</col>
+      <col>qid</col>
+      <col>dep_qid</col>
+      <col>dep_aid</col>
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+  </table>
+  
+<sequence name="dependencies_sequence" initialValue="155"/>
+  
+<table name="ip_track">
+    <field name="ip" type="C" size="15"/>
+    <field name="sid" type="I" />
+    <field name="completed" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_ip_track_sid">
+      <col>sid</col>
+    </index>
+	<opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+  </table>
+  
+<table name="questions">
+    <field name="qid" type="I" >
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="question" type="X">
+      <NOTNULL/>
+    </field>
+    <field name="aid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="page" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="num_answers" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="num_required" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="oid" type="I" >
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="orientation" type="C" size="15">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <index name="idx_questions_aid">
+      <col>aid</col>
+    </index>
+    <index name="idx_questions_sid">
+      <col>sid</col>
+    </index>
+	<opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+	<!-- Without the following option PostgreSQL would create an additional field called
+	'oid' wich conflicts with the field oid defined above. -->
+	<opt platform="postgres">WITHOUT OIDS</opt>
+    <data>
+      <row><f>1</f><f>Dynamic type question</f><f>1</f><f>1</f><f>1</f><f>0</f><f>0</f><f>1</f><f>Vertical</f></row>
+      <row><f>2</f><f>Static type question</f><f>2</f><f>1</f><f>1</f><f>2</f><f>0</f><f>2</f><f>Vertical</f></row>      
+    </data>
+  </table>
+  
+<sequence name="questions_sequence" initialValue="100"/>
+
+<table name="report_questions">
+    <field name="rqid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>    
+    <field name="report_id" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>    
+    <field name="qid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>    
+    <field name="layout" type="C" size="25"></field>    
+    <field name="display" type="C" size="25"></field>    
+    <field name="crosstab_questions" type="C" size="255"></field>    
+    <field name="order_id" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    
+    <field name="sequence" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_report_questions_qid">
+      <col>qid</col>
+    </index>
+    <index name="idx_report_questions_report_id">
+      <col>report_id</col>
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+</table>
+
+<sequence name="report_questions_sequence" initialValue="1"/>
+
+<table name="reports">    
+    <field name="report_id" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>    
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>    
+    <field name="report_name" type="C" size="100"></field>    
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+</table>
+
+<sequence name="reports_sequence" initialValue="1"/>
+  
+<table name="results">
+    <field name="rid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="qid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="avid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="entered" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sequence" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_results_sid">
+      <col>sid</col>
+    </index>
+    <index name="idx_results_qid">
+      <col>qid</col>
+    </index>
+    <index name="idx_results_sequence">
+      <col>sequence</col>
+    </index>
+    <index name="idx_results_avid">
+      <col>avid</col>
+    </index>
+    <opt platform="mysql">type=MyISAM</opt>
+  </table>
+  
+<sequence name="results_sequence" initialValue="1284"/>
+  
+<table name="results_text">
+    <field name="rid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="qid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="answer" type="X">
+      <NOTNULL/>
+    </field>
+    <field name="entered" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sequence" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_results_text_sid">
+      <col>sid</col>
+    </index>
+    <index name="idx_results_text_qid">
+      <col>qid</col>
+    </index>
+    <index name="idx_results_text_sequence">
+      <col>sequence</col>
+    </index>
+    <index name="idx_results_text_answer">
+      <col>answer</col>
+	  <FULLTEXT />
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+</table>
+  
+<sequence name="results_text_sequence" initialValue="177"/>
+
+<sequence name="sequence" initialValue="400"/>  
+  
+<table name="surveys">
+    <field name="sid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="name" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="start_date" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="end_date" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="active" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="template" type="C" size="25"/>
+    <field name="redirect_page" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="survey_text_mode" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="user_text_mode" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="date_format" type="C" size="50">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="created" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="time_limit" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="hidden" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="public_results" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="access_control" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="survey_limit_times" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="survey_limit_number" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="survey_limit_unit" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="survey_limit_seconds" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+	<opt platform="mysql">CHARACTER SET latin1 type=ISAM</opt>
+  </table>
+  
+<sequence name="surveys_sequence" initialValue="27"/>
+  
+<table name="time_limit">
+    <field name="sequence" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="elapsed_time" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="quitflag" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_time_limit_sid">
+      <col>sid</col>
+    </index>
+    <opt platform="mysql">type=MyISAM</opt>
+  </table>
+  
+<table name="users">
+    <field name="uid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="sid" type="I">
+      <KEY/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="name" type="C" size="50">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="email" type="C" size="100">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="username" type="C" size="25">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="password" type="C" size="25">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+    <field name="admin_priv" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="create_priv" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="take_priv" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="results_priv" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="edit_priv" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="status" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="status_date" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="invite_code" type="C" size="32"/>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+	<data>
+      <row><f>1</f><f>0</f><f></f><f></f><f>admin</f><f>password</f><f>1</f><f>1</f><f>0</f><f>0</f><f>0</f><f>0</f><f>0</f><f></f></row>
+      <row><f>29</f><f>5</f><f></f><f></f><f>user</f><f>password</f><f>0</f><f>0</f><f>0</f><f>0</f><f>1</f><f>0</f><f>0</f><f></f></row>
+      <row><f>25</f><f>2</f><f></f><f></f><f>user</f><f>password</f><f>0</f><f>0</f><f>1</f><f>0</f><f>1</f><f>3</f><f>1095135716</f><f></f></row>
+    </data>
+  </table>
+  
+<sequence name="users_sequence" initialValue="29"/>
+ 
+</schema>
