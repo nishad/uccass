@@ -90,6 +90,14 @@ define('NL',"\n");
 define('CR',"\r");
 define('NOT', 'NOT');
 
+// Dependency modes of questions
+// We use string values to preserve compatibility with previous versions of uccass
+// that used those strings.
+define('DEPEND_MODE_HIDE', 'Hide');
+define('DEPEND_MODE_REQUIRE', 'Require');
+define('DEPEND_MODE_SHOW', 'Show');
+define('DEPEND_MODE_SELECTOR', 'Selector');
+
 //Hack to get rid of cookies named "sid"
 if(isset($_POST['sid']))
 { $_REQUEST['sid'] = $_POST['sid']; }
@@ -172,7 +180,7 @@ class UCCASS_Main
 
         //Establish Connection to database
         $this->db = NewADOConnection($this->CONF['db_type']);
-        //$this->db->debug = true; // Print all the queries. FIXME: debug only, delete
+        //$this->db->debug = true; // Print all the queries.
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
         $conn = $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
         if(!$conn)
@@ -201,7 +209,9 @@ class UCCASS_Main
         //Define variables
         $this->CONF['orientation'] = array($this->lang['vertical'],$this->lang['horizontal'],$this->lang['dropdown'],$this->lang['matrix']);
         $this->CONF['text_modes'] = array($this->lang['text_only'],$this->lang['limited_html'],$this->lang['full_html']);
-        $this->CONF['dependency_modes'] = array($this->lang['hide'],$this->lang['require'],$this->lang['show']);
+        $this->CONF['dependency_modes'] = array(DEPEND_MODE_HIDE => $this->lang['hide'],
+        	DEPEND_MODE_REQUIRE=>$this->lang['require'], DEPEND_MODE_SHOW => $this->lang['show'],
+        	DEPEND_MODE_SELECTOR => $this->lang['selector']);
 
         //Validate and set default survey text modes
         $this->CONF['survey_text_mode'] = (int)$this->CONF['survey_text_mode'];
@@ -422,8 +432,24 @@ class UCCASS_Main
 
     /*************************
     * RETRIEVE ANSWER VALUES *
-    *************************/
-    function get_answer_values($id,$by=BY_AID,$mode=SAFE_STRING_TEXT)
+    * @param int $id id of an answer type or a question whose answer values we
+    * want
+    * @param int $by BY_AID (id is an id of an answer type) or BY_QID (...
+    * of a question)
+    * @param int $mode
+    * @param mixed $selectors (array/bool) Either an array of strings used to
+    * limit the number of selected dynamic answer type answers or false (==
+    * select all).
+    * 
+    * @return mixed: Failure => FALSE; Success => array (keys: avid, value,
+    * numeric_value, image, the value of avid; values: arrays). 
+    * Ex. (2 answers): array ('avid' => array ( 0=> '1', 1 => '2', ), 'value' =>
+    * array ( 0 => 'A blondie', 1 => 'A brunette', ), 'numeric_value' => array (
+    * 0 => '1', 1 => '2', ), 'image' => array ( 0 => 'bar.gif', 1 => 'bar.gif',
+    * ), 1 => 'A blondie', 2 => 'A brunette', )
+    * 
+    *************************/ // FIXME: $selector is false or an array of answers
+    function get_answer_values($id,$by=BY_AID,$mode=SAFE_STRING_TEXT, $selectors = false)
     {
         $retval = FALSE;
         static $answer_values;
@@ -435,22 +461,37 @@ class UCCASS_Main
         { $retval = $answer_values[$id]; }
         else
         {
-            if($by==BY_QID)
-            {
-                $query = "SELECT av.avid, av.value, av.numeric_value, av.image FROM {$this->CONF['db_tbl_prefix']}answer_values av,
-                          {$this->CONF['db_tbl_prefix']}questions q WHERE q.aid = av.aid AND q.qid = $id AND q.sid = $sid
-                          ORDER BY av.avid ASC";
-            }
-            else
-            {
-                $query = "SELECT av.avid, av.value, av.numeric_value, av.image FROM {$this->CONF['db_tbl_prefix']}answer_values av
-                          WHERE aid = $id ORDER BY avid ASC";
-            }
-
+        	// Prepare the selectors to be included in a where condition
+        	$selector_where_clause = " 1=1 ";	// a condition that is always true
+        	$selector_join_av = " LEFT JOIN {$this->CONF['db_tbl_prefix']}dyna_answer_selectors avs ON (av.avid = avs.avid)";
+        	if(is_array($selectors))
+        	{
+        		$selector_join_atype = " ";
+        		$operator = '=';
+        		$selector_where_clause = "("; // will be: (avs.selector = val1 [OR ...] OR avs.selector is null))
+        		
+        		foreach($selectors as $selector_value)
+        		{
+        			$selector_value = $this->SfStr->getSafeString($selector_value, SAFE_STRING_DB); 
+        			$selector_where_clause .= "avs.selector $operator $selector_value OR "; 
+        		}
+        		$selector_where_clause .= "avs.selector is null)";
+        	}
+        	
+        	// Create the query
+    		$query = "SELECT av.avid, av.value, av.numeric_value, av.image, atype.is_dynamic 
+    				  FROM {$this->CONF['db_tbl_prefix']}answer_values av $selector_join_av" .
+    				  	(($by==BY_QID)? "JOIN {$this->CONF['db_tbl_prefix']}questions q ON (q.aid = av.aid) " : "") .  
+            			"JOIN {$this->CONF['db_tbl_prefix']}answer_types atype ON (atype.aid = av.aid)".
+                      "WHERE $selector_where_clause AND " .
+                      	(($by==BY_QID)? "q.qid = $id AND q.sid = $sid " : "av.aid = $id ") .
+                      "ORDER BY av.avid ASC";
+			
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
 
+            $isDynamic = false;
             while($r = $rs->FetchRow($rs))
             {
                 $retval['avid'][] = $r['avid'];
@@ -458,9 +499,11 @@ class UCCASS_Main
                 $retval['numeric_value'][] = $r['numeric_value'];
                 $retval['image'][] = $r['image'];
                 $retval[$r['avid']] = $r['value'];
+                $isDynamic = $isDynamic || ($r['is_dynamic'] == 1); // FIXME: check the field is_dynamic instead
             }
 
-            $answer_values[$id] = $retval;
+            if(!$isDynamic)
+            { $answer_values[$id] = $retval; }	// don't save  dynamic answer type answer values
         }
 
         return $retval;
