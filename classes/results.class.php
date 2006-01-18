@@ -200,7 +200,7 @@ class UCCASS_Results extends UCCASS_Main
 
         $this->smarty->assign_by_ref('output',$output);
     }
-	
+
     function _loadBarGraph(&$survey,&$data,$qid_array=array()) // syntax &$data=array() doesn't work in php 4.4.0
     {
         $q_num = 1;
