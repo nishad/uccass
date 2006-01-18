@@ -170,17 +170,12 @@
               button above after the question has been added to the survey.
             </span>
             <br />
-
-            {* If the question's answer type is dynamic let the user set a selector dependency *}
-			{if isset($is_dynamic) }
-				<hidden id="option[0]" value="{conf.dependency_mode_selector}" />
-			{/if}
-
+            
             {section name="dep" loop=3 show=TRUE}
               ({$smarty.section.dep.iteration})
               &nbsp;&nbsp;&nbsp;
               <select name="option[{$smarty.section.dep.iteration}]" size="1">
-                <option value=""></option>                
+                <option value=""></option>
                 {foreach key=mode_id item=mode_name from=$conf.dependency_modes}
 		          <option value="{$mode_id}" {$data.option_selected[dep][mode_id]}>{$mode_name}</option>
 				{/foreach}
