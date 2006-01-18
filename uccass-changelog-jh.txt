@@ -85,9 +85,6 @@ classes/survey.class.php:
 
 ###############################################################################################################
 DYNAMIC ANSWER TYPE - 13.1.2006
-classes/main.class.php:
- + ANSWER_TYPE_DYNAMIC
- 
 unit_tests.php:
  + change/resetTablePrefix, generateTestTablesIfNone, + TestOfTAnswerType
  
