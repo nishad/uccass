@@ -383,10 +383,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         }
 
                         if(count($input['value']) == 0)
-                        { $error .= $lang['answer_value_error']; }
+                        { $error .= $this->lang['answer_value_error']; }
                     }
                     else
-                    { $error .= $lang['bad_answer-numeric_value']; }
+                    { $error .= $this->lang['bad_answer-numeric_value']; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -400,7 +400,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     if($input['num_answers'] > 99)
                     {
                         $input['num_answers'] = 99;
-                        $error .= $lang['only_99_allowed'];
+                        $error .= $this->lang['only_99_allowed'];
                         $input['show_add_answers'] = FALSE;
                     }
                     elseif($input['num_answers'] == 99)
@@ -420,7 +420,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= $lang['bad_answer_type'];
+                    $error .= $this->lang['bad_answer_type'];
                 break;
             }
 
@@ -552,7 +552,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $this->smarty->assign_by_ref('answer',$answer);
             }
             else
-            { $error = $lang['bad_answer_type']; }
+            { $error = $this->lang['bad_answer_type']; }
         }
 
         if(!empty($error))
