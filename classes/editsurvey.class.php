@@ -601,22 +601,33 @@ class UCCASS_EditSurvey extends UCCASS_Main
     }
 
     // ADD DEPENDENCY TO QUESTION //
-    function _processAddDependency($sid,$qid)
+    /**
+     * Add dependecies to a question.
+     * @param int $sid Survey id of the survey the question belongs to.
+     * @param mixed $qid int/bool Id of the edited question to which we add
+     * the dependency(ies).
+     * @param array $validated_dep The output of _validateDependency (it won't
+     * be called again) or null if we should call it ourselves.
+     * 
+     * @return array array of errors that occured or an empty array if none
+     */
+    function _processAddDependency($sid, $qid, $validated_dep = null)
     {
         $error = array();
-        $dep = $this->_validateDependency($sid,$qid);
+        if(is_null($validated_dep))
+        { $validated_dep = $this->_validateDependency($_REQUEST,$qid); }
 
         //Loop through any new dependencies passed from form. If dependency is based upon
         //a question on the same page, force the creation of a page break.
-        if(empty($dep['error']) && !empty($dep['input']))
+        if(empty($validated_dep['error']) && !empty($validated_dep['input']))
         {
-            foreach($dep['input']['dep_aid'] as $num=>$dep_aid_array)
+            foreach($validated_dep['input']['dep_aid'] as $num=>$dep_aid_array)
             {
                 foreach($dep_aid_array as $dep_aid)
                 {
                     $dep_insert = '';
                     $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
-                    $dep_insert = "($dep_id,$sid,$qid,{$dep['input']['dep_qid'][$num]},{$dep_aid},{$dep['input']['option'][$num]})";
+                    $dep_insert = "($dep_id,$sid,$qid,{$validated_dep['input']['dep_qid'][$num]},{$dep_aid},{$validated_dep['input']['option'][$num]})";
 
                     $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id, sid, qid, dep_qid, dep_aid, dep_option)
                             VALUES " . $dep_insert;
@@ -626,18 +637,19 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 }
             }
 
-            if(isset($dep['input']['dep_require_pagebreak']))
+            if(isset($validated_dep['input']['dep_require_pagebreak']))
             {
                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
-                        (page > {$dep['input']['page']} OR (page = {$dep['input']['page']} AND oid > {$dep['input']['oid']}) OR qid = $qid)";
+                        (page > {$validated_dep['input']['page']} OR (page = {$validated_dep['input']['page']} AND oid > {$validated_dep['input']['oid']}) OR qid = $qid)";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
             }
         }
-        return array_merge($error,$dep['error']);
+        return array_merge($error,$validated_dep['error']);
     }
-
+    
+	/*
     // VALIDATE NEW DEPENDENCIES //
     function _validateDependency($sid,$qid)
     {
@@ -694,6 +706,110 @@ class UCCASS_EditSurvey extends UCCASS_Main
                             $input['page'] = $r['page'];
                             $input['oid'] = $r['oid'];
                         }
+                    }
+                }
+            }
+        }
+        return(array('input'=>$input, 'error'=>$error));
+    }
+    */
+    
+
+    // VALIDATE NEW DEPENDENCIES //
+    /**
+     * Validate new dependencies and prepare the data for insertion.
+     * Any errors are put to the array function's result['error']
+     * @param array $request either _REQUEST or _POST - contains the data of the
+     * new submitted dependency.
+     * @param mixed $qid int/bool Id of the edited question to which we add
+     * the dependency(ies) or NULL if qid is not available (e.g. when adding a
+     * new question).
+     * @param int $question_page Page of the edited question to which we add
+     * the dependency(ies) or NULL if qid is given (we can find page having
+     * qid).
+     * @param int $question_oid Oid of the edited question to which we add the
+     * dependency(ies) or NULL if qid is given (we can find page having qid).
+     * 
+     * @return array array('input'=>(copy of data from the request[or empty]),
+     * 'error'=>(array of errors that occured[or empty]))
+     */
+    function _validateDependency(&$request, $qid, $question_page = null, $question_oid = null )
+    {
+        $input = array();
+        $error = array();
+        
+        // FIXME: 1. check that a selector dependency is only added to a dynamic ans.type question
+        //		2. check that a dependency on a text question (S, T) is only used as a selector depend. 
+        
+        // Check parameters
+        if(is_null($qid) && (is_null($question_page) || is_null($question_oid)))
+        { 
+        	$error[] = 'PHP programming error - _validateDependency: either $qid or ($question_page and $question_oid) must be non null.';
+        	return(array('input'=>$input, 'error'=>$error));
+        }
+
+		// Validate dependency
+        if(isset($request['option']) && is_array($request['option']) && !empty($request['option']))
+        {
+            foreach($request['option'] as $num=>$option)
+            {
+                if(!empty($option))
+                {
+                    //Valide dependency option chosen (hide, require or show)
+                    if(empty($option) || !in_array($option,array_keys($this->CONF['dependency_modes'])))
+                    { $error[] = $this->lang('choose_dep_type'); }
+                    else
+                    { $input['option'][$num] = $this->SfStr->getSafeString($option,SAFE_STRING_DB); }
+
+                    //Validate question ID to add depenency to
+                    if(empty($request['dep_qid'][$num]))
+                    { $error[] = $this->lang('choose_dep_question'); }
+                    else
+                    { $input['dep_qid'][$num] = (int)$request['dep_qid'][$num]; }
+
+                    //Validate question ID to base dependency on
+                    if(empty($request['dep_aid'][$num]))
+                    { $error[] = $this->lang('choose_dep_question2'); }
+                    else
+                    {
+                        foreach($request['dep_aid'][$num] as $dep_aid)
+                        { $input['dep_aid'][$num][] = (int)$dep_aid; }
+                    }
+
+                    $input['dep_qid'][$num] = (int)$request['dep_qid'][$num];
+
+                    //Ensure question chosen to base new dependency on is before the question the dependency
+                    //is being added to. If both are on the same page, set a flag to require a page break
+                    //be added before the selected question.
+                    if(!is_null($qid))
+                    {
+	                    $check_query = "SELECT q1.page, q1.oid, q2.page AS dep_page, q2.oid AS dep_oid
+	                                    FROM {$this->CONF['db_tbl_prefix']}questions q1, {$this->CONF['db_tbl_prefix']}questions q2
+	                                    WHERE q1.qid = $qid AND q2.qid = {$input['dep_qid'][$num]}";
+                    } else {
+                    	// Note: we can use a constant in the select clause - and we want the same results from both queries
+                    	$check_query = "SELECT $question_page AS page, $question_oid AS oid, q2.page AS dep_page, q2.oid AS dep_oid
+                    					FROM {$this->CONF['db_tbl_prefix']}questions q2 
+                    					WHERE q2.qid = {$input['dep_qid'][$num]}";
+                    }
+
+                    $rs = $this->db->Execute($check_query);
+                    if($rs === FALSE)
+                    { $error[] = $this->lang('db_query_error') . $this->db->ErrorMsg(); }
+
+                    while($r = $rs->FetchRow($rs))
+                    {
+                        if($r['dep_page'] > $r['page'] || ($r['dep_page'] == $r['page'] && $r['dep_oid'] > $r['oid']))
+                        { $error[] = $this->lang('dep_order_error'); }
+                        elseif($r['page'] == $r['dep_page'])
+                        {
+                            $input['dep_require_pagebreak'] = 1;
+                        }
+                        else
+                        { $input['dep_require_pagebreak'] = 0; }
+                        
+                        $input['page'] = $r['page'];
+                        $input['oid'] = $r['oid'];
                     }
                 }
             }
@@ -1214,7 +1330,11 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 //If there is no error so far, attempt to process the requested dependencies
                 if(empty($error))
                 {
-
+                	$dependencies = $this->_validateDependency($_POST, null, $page, $oid);
+                	$error = array_merge($error, $dependencies['error']);
+	                // $dep_insert = array();
+	                
+	                /*
                     $dep_insert = array();
                     $dep_require_pagebreak = 0;
 
@@ -1247,13 +1367,14 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
                                 foreach($_POST['dep_aid'][$num] as $dep_aid)
                                 {
-                                    $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence'); // TODO: check that it works correctly
+                                    $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
                                     // %% will be later replaced by qid
-                                    $dep_insert[] = "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option) "; // FIXME: multiple insert only works with MySQL
+                                    $dep_insert[] = "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option) ";
                                 }
                             }
                         }
                     }
+                    //*/
 
                     //If no error has occurred, attempt to create new question in database
                     if(empty($error))
@@ -1268,7 +1389,10 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         else
                         {
                             //Create dependencies in database and create page break, if required
-                            if(!empty($dep_insert))
+                            $dep_error = $this->_processAddDependency($sid, $qid, $dependencies);
+                            $error = array_merge($error, $dep_error);
+                            
+                            /*if(!empty($dep_insert))
                             {
                                 $dep_query_start = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id,sid,qid,dep_qid,dep_aid,dep_option) VALUES ";
                                 // Insert each dependency; if one fails try the others anyway
@@ -1290,7 +1414,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                                     if($rs === FALSE)
                                     { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
                                 }
-                            }
+                            }*/
 
                             $notice = $this->lang['question_added'];
                         }
