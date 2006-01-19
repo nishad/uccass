@@ -953,32 +953,18 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 $this->data['qid'][$x] = $r['qid'];
                 $this->data['question'][$x] = $this->SfStr->getSafeString($r['question'],$survey_text_mode);
 
-				// Prepare possible answers to question we depend upon  
-				$this->_prepare_data4dependencies($r);
-
                 if($r['type'] != ANSWER_TYPE_N)
-                {
-                    $this->data['qnum'][$x] = $q_num++;
-                    $this->data['page_oid'][] = $r['page'] . '-' . $r['oid'];
-                    $this->data['qnum2'][] = $this->data['qnum'][$x];
-                    $this->data['qnum2_selected'][] = '';
-
-                    // Prepare data for possible dependencies 
-                    // MM + MS - normal dependencies, S - a selector dependency [for dynamic a.type question]
-                    if(/*$r['type'] != ANSWER_TYPE_S &&*/ $r['type'] != ANSWER_TYPE_T)
-                    {
-                        $this->data['dep_qid'][] = $r['qid'];
-                        $this->data['dep_qnum'][] = $this->data['qnum'][$x];
-                    }
-
-                }
+                { $this->data['qnum'][$x] = $q_num++; }
                 else
-                {
-                    $this->data['qnum'][$x] = 'L'.$label_num++;
-                    $this->data['page_oid'][] = $r['page'] . '-' . $r['oid'];
-                    $this->data['qnum2'][] = $this->data['qnum'][$x];
-                    $this->data['qnum2_selected'][] = '';
-                }
+                { $this->data['qnum'][$x] = 'L'.$label_num++; }
+                
+                // Prepare possible answers to question we depend upon  
+				$this->_prepare_data4dependencies($r, $this->data['qnum'][$x]);
+                
+                
+                $this->data['page_oid'][] = $r['page'] . '-' . $r['oid'];
+                $this->data['qnum2'][] = $this->data['qnum'][$x];
+                $this->data['qnum2_selected'][] = '';
 
                 $this->data['show_edep'][$x] = FALSE;
 
@@ -987,6 +973,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
             }while($r = $rs->FetchRow($rs));
 
             //load dependencies for current survey
+            // FIXME: modify to select => display also selector dependencies [on S questions]
             $query = "SELECT d.qid, d.dep_qid, av.value, d.dep_option FROM {$this->CONF['db_tbl_prefix']}dependencies d,
                       {$this->CONF['db_tbl_prefix']}answer_values av WHERE d.dep_aid = av.avid AND d.sid = $sid";
             $rs = $this->db->Execute($query);
@@ -1026,22 +1013,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
         { $this->data['show']['dep'] = FALSE; }
 
         //Create javascript to fill <select> boxes when creating dependencies
-        if(isset($this->data['dep_avid']) && count($this->data['dep_avid']))
-        {
-            $this->data['js'] = '';
-
-            foreach($this->data['dep_avid'] as $qid=>$avid_array)
-            {
-                foreach($avid_array as $key=>$avid)
-                {
-                    $this->data['js'] .= "Answers['$qid,$key'] = '$avid';\n";
-                    $value = addslashes($this->data['dep_value'][$qid][$key]);
-                    $this->data['js'] .= "Values['$qid,$key'] = '$value';\n";
-                }
-                $c = count($avid_array);
-                $this->data['js'] .= "Num_Answers['$qid'] = '$c';\n";
-            }
-        }
+        $this->_prepare_js4dependencies();
 
         //Set "insert question after..." select box to selected element or last element
         if(isset($_POST['insert_after']))
@@ -1490,16 +1462,17 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $this->data['answer'][] = $r;
         }
 
-        //Retrieve existing question numbers
+        /*/Retrieve existing question numbers
         //for questions BEFORE this one being edited
-        //and create Javascript for dependency <select> boxes
+        //and create Javascript for dependency <select> boxes	// FIXME: unify with loadQuestions
         $query = "SELECT q.qid, at.type, av.avid, av.value FROM {$this->CONF['db_tbl_prefix']}questions q,
                   {$this->CONF['db_tbl_prefix']}answer_types at LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av
                   ON at.aid = av.aid WHERE q.sid = $sid AND
                   (q.page < {$this->data['question_data']['page']} OR (q.page = {$this->data['question_data']['page']} AND q.oid < {$this->data['question_data']['oid']}))
                   AND q.aid = at.aid ORDER BY page ASC, oid ASC";
 
-        $x = 1;
+        
+        $question_count = 1;
         $av_count = 0;
         $old_qid = '';
         $this->data['js'] = '';
@@ -1511,10 +1484,8 @@ class UCCASS_EditSurvey extends UCCASS_Main
             do
             {
                 if($r['type'] != ANSWER_TYPE_N)
-                {
-                    if($r['type'] == ANSWER_TYPE_S || $r['type'] == ANSWER_TYPE_T)
-                    { $x++; }
-                    else
+                {	// BEGIN: TODO: replace by calls to _prepare_data4dependencies nad _prepare_js4dependencies
+                    if($r['type'] != ANSWER_TYPE_S && $r['type'] != ANSWER_TYPE_T)
                     {
                         if($r['qid'] != $old_qid)
                         {
@@ -1522,7 +1493,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                             { $this->data['js'] .= "Num_Answers['{$old_qid}'] = '{$av_count}';\n"; }
 
                             $av_count = 0;
-                            $this->data['qnum'][$r['qid']] = $x++;
+                            $this->data['qnum'][$r['qid']] = $question_count;
                             $old_qid = $r['qid'];
 
                         }
@@ -1533,7 +1504,8 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         $av_count++;
 
                     }
-                }
+                    ++$question_count;
+                } // END
             }while($r = $rs->FetchRow($rs));
 
             $this->data['js'] .= "Num_Answers['{$old_qid}'] = '{$av_count}';\n";
@@ -1543,7 +1515,39 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 $this->data['dep_qid'] = array_keys($this->data['qnum']);
                 $this->data['dep_qnum'] = array_values($this->data['qnum']);
             }
+        }//*/
+        //load all questions for this survey
+        $query = "SELECT q.qid, q.aid, q.page, a.type, q.oid
+                  FROM {$this->CONF['db_tbl_prefix']}questions q,
+                  {$this->CONF['db_tbl_prefix']}answer_types a
+                  WHERE q.aid = a.aid AND q.sid = $sid 
+                  AND (q.page < {$this->data['question_data']['page']} OR (q.page = {$this->data['question_data']['page']} AND q.oid < {$this->data['question_data']['oid']}))
+                  ORDER BY q.page, q.oid, a.aid";
+        $rs = $this->db->Execute($query);
+        if($rs === FALSE)
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
+
+        $page = 1;
+        $q_num = 1;
+        $label_num = 1;
+
+        while($r = $rs->FetchRow($rs))
+        {
+            //Load data for each question into the $data array
+            while($page != $r['page'])
+            { $page++; }
+
+            if($r['type'] != ANSWER_TYPE_N)
+            { $this->data['qnum'][$r['qid']] = $q_num++; }
+            else
+            { $this->data['qnum'][$r['qid']] = 'L'.$label_num++; }
+            
+            // Prepare possible answers to question we depend upon  
+			$this->_prepare_data4dependencies($r, $this->data['qnum'][$r['qid']]);
         }
+        
+        $this->_prepare_js4dependencies();
+        //  $this->data['qnum'][$r['qid']] = $question_count;
 
         //Retrieve existing dependencies for question
         $this->data['dependencies'] = array();
@@ -1568,28 +1572,79 @@ class UCCASS_EditSurvey extends UCCASS_Main
 	 * when defining a new dependency.
 	 * Modifies $this->data['dep_avid'] and $this->data['dep_value'].
 	 * @param array $row Array of an elements of answer_types JOINed with
-	 * answer_values.
+	 * answer_values. It must contain the keys: qid, aid
+	 * @param string $question_label Label for the given qid (used in the
+	 * select tag of questions to depend upon.)
 	 * @access private
 	 */
-	function _prepare_data4dependencies(&$row)
+	function _prepare_data4dependencies(&$row, $question_label)
 	{
-        if($row['type'] == ANSWER_TYPE_MS || $row['type'] == ANSWER_TYPE_MM)
+		$can_depend = true;	// Is it possible to depend on the given question?
+		
+		switch($row['type'])
+		{
+			case ANSWER_TYPE_N:
+				return; // break;	
+				
+			case ANSWER_TYPE_MS:
+			case ANSWER_TYPE_MM:
+	            //Retrieve answer value in SAFE_STRING_JAVASCRIPT mode
+	            //so they can be shown in dependency <select>; html entities will be replaced  
+	            // by JavaScript itself in the constructor of Option
+	            $temp = $this->get_answer_values($row['aid'],BY_AID,SAFE_STRING_JAVASCRIPT);
+	            $this->data['dep_avid'][$row['qid']] = $temp['avid'];
+	            $this->data['dep_value'][$row['qid']] = $temp['value'];
+	            break;
+	            
+			case ANSWER_TYPE_S:
+				// A selector dependancy of a dynamic answer type question also needs st. to display:
+	        	$this->data['dep_avid'][$row['qid']][] = 0;	// dummy id
+	        	$this->data['dep_value'][$row['qid']][] = '[a text]'; // L10N: text_answer_label
+	        	break;
+	        	
+			default: 
+				$can_depend = false;
+		}
+        
+        // Prepare data for possible dependencies 
+        if($can_depend)
         {
-            //Retrieve answer value in SAFE_STRING_JAVASCRIPT mode
-            //so they can be shown in dependency <select>; html entities will be replaced  
-            // by JavaScript itself in the constructor of Option
-            $temp = $this->get_answer_values($row['aid'],BY_AID,SAFE_STRING_JAVASCRIPT);
-            $this->data['dep_avid'][$row['qid']] = $temp['avid'];
-            $this->data['dep_value'][$row['qid']] = $temp['value'];
-        }
-        elseif ($row['type'] == ANSWER_TYPE_S)
-        {
-        	// A selector dependancy of a dynamic answer type question also needs st. to display:
-        	$this->data['dep_avid'][$row['qid']][] = 0;	// dummy id
-        	$this->data['dep_value'][$row['qid']][] = '[a text]'; // L10N: text_answer_label
+            $this->data['dep_qid'][] = $row['qid'];
+            $this->data['dep_qnum'][] = $question_label;
         }
 	}
+	
+	/**
+	 * Create javascript to fill <select> boxes when creating dependencies.
+	 * The result is stored into $this->data['js'].
+	 * The necessary data is taken from $this->data, namely the keys dep_avid,
+	 * dep_value.
+	 * It's assumed that the data has been prepared by
+	 * _prepare_data4dependencies and that the array contains prepared data for
+	 * all questions  on which one can become dependant.
+	 * 
+	 * @access private
+	 */
+	function _prepare_js4dependencies()
+	{
+		//Create javascript to fill <select> boxes when creating dependencies
+        if(isset($this->data['dep_avid']) && count($this->data['dep_avid']))
+        {
+            $this->data['js'] = '';
 
+            foreach($this->data['dep_avid'] as $qid=>$avid_array)
+            {
+                foreach($avid_array as $key=>$avid)
+                {
+                    $this->data['js'] .= "Answers['$qid,$key'] = '$avid';\n";
+                    $value = addslashes($this->data['dep_value'][$qid][$key]);
+                    $this->data['js'] .= "Values['$qid,$key'] = '$value';\n";
+                }
+                $c = count($avid_array);
+                $this->data['js'] .= "Num_Answers['$qid'] = '$c';\n";
+            }
+        }
+	}
 
 }
 
