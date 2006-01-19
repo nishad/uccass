@@ -651,7 +651,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 if(!empty($option))
                 {
                     //Valide dependency option chosen (hide, require or show)
-                    if(empty($option) || !in_array($option,$this->CONF['dependency_modes']))
+                    if(empty($option) || !in_array($option,array_keys($this->CONF['dependency_modes'])))
                     { $error[] = $this->lang['choose_dep_type']; }
                     else
                     { $input['option'][$num] = $this->SfStr->getSafeString($option,SAFE_STRING_DB); }
@@ -974,25 +974,27 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $key = array_search($_SESSION['answer_orientation'],$this->CONF['orientation']);
             $this->data['orientation']['selected'][$key] = FORM_SELECTED;
         }
-
+		
+		// Dependencies: prepare the flag 'selected' for the selected option/qid
         for($x=1;$x<=3;$x++)
         {
-            if(isset($_POST['option'][$x]))
+            if(isset($_POST['option'][$x]) && in_array($_POST['option'][$x], array_keys($this->CONF['dependency_modes'])))
             {
-                $key = array_search($_POST['option'][$x], $this->CONF['dependency_modes']);
-                if($key !== FALSE)
-                { $this->data['option_selected'][$x-1][$key] = FORM_SELECTED; } // FIXME: key: not num but DEPEND_MODE_*
+                $key = $_POST['option'][$x]; //$this->CONF['dependency_modes'] contains labels indexed by keys like 'Hide'
+                $this->data['option_selected'][$x-1][$key] = FORM_SELECTED; // FIXME: key: not num but DEPEND_MODE_*
             }
             if(isset($_POST['dep_qid'][$x]))
             {
+            	// FIXME: this marks the qid as selected but won' trigger populate() and so 
+            	// the select with possible answers will be empty !!! 
                 $key = array_search($_POST['dep_qid'][$x], $this->data['dep_qid']);
                 if($key !== FALSE)
                 { $this->data['dep_qid_selected'][$x-1][$key] = FORM_SELECTED; }
             }
         }
 
-        // $this->print_array($this->data['option_selected']); // debug only?
-        // $this->print_array($this->data['dep_qid_selected']); // debug only?
+        // $this->print_array($this->data['option_selected']); // debug only
+        // $this->print_array($this->data['dep_qid_selected']); // debug only
     }
 
     // PROCESS MOVING A QUESTION  UP OR DOWN IN THE LIST //
@@ -1222,7 +1224,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         foreach($_POST['option'] as $num=>$option)
                         {
                             if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_POST['dep_aid'][$num])
-                               && in_array($option,$this->CONF['dependency_modes']))
+                               && in_array($option,array_keys($this->CONF['dependency_modes'])))
                             {
                                 $dep_qid = (int)$_POST['dep_qid'][$num];
 
@@ -1245,8 +1247,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
                                 foreach($_POST['dep_aid'][$num] as $dep_aid)
                                 {
-                                    $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
-                                    $dep_insert .= "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option), ";
+                                    $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence'); // TODO: check that it works correctly
+                                    // %% will be later replaced by qid
+                                    $dep_insert[] = "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option) "; // FIXME: multiple insert only works with MySQL
                                 }
                             }
                         }
