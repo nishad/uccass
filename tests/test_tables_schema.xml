@@ -37,6 +37,10 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
     <data>
       <row><f>1</f><f>Dynamic answer type</f><f>DYN</f><f></f><f>1</f><f>1</f></row>
       <row><f>2</f><f>StaTic answer type</f><f>MS</f><f></f><f>1</f><f>0</f></row>
+      
+      <row><f>101</f><f>Sentence (255 characters)</f><f>S</f><f></f><f>101</f><f>0</f></row>
+      <row><f>102</f><f>Discrimination Types</f><f>MM</f><f>Check all that apply</f><f>101</f><f>0</f></row>
+      <row><f>103</f><f>Dynamic: select course</f><f>MS</f><f></f><f>101</f><f>1</f></row>
     </data>
   </table>
   
@@ -73,6 +77,14 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
       <row><f>3</f><f>1</f><f>Empty</f><f>3</f><f>bar.gif</f></row>
       <row><f>4</f><f>2</f><f>Static: Yes</f><f>1</f><f>bar.gif</f></row>
       <row><f>5</f><f>2</f><f>Static: No</f><f>2</f><f>bar.gif</f></row>
+      
+       <row><f>101</f><f>102</f><f>Discr.t.: No</f><f>1</f><f>bar.gif</f></row>
+      <row><f>102</f><f>102</f><f>Discr.t.: Yes - National Orgin</f><f>2</f><f>bar.gif</f></row>
+      <row><f>103</f><f>102</f><f>Discr.t.: Yes - Religious</f><f>3</f><f>bar.gif</f></row>
+      <row><f>104</f><f>102</f><f>Discr.t.: Yes - Gender</f><f>4</f><f>bar.gif</f></row>
+      <row><f>105</f><f>102</f><f>Discr.t.: Yes - Racial</f><f>5</f><f>bar.gif</f></row>
+      <row><f>106</f><f>103</f><f>Course 1</f><f>1</f><f>bar.gif</f></row>
+      <row><f>107</f><f>103</f><f>Course 2</f><f>2</f><f>bar.gif</f></row>
     </data>
   </table>
   
@@ -99,6 +111,9 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
       <row><f>1</f><f>blondie</f></row>
       <row><f>2</f><f>brunette</f></row>
       <row><f>3</f><f></f></row>
+      
+      <row><f>106</f><f>student1</f></row>
+      <row><f>107</f><f>student2</f></row>
     </data>
 </table>
 
@@ -245,7 +260,10 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
 	<opt platform="postgres">WITHOUT OIDS</opt>
     <data>
       <row><f>1</f><f>Dynamic type question</f><f>1</f><f>1</f><f>1</f><f>0</f><f>0</f><f>1</f><f>Vertical</f></row>
-      <row><f>2</f><f>Static type question</f><f>2</f><f>1</f><f>1</f><f>2</f><f>0</f><f>2</f><f>Vertical</f></row>      
+      <row><f>2</f><f>Static type question</f><f>2</f><f>1</f><f>1</f><f>2</f><f>0</f><f>2</f><f>Vertical</f></row>
+      
+      <row><f>101</f><f>Your student id</f><f>101</f><f>101</f><f>1</f><f>1</f><f>0</f><f>1</f><f>Vertical</f></row>
+      <row><f>102</f><f>Select 2+ values</f><f>102</f><f>101</f><f>1</f><f>1</f><f>0</f><f>2</f><f>Vertical</f></row>
     </data>
   </table>
   
@@ -463,6 +481,10 @@ test_tables_schema.xml: Schema + data for tests. Set uccass to use different pre
       <DEFAULT value="0"/>
     </field>
 	<opt platform="mysql">CHARACTER SET latin1 type=ISAM</opt>
+	<data>
+      <row><f>1</f><f>Dummy Survey</f><f>0</f><f>0</f><f>1</f><f>Default</f><f>index</f><f>0</f><f>0</f><f>Y-m-d H:i</f><f>1089173049</f><f>0</f><f>0</f><f>1</f><f>0</f><f>2</f><f>1</f><f>3</f><f>0</f></row>
+      <row><f>101</f><f>Dynamic answers survey</f><f>0</f><f>0</f><f>1</f><f>Default</f><f>index</f><f>0</f><f>0</f><f>Y-m-d H:i:s</f><f>1089173049</f><f>0</f><f>0</f><f>1</f><f>0</f><f>2</f><f>1</f><f>3</f><f>0</f></row>
+    </data>
   </table>
   
 <sequence name="surveys_sequence" initialValue="27"/>

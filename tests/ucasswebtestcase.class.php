@@ -67,6 +67,8 @@ class UCCASS_WebTestCase extends WebTestCase
 	/** @var string Name used for our new test answer type. */
 	var $answer_type_name = '_test_answer_';
 	var $answer_type_value = '_test_answer_1';
+	var $dynaanswer_type_name = '_test__dynamic_courses';
+	var $dynaanswer_values = array('student1' => 'course 1', 'student2' => 'course 2');	// selector => value
 	
 	/** @var array Defines the questions that we shall try to create.
      * @access protected [read only] */

@@ -147,7 +147,8 @@ class TestOfTakeSurvey extends UCCASS_WebTestCase
     	$this->assert_TakeSurveyPage(2);
     	$this->assertWantedText('question2_text');
     	$question_name = $this->find_question_field_name();
-    	$this->assertTrue( $this->setField($question_name, 'A sentence...') );
+    	$selectors = array_keys($this->dynaanswer_values);
+    	$this->assertTrue( $this->setField($question_name, $selectors[0]) );
     	$this->assertTrue( $this->clickSubmitByName('next') );
     }
     
@@ -191,9 +192,26 @@ class TestOfTakeSurvey extends UCCASS_WebTestCase
     	$this->assert_no_error();
     	$this->assert_TakeSurveyPage(5);
     	$this->assertWantedText('question5_mm_1answer');
-    	$this->assertField('next', 'Finish', 'This should be the last page ".%s');	// L10N
     	$question_name = $this->find_question_field_name();
     	$this->assertTrue( $this->setField($question_name, array($this->answer_type_value)) );
+    	$this->assertTrue( $this->clickSubmitByName('next')  );
+    }
+    
+    /**
+     * Answer the 6th question and finish. Check dependencies.
+     */
+    function question6_dynamic()
+    {
+    	$this->printinfo('question6_dynamic');
+    	$this->assert_no_error();
+    	$this->assert_TakeSurveyPage(6);
+    	$this->assertWantedText('question6_dynamic');
+    	$this->assertField('next', 'Finish', 'This should be the last page ".%s');	// L10N
+    	$question_name = $this->find_question_field_name();
+    	// TODO: use $this->dynaanswer_values; also in setting the selector determining text field in q2
+    	$answers = array_values($this->dynaanswer_values);
+    	$this->assertTrue( $this->setField($question_name, array($answers[0])) ); // answer matching the selector set in subtest_question2_text
+    	$this->assertFalse( $this->setField($question_name, array($answers[1])) ); // this answer should be excluded by the selector
     	$this->assertTrue( $this->clickSubmitByName('next')  );
     }
      

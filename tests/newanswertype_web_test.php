@@ -110,5 +110,84 @@ class TestOfNewAnswerType extends UCCASS_WebTestCase
     	$this->assertNoUnwantedText('Error');	// L10N
     }
     
+    /**
+     * TEST: Try to add a new multiple choices - single answer DYNAMIC question.
+     * Pre- condition: The survey $this->testSurveyName exists.
+     */
+    function test_new_dynamic_answertype()
+    {
+    	$this->printinfo('test_new_dynamic_answertype');
+
+		// 1. Go to the page
+		$this->goto_NewAnswerTypePage();
+    	
+    	// Set fields
+    	$this->assertTrue( $this->setField('name', $this->dynaanswer_type_name) );
+    	$this->assertTrue( $this->setField('label', $this->dynaanswer_type_name) );
+    	$this->assertTrue( $this->setField('type', 'MS - Multiple Choice, Single Answer') );
+    	$this->assertTrue( $this->setField('is_dynamic', '1'), 'Failed to set the field is_dynamic to 1.' );
+    	// Answers; 
+    	// Note setting a field to array(value1,value2) produces 2 parameters per text field 
+    	// (value[]=value1 and value[]=value2 per one field named 'value[]' => for 6 fields we get
+    	// 12 elements); it wouldn't mind if we could do the same for image[] but we can't - it's a
+    	// select, which is set by label, not value, and the value being set is compared to labels
+    	// - but array('aquabar.gif','aquabar.gif') != 'aquabar.gif'
+		$answer_count = count($this->dynaanswer_values);
+    	$images = array_fill ( 1, $answer_count, 'aquabar.gif' );
+    	$answer_values = array('value[]' => $this->dynaanswer_values, 
+			'numeric_value[]' => range(1, $answer_count), 'image[]' => $images);
+    	// TODO: set the selectors for $this->dynaanswer_values
+    	
+    	// Submit
+    	$this->assertTrue( $this->clickSubmitByName('submit', $answer_values)/*, 'Submit the new answer type failed. %s'*/ );
+    	
+    	// Check result
+    	$this->assert_NewAnswerTypePage();
+    	$success = $this->assertWantedText('New answer type successfully added.');		// L10N
+    	$success = $success && $this->assertNoUnwantedText('Error');	// L10N
+    	if($success)
+    	{ $this->assertTrue($this->_insert_selectors(), 'Failed to insrt selectors for the dynamic answer type' ); }
+    	else
+    	{ $this->showSource(); }
+    }
+    
+    /**
+     * Insert into the DB selectors for the answe values in $this-
+     * >dynaanswer_values.
+     */
+    function _insert_selectors()
+    {
+    	$sname = $this->uccassMain->SfStr->getSafeString($this->testSurveyName,SAFE_STRING_DB);
+    	$aname = $this->uccassMain->SfStr->getSafeString($this->dynaanswer_type_name,SAFE_STRING_DB);
+    	$prefix = $this->uccassMain->CONF['db_tbl_prefix'];
+    	$select_avids = "SELECT av.avid, av.value FROM {$prefix}answer_types at JOIN {$prefix}surveys s ON (s.sid=at.sid)
+    					JOIN {$prefix}answer_values av ON (av.aid=at.aid) 
+    					WHERE s.name = $sname AND at.name = $aname";
+    	$rs = $this->uccassMain->db->Execute($select_avids);
+        if($rs === FALSE)
+        { 
+        	$this->sendMessage("ERROR of DB in _insert_selectors (query: $select_avids): " . $this->db->ErrorMsg());
+        	return false; 
+        }
+        
+        while($row = $rs->FetchRow($rs))
+        {
+        	$selector = array_search($row['value'], $this->dynaanswer_values);
+        	if($this->assertTrue($selector !== false, "The answer value {$row['value']} has no corresponding selector in this->dynaanswer_values."))
+        	{
+        		$selector = $this->uccassMain->SfStr->getSafeString($selector,SAFE_STRING_DB);
+        		$insert = "INSERT INTO {$prefix}dyna_answer_selectors(avid, selector) VALUES ({$row['avid']}, $selector)";
+        		$rs = $this->uccassMain->db->Execute($insert);
+        		if($rs === FALSE)
+		        { 
+		        	$this->sendMessage("ERROR in _insert_selectors: failed to insert selectors; query: $insert;error: " . $this->db->ErrorMsg());
+		        	return false;
+		        }
+        	}  
+        }
+        
+        return true;
+    }
+    
 } // TestOfNewAnswerType
 ?>
