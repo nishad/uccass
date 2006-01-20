@@ -60,6 +60,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             { $error .= $this->lang['enter_name']; }
 
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
+            
+            // Note: it's only meaningful for answer types with multiple answer values to be dynamic
+        	$input['is_dynamic'] = isset($_REQUEST['is_dynamic']) && !empty($_REQUEST['is_dynamic']);
 
             switch($_REQUEST['type'])
             {
@@ -312,6 +315,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             $input['aid'] = (int)$_REQUEST['aid'];
 
             $new_answer_count = 0;
+            
+            // Note: it's only meaningful for answer types with multiple answer values to be dynamic
+        	$input['is_dynamic'] = isset($_REQUEST['is_dynamic']) && !empty($_REQUEST['is_dynamic']);
 
             switch($_REQUEST['type'])
             {
@@ -427,9 +433,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             if(empty($error) && !isset($_REQUEST['add_answers_submit']))
             {
 
+                $is_dynamic = ($input['is_dynamic'])? 1 : 0;
                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}answer_types SET
                           name={$input['name']},type={$input['type']},label={$input['label']}
-                          WHERE aid = $aid";
+                          is_dynamic=$is_dynamic WHERE aid = $aid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
                 { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
@@ -507,9 +514,12 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             $this->smarty->assign_by_ref('answer',$input);
         }
 
+        //////////////////////////////////
+        //			LOAD ANSWER			//
+        //////////////////////////////////
         if($load_answer)
         {
-            $query = "SELECT aid, name, type, label, sid FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid";
+            $query = "SELECT aid, name, type, label, sid, is_dynamic FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
@@ -631,9 +641,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     * ***************************/
     function db_insert_answer_type($input) 
     {
+        $is_dynamic = ($input['is_dynamic'])? 1 : 0;
         $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
-        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES"
-                  ."($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']})";
+        $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid, is_dynamic) VALUES"
+                  ."($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']}, $is_dynamic)";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
         { 

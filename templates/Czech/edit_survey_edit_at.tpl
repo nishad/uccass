@@ -94,6 +94,21 @@
           </ul>
         </div>
 
+        <div class="whitebox">
+          Is Dynamic
+        </div>
+
+        <div class="indented_cell">
+          <input type="checkbox" name="is_dynamic" {if $answer.is_dynamic}checked{/if} value="1"> is dynamic
+          <p>
+          With a dynamic answer type only a subset of all possible answers is 
+          presented to the respondent, based on some selector (for example his/her answer 
+          to a previous question). A question of a dynamic answer type requires a selector 
+          dependency. Also selectors must be assigned to the individual answer values in 
+          the table (prefix)dyna_answer_selectors.
+          </p>
+        </div>
+
         <div style="text-align:center">
           <input type="submit" name="submit" value="Edit Answer">
         </div>

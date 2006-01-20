@@ -1,3 +1,4 @@
+<!-- edit_survey_new_at.tpl-BEGIN -->
       {* SUCCESS MESSAGE *}
         {section name="success" loop=1 show=$success}
           <div class="message">New answer type successfully added.</div>
@@ -67,6 +68,21 @@
           </ul>
         </div>
 
+        <div class="whitebox">
+          Is Dynamic
+        </div>
+
+        <div class="indented_cell">
+          <input type="checkbox" name="is_dynamic" {if $answer.is_dynamic}checked{/if} value="1"> is dynamic
+          <p>
+          With a dynamic answer type only a subset of all possible answers is 
+          presented to the respondent, based on some selector (for example his/her answer 
+          to a previous question). A question of a dynamic answer type requires a selector 
+          dependency. Also selectors must be assigned to the individual answer values in 
+          the table (prefix)dyna_answer_selectors.
+          </p>
+        </div>
+
         <div style="text-align:center">
           <input type="submit" name="submit" value="Add Answer">
         </div>
@@ -130,3 +146,4 @@
         </div>
 
       </form>
+<!-- edit_survey_new_at.tpl-END -->
