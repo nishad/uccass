@@ -59,6 +59,7 @@ class TestOfAnswerTypes extends UnitTestCase
     		'type' => 'MS',			// Multiple choice Single answer
     		'label' => 'typeLabel',
     		'sid' => 111,			// survey id
+    		'is_dynamic' => 0,
     		// answers
     		'value' => array('answer0', 'answer1'),
     		'numeric_value' => array(0, 1),
@@ -79,8 +80,8 @@ class TestOfAnswerTypes extends UnitTestCase
 
     	$this->mockADOConnection->expectArgumentsAt(0, 'GenID',array($prefix.'answer_types_sequence')); // * => any prefix
     	$this->mockADOConnection->setReturnValueAt(0, 'GenID', $answerId);
-    	$query = "INSERT INTO {$prefix}answer_types (aid, name, type, label, sid) VALUES"
-                 . "($answerId, {$input['name']},{$input['type']},{$input['label']},{$input['sid']})";
+    	$query = "INSERT INTO {$prefix}answer_types (aid, name, type, label, sid, is_dynamic) VALUES"
+                 . "($answerId, {$input['name']},{$input['type']},{$input['label']},{$input['sid']}, {$input['is_dynamic']})";
         $this->mockADOConnection->expectArgumentsAt(0,'Execute',array($query));
         $this->mockADOConnection->setReturnValue('Execute', new ADORecordSet(0)); // for all calls to Execute
              
