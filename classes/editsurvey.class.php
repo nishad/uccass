@@ -518,13 +518,20 @@ class UCCASS_EditSurvey extends UCCASS_Main
         }
 
         //check for and add new dependencies
+        $dependencies = array();
         if(isset($_REQUEST['option']))
+        { $dependencies = $this->_validateDependencyForExisting($_REQUEST,$qid); }
+        
+        // A dynamic question must have exactly 1 selector dependency
+    	if(empty($this->data['error']))
+        { $this->data['error'] = array_merge($this->data['error'], $this->_validateQuestionIfDynamic($dependencies, $qid, BY_QID)); }
+        
+        if(isset($_REQUEST['option']) && empty($this->data['error']))
         {
-            $er = $this->_processAddDependency($sid,$qid);
-            if(!empty($er))
-            { $this->data['error'] = array_merge($this->data['error'],$er); }
+            $er = $this->_processAddDependency($sid,$qid, $dependencies);
+            $this->data['error'] = array_merge($this->data['error'],$er);
         }
-
+        
         //Set success or failure message and redirect to appropriate page
         if(empty($this->data['error']))
         {
@@ -614,6 +621,8 @@ class UCCASS_EditSurvey extends UCCASS_Main
     function _processAddDependency($sid, $qid, $validated_dep = null)
     {
         $error = array();
+        
+		// Validate dependencies and dynamic question:
         if(is_null($validated_dep))
         { $validated_dep = $this->_validateDependencyForExisting($_REQUEST,$qid); }
 
@@ -725,7 +734,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
     { return $this->_validateDependency($request, null,$question_page,  $question_oid, $aid); }
     /**
      * Validate new dependencies and prepare the data for insertion.
-     * Any errors are put to the array function's result['error']
+     * Any errors are put to the array function's result['error'].
+     * If the question is dynamic, check that it has exactly one selector
+     * dependency.
      * @param array $request either _REQUEST or _POST - contains the data of the
      * new submitted dependency.
      * @param mixed $qid int/bool Id of the edited question to which we add
@@ -745,6 +756,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
     {
         $input = array();
         $error = array();
+        $selector_deps_count = 0;	// number of selector dependencies of the question
         
         // FIXME: 1. check that a selector dependency is only added to a dynamic ans.type question
         //		2. check that a dependency on a text question (S, T) is only used as a selector depend. 
@@ -825,15 +837,27 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         
                         // Check correct combinations of dependency mode - question type:
                         // Only a dynamic question may have a selector dependency
-                        if( ($option == DEPEND_MODE_SELECTOR) && !$r['is_dynamic'])
-                        { $error[] = $this->lang('err.nondynamic_selector_dep'); }
+                        if( ($option == DEPEND_MODE_SELECTOR))
+                        {
+                        	if(!$r['is_dynamic']) 
+                        	{ $error[] = $this->lang('err.nondynamic_selector_dep'); }
+                        	else
+                        	{
+                        		if(!isset($input['count_selector_deps']))
+                        		{ $input['count_selector_deps'] = 1; }
+                        		else 
+                        		{ $input['count_selector_deps'] = 1 + $input['count_selector_deps']; }; 
+                        	}
+                        	
+                        }
                         // Only selector dependency may be bound to a textual answer (S, T)
                         if(($option != DEPEND_MODE_SELECTOR) && ($r['dep_type'] == ANSWER_TYPE_S))
-                        { $error[] = $this->lang('err.dep_on_textual_answer'); }
+                        { $error[] = $this->lang('err.dep_on_textual_answer') . $option; }
                     }
                 }
             }
         }
+        
         return(array('input'=>$input, 'error'=>$error));
     }
 
@@ -1315,58 +1339,20 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 if(in_array($_POST['orientation'],$this->CONF['orientation']))
                 { $orientation = $this->SfStr->getSafeString($_POST['orientation'],SAFE_STRING_DB); }
                 else
-                { $orientation = $thid->SfStr->getSafeString($this->lang['vertical'],SAFE_STRING_DB); }
+                { $orientation = $this->SfStr->getSafeString($this->lang['vertical'],SAFE_STRING_DB); }
 
                 $_SESSION['answer_orientation'] = $_POST['orientation'];
 
                 //If there is no error so far, attempt to process the requested dependencies
                 if(empty($error))
                 {
+                	// Validate dependencies and dynamic question
                 	$dependencies = $this->_validateDependencyForNew($_POST, $page, $oid, $aid);
                 	$error = array_merge($error, $dependencies['error']);
-	                // $dep_insert = array();
-	                
-	                /*
-                    $dep_insert = array();
-                    $dep_require_pagebreak = 0;
-
-                    //check for dependencies
-                    if(isset($_POST['option']))
-                    {
-                        foreach($_POST['option'] as $num=>$option)
-                        {
-                            if(!empty($option) && !empty($_REQUEST['dep_qid'][$num]) && !empty($_POST['dep_aid'][$num])
-                               && in_array($option,array_keys($this->CONF['dependency_modes'])))
-                            {
-                                $dep_qid = (int)$_POST['dep_qid'][$num];
-
-                                //Ensure dependencies are based on questions before the question being added
-                                $check_query = "SELECT page, oid FROM {$this->CONF['db_tbl_prefix']}questions WHERE qid = $dep_qid";
-
-                                $rs = $this->db->Execute($check_query);
-                                if($rs === FALSE)
-                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
-
-                                while($r = $rs->FetchRow($rs))
-                                {
-                                    if($r['page'] > $page || ($r['page'] == $page && $r['oid'] > $oid))
-                                    { $error[] = $this->lang['dep_order_error']; }
-                                    elseif($r['page'] == $page)
-                                    { $dep_require_pagebreak = 1; }
-                                }
-
-                                $option = $this->SfStr->getSafeString($option,SAFE_STRING_DB);
-
-                                foreach($_POST['dep_aid'][$num] as $dep_aid)
-                                {
-                                    $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
-                                    // %% will be later replaced by qid
-                                    $dep_insert[] = "($dep_id,$sid,%%,$dep_qid," . (int)$dep_aid . ",$option) ";
-                                }
-                            }
-                        }
-                    }
-                    //*/
+                	
+                	// A dynamic question must have exactly 1 selector dependency
+                	if(empty($error))
+                    { $error = array_merge($error, $this->_validateQuestionIfDynamic($dependencies, $aid, BY_AID)); }
 
                     //If no error has occurred, attempt to create new question in database
                     if(empty($error))
@@ -1383,31 +1369,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
                             //Create dependencies in database and create page break, if required
                             $dep_error = $this->_processAddDependency($sid, $qid, $dependencies);
                             $error = array_merge($error, $dep_error);
-                            
-                            /*if(!empty($dep_insert))
-                            {
-                                $dep_query_start = "INSERT INTO {$this->CONF['db_tbl_prefix']}dependencies (dep_id,sid,qid,dep_qid,dep_aid,dep_option) VALUES ";
-                                // Insert each dependency; if one fails try the others anyway
-                                foreach($dep_insert as $single_dependency)
-                                {
-                                	$single_dependency = str_replace('%%',$qid,$single_dependency);
-                                	$dep_query = $dep_query_start . $single_dependency;
-                                	$rs = $this->db->Execute($dep_query);
-
-                                if($rs === FALSE)
-                                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
-                                } // insert each dependency
-
-                                if($dep_require_pagebreak)
-                                {
-                                    $query = "UPDATE {$this->CONF['db_tbl_prefix']}questions SET page = page + 1 WHERE sid = $sid AND
-                                              (page > $page OR (page = $page AND oid > $oid) OR qid = $qid)";
-                                    $rs = $this->db->Execute($query);
-                                    if($rs === FALSE)
-                                    { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
-                                }
-                            }*/
-
                             $notice = $this->lang['question_added'];
                         }
                     }
@@ -1664,6 +1625,69 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 $this->data['js'] .= "Num_Answers['$qid'] = '$c';\n";
             }
         }
+	}
+	
+	/**
+	 * Is the given answer type dynamic?
+	 * @param int $id either aid (answer type id) or qid (question id)
+	 * @param int $mode says whether the id is an aid (BY_AID) or a qid (BY_QID)
+	 */
+	function _isDynamic($id, $mode)
+	{
+		// Result = is_dynamic = 0 or 1; on a failure result === false.
+		if($mode === BY_QID)
+		{
+			$query = "SELECT at.is_dynamic FROM {$this->CONF['db_tbl_prefix']}questions q " .
+				"JOIN {$this->CONF['db_tbl_prefix']}answer_types at ON (at.aid=q.aid) WHERE qid=$id";
+		} 
+		elseif($mode === BY_AID)
+		{
+			$query = "SELECT is_dynamic FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid=$id";
+		}
+		$result = $this->db->GetOne($query);
+		if($result === false)
+		{ $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return false; }
+		return (bool)$result;
+	}
+	
+	/**
+	 * If the given question/answer type is dynamic, check it has the right
+	 * number of selector dependencies.
+	 * @param array $dependencies Info about dependencies of the question as
+	 * extracted from the request by _validateDependency.
+	 * @param int $id either aid (answer type id) or qid (question id)
+	 * @param int $mode says whether the id is an aid (BY_AID) or a qid (BY_QID)
+	 * @return array Array of errors (or an empty one)
+	 */
+	function _validateQuestionIfDynamic(&$dependencies, $id, $mode)
+	{
+		$errors = array();
+		
+		if(! $this->_isDynamic($id, $mode))
+		{ return $errors; }
+		
+		$count_selector_deps = 0;
+		
+		// Existing question - retrieve existing dependencies
+		if($mode === BY_QID)
+		{
+			$option_selector = $this->SfStr->getSafeString(DEPEND_MODE_SELECTOR,SAFE_STRING_DB);
+			$query = "SELECT count(*) FROM {$this->CONF['db_tbl_prefix']}dependencies 
+                        WHERE qid=$id AND dep_option=$option_selector" ;
+            $rs = $this->db->GetOne($query);
+            if($rs === FALSE)
+            { $errors[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); return false; }
+            else
+            { $count_selector_deps = (int)$rs; }
+		}
+		
+		$count_selector_deps += isset($dependencies['input']['count_selector_deps'])? 
+    		$dependencies['input']['count_selector_deps'] : 0;
+    	// Check the number of selectordependencies; we allow to delete a selector dep. of an 
+    	// existing question because we assume the user is going to add one later.
+        if($count_selector_deps > 1 || (($count_selector_deps < 1) && ($mode !== BY_QID)))
+        { $errors[] = $this->lang('err.must_1_selector_dep') . "$count_selector_deps"; }
+        return $errors;
 	}
 
 }

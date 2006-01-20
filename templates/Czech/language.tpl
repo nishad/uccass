@@ -90,6 +90,7 @@ $lang['page_break_end'] = 'Cannot insert PAGE BREAK as last question.';
 $lang['question_added'] = 'Question successfully added to survey.';
 $lang['err.dep_on_textual_answer'] = 'Only a selector dependency may be bound to a textual answer.';
 $lang['err.nondynamic_selector_dep'] = 'Only a question with a dynamic answer type may have a selector dependency.';
+$lang['err.must_1_selector_dep'] = 'A question with a dynamic answer type must have exactly one selector dependency. But it has: ';
 
 //Reports
 $lang['new_report'] = 'New Report created successfully.';
