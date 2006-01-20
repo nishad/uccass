@@ -615,7 +615,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
     {
         $error = array();
         if(is_null($validated_dep))
-        { $validated_dep = $this->_validateDependency($_REQUEST,$qid); }
+        { $validated_dep = $this->_validateDependencyForExisting($_REQUEST,$qid); }
 
         //Loop through any new dependencies passed from form. If dependency is based upon
         //a question on the same page, force the creation of a page break.
@@ -716,6 +716,13 @@ class UCCASS_EditSurvey extends UCCASS_Main
     
 
     // VALIDATE NEW DEPENDENCIES //
+    /** See _validateDependency; for an existing question. */
+    function _validateDependencyForExisting(&$request, $qid)
+    { return $this->_validateDependency($request, $qid); }
+    
+    /** See _validateDependency; for a new question. */
+    function _validateDependencyForNew(&$request, $question_page, $question_oid, $aid)
+    { return $this->_validateDependency($request, null,$question_page,  $question_oid, $aid); }
     /**
      * Validate new dependencies and prepare the data for insertion.
      * Any errors are put to the array function's result['error']
@@ -729,11 +736,12 @@ class UCCASS_EditSurvey extends UCCASS_Main
      * qid).
      * @param int $question_oid Oid of the edited question to which we add the
      * dependency(ies) or NULL if qid is given (we can find page having qid).
+     * @param boolean $aid id of the question's answer type.
      * 
      * @return array array('input'=>(copy of data from the request[or empty]),
      * 'error'=>(array of errors that occured[or empty]))
      */
-    function _validateDependency(&$request, $qid, $question_page = null, $question_oid = null )
+    function _validateDependency(&$request, $qid, $question_page = null, $question_oid = null, $aid = null)
     {
         $input = array();
         $error = array();
@@ -742,9 +750,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
         //		2. check that a dependency on a text question (S, T) is only used as a selector depend. 
         
         // Check parameters
-        if(is_null($qid) && (is_null($question_page) || is_null($question_oid)))
+        if(is_null($qid) && (is_null($question_page) || is_null($question_oid) || is_null($aid)))
         { 
-        	$error[] = 'PHP programming error - _validateDependency: either $qid or ($question_page and $question_oid) must be non null.';
+        	$error[] = 'PHP programming error - _validateDependency: either $qid or ($question_page and $question_oid and $aid) must be non null.';
         	return(array('input'=>$input, 'error'=>$error));
         }
 
@@ -781,16 +789,19 @@ class UCCASS_EditSurvey extends UCCASS_Main
                     //Ensure question chosen to base new dependency on is before the question the dependency
                     //is being added to. If both are on the same page, set a flag to require a page break
                     //be added before the selected question.
+                    $prefix = $this->CONF['db_tbl_prefix'];
                     if(!is_null($qid))
                     {
-	                    $check_query = "SELECT q1.page, q1.oid, q2.page AS dep_page, q2.oid AS dep_oid
-	                                    FROM {$this->CONF['db_tbl_prefix']}questions q1, {$this->CONF['db_tbl_prefix']}questions q2
+	                    $check_query = "SELECT q1.page, q1.oid, at1.is_dynamic, q2.page AS dep_page, q2.oid AS dep_oid, at2.type AS dep_type
+	                                    FROM {$prefix}questions q1 JOIN {$prefix}answer_types at1 ON (at1.aid = q1.aid),
+	                                    {$prefix}questions q2 JOIN {$prefix}answer_types at2 ON (at2.aid = q2.aid)
 	                                    WHERE q1.qid = $qid AND q2.qid = {$input['dep_qid'][$num]}";
                     } else {
                     	// Note: we can use a constant in the select clause - and we want the same results from both queries
-                    	$check_query = "SELECT $question_page AS page, $question_oid AS oid, q2.page AS dep_page, q2.oid AS dep_oid
-                    					FROM {$this->CONF['db_tbl_prefix']}questions q2 
-                    					WHERE q2.qid = {$input['dep_qid'][$num]}";
+                    	$check_query = "SELECT $question_page AS page, $question_oid AS oid, at1.is_dynamic, q2.page AS dep_page, q2.oid AS dep_oid, at2.type AS dep_type
+                    					FROM {$prefix}questions q2  JOIN {$prefix}answer_types at2 ON (at2.aid = q2.aid),
+                    						{$prefix}answer_types at1
+                    					WHERE q2.qid = {$input['dep_qid'][$num]} AND at1.aid = $aid";
                     }
 
                     $rs = $this->db->Execute($check_query);
@@ -799,6 +810,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
                     while($r = $rs->FetchRow($rs))
                     {
+                    	// Check order
                         if($r['dep_page'] > $r['page'] || ($r['dep_page'] == $r['page'] && $r['dep_oid'] > $r['oid']))
                         { $error[] = $this->lang('dep_order_error'); }
                         elseif($r['page'] == $r['dep_page'])
@@ -810,6 +822,14 @@ class UCCASS_EditSurvey extends UCCASS_Main
                         
                         $input['page'] = $r['page'];
                         $input['oid'] = $r['oid'];
+                        
+                        // Check correct combinations of dependency mode - question type:
+                        // Only a dynamic question may have a selector dependency
+                        if( ($option == DEPEND_MODE_SELECTOR) && !$r['is_dynamic'])
+                        { $error[] = $this->lang('err.nondynamic_selector_dep'); }
+                        // Only selector dependency may be bound to a textual answer (S, T)
+                        if(($option != DEPEND_MODE_SELECTOR) && ($r['dep_type'] == ANSWER_TYPE_S))
+                        { $error[] = $this->lang('err.dep_on_textual_answer'); }
                     }
                 }
             }
@@ -1302,7 +1322,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
                 //If there is no error so far, attempt to process the requested dependencies
                 if(empty($error))
                 {
-                	$dependencies = $this->_validateDependency($_POST, null, $page, $oid);
+                	$dependencies = $this->_validateDependencyForNew($_POST, $page, $oid, $aid);
                 	$error = array_merge($error, $dependencies['error']);
 	                // $dep_insert = array();
 	                

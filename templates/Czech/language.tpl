@@ -88,6 +88,8 @@ $lang['page_break_first'] = 'Cannot insert PAGE BREAK as first question. Please 
 $lang['page_break_inserted'] = 'PAGE BREAK inserted successfully.';
 $lang['page_break_end'] = 'Cannot insert PAGE BREAK as last question.';
 $lang['question_added'] = 'Question successfully added to survey.';
+$lang['err.dep_on_textual_answer'] = 'Only a selector dependency may be bound to a textual answer.';
+$lang['err.nondynamic_selector_dep'] = 'Only a question with a dynamic answer type may have a selector dependency.';
 
 //Reports
 $lang['new_report'] = 'New Report created successfully.';
