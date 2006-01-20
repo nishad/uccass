@@ -758,9 +758,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
         $error = array();
         $selector_deps_count = 0;	// number of selector dependencies of the question
         
-        // FIXME: 1. check that a selector dependency is only added to a dynamic ans.type question
-        //		2. check that a dependency on a text question (S, T) is only used as a selector depend. 
-        
         // Check parameters
         if(is_null($qid) && (is_null($question_page) || is_null($question_oid) || is_null($aid)))
         { 
@@ -1016,10 +1013,10 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
             }while($r = $rs->FetchRow($rs));
 
-            //load dependencies for current survey
+            //load dependencies for current survey (note: selector dependencies haven't a valid avid)
             // FIXME: modify to select => display also selector dependencies [on S questions]
-            $query = "SELECT d.qid, d.dep_qid, av.value, d.dep_option FROM {$this->CONF['db_tbl_prefix']}dependencies d,
-                      {$this->CONF['db_tbl_prefix']}answer_values av WHERE d.dep_aid = av.avid AND d.sid = $sid";
+            $query = "SELECT d.qid, d.dep_qid, av.value, d.dep_option FROM {$this->CONF['db_tbl_prefix']}dependencies d
+                      LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av ON (d.dep_aid = av.avid) WHERE d.sid = $sid";
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
@@ -1027,28 +1024,36 @@ class UCCASS_EditSurvey extends UCCASS_Main
             while($r = $rs->FetchRow($rs))
             {
                 // __hide__ if question __xx__ is __a,b,c__
-                $x = array_search($r['qid'],$this->data['qid']);
-                $key = array_search($r['dep_qid'],$this->data['qid']);
+                $x = array_search($r['qid'],$this->data['qid']);		// index of the qid in data[]
+                $key = array_search($r['dep_qid'],$this->data['qid']);	// index of the dep_qid in data[]
                 $qnum = $this->data['qnum'][$key];
+                $answer_value = isset($r['value'])? $this->SfStr->getSafeString($r['value'],$survey_text_mode) : "";
+	            
+	            // A selector dependency is satisfied for any answer:
+	            if($r['dep_option'] === DEPEND_MODE_SELECTOR)
+	            { $answer_value = $this->lang('whatever'); } 
 
                 $this->data['show_edep'][$x] = TRUE;
+                $option = isset($this->CONF['dependency_modes'][$r['dep_option']])? 
+            		$this->CONF['dependency_modes'][$r['dep_option']] : $r['dep_option'];
+            	$option = $this->SfStr->getSafeString($option,$survey_text_mode);
                 if(isset($this->data['edep_value'][$x]) && in_array($qnum,$this->data['edep_qnum'][$x]))
                 {
                     $key2 = array_search($qnum,$this->data['edep_qnum'][$x]);
 
-                    if($this->data['edep_option'][$x][$key2] == $r['dep_option'])
-                    { $this->data['edep_value'][$x][$key2] .= ', ' . $this->SfStr->getSafeString($r['value'],$survey_text_mode); }
+                    if($this->data['edep_option'][$x][$key2] == $option)
+                    { $this->data['edep_value'][$x][$key2] .= ', ' . $answer_value; }
                     else
                     {
-                        $this->data['edep_option'][$x][] = $this->SfStr->getSafeString($r['dep_option'],$survey_text_mode);
-                        $this->data['edep_value'][$x][] = $this->SfStr->getSafeString($r['value'],$survey_text_mode);
+                        $this->data['edep_option'][$x][] = $option;
+                        $this->data['edep_value'][$x][] = $answer_value;
                         $this->data['edep_qnum'][$x][] = $qnum;
                     }
                 }
                 else
                 {
-                    $this->data['edep_option'][$x][] = $this->SfStr->getSafeString($r['dep_option'],$survey_text_mode);
-                    $this->data['edep_value'][$x][] = $this->SfStr->getSafeString($r['value'],$survey_text_mode);
+                    $this->data['edep_option'][$x][] = $option;
+                    $this->data['edep_value'][$x][] = $answer_value;
                     $this->data['edep_qnum'][$x][] = $qnum;
                 }
             }
@@ -1443,60 +1448,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $this->data['answer'][] = $r;
         }
 
-        /*/Retrieve existing question numbers
-        //for questions BEFORE this one being edited
-        //and create Javascript for dependency <select> boxes	// FIXME: unify with loadQuestions
-        $query = "SELECT q.qid, at.type, av.avid, av.value FROM {$this->CONF['db_tbl_prefix']}questions q,
-                  {$this->CONF['db_tbl_prefix']}answer_types at LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av
-                  ON at.aid = av.aid WHERE q.sid = $sid AND
-                  (q.page < {$this->data['question_data']['page']} OR (q.page = {$this->data['question_data']['page']} AND q.oid < {$this->data['question_data']['oid']}))
-                  AND q.aid = at.aid ORDER BY page ASC, oid ASC";
-
-        
-        $question_count = 1;
-        $av_count = 0;
-        $old_qid = '';
-        $this->data['js'] = '';
-        $rs = $this->db->Execute($query);
-        if($rs === FALSE)
-        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
-        if($r = $rs->FetchRow($rs))
-        {
-            do
-            {
-                if($r['type'] != ANSWER_TYPE_N)
-                {	// BEGIN: TODO: replace by calls to _prepare_data4dependencies nad _prepare_js4dependencies
-                    if($r['type'] != ANSWER_TYPE_S && $r['type'] != ANSWER_TYPE_T)
-                    {
-                        if($r['qid'] != $old_qid)
-                        {
-                            if($av_count)
-                            { $this->data['js'] .= "Num_Answers['{$old_qid}'] = '{$av_count}';\n"; }
-
-                            $av_count = 0;
-                            $this->data['qnum'][$r['qid']] = $question_count;
-                            $old_qid = $r['qid'];
-
-                        }
-
-                        $this->data['js'] .= "Answers['{$r['qid']},{$av_count}'] = '{$r['avid']}';\n";
-                        $this->data['js'] .= "Values['{$r['qid']},{$av_count}'] = '" . addslashes($r['value']) . "';\n";
-
-                        $av_count++;
-
-                    }
-                    ++$question_count;
-                } // END
-            }while($r = $rs->FetchRow($rs));
-
-            $this->data['js'] .= "Num_Answers['{$old_qid}'] = '{$av_count}';\n";
-
-            if(!empty($this->data['qnum']))
-            {
-                $this->data['dep_qid'] = array_keys($this->data['qnum']);
-                $this->data['dep_qnum'] = array_values($this->data['qnum']);
-            }
-        }//*/
         //load all questions for this survey
         $query = "SELECT q.qid, q.aid, q.page, a.type, q.oid
                   FROM {$this->CONF['db_tbl_prefix']}questions q,
@@ -1532,8 +1483,9 @@ class UCCASS_EditSurvey extends UCCASS_Main
 
         //Retrieve existing dependencies for question
         $this->data['dependencies'] = array();
-        $query = "SELECT d.dep_id, d.dep_qid, d.dep_option, av.value FROM {$this->CONF['db_tbl_prefix']}dependencies d,
-                  {$this->CONF['db_tbl_prefix']}answer_values av WHERE d.dep_aid = av.avid AND d.qid = $qid";
+        $query = "SELECT d.dep_id, d.qid, d.dep_qid, d.dep_option, av.value FROM {$this->CONF['db_tbl_prefix']}dependencies d
+                      LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av ON (d.dep_aid = av.avid) WHERE d.qid = $qid";
+            
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
         { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
@@ -1541,9 +1493,16 @@ class UCCASS_EditSurvey extends UCCASS_Main
         while($r = $rs->FetchRow($rs))
         {
             $this->data['edep']['dep_id'][] = $r['dep_id'];
-            $this->data['edep']['option'][] = $r['dep_option'];
+            $option = isset($this->CONF['dependency_modes'][$r['dep_option']])? 
+            	$this->CONF['dependency_modes'][$r['dep_option']] : $r['dep_option'];
+            $option = $this->SfStr->getSafeString($option,SAFE_STRING_TEXT);
+            $this->data['edep']['option'][] = $option;
             $this->data['edep']['qnum'][] = $this->data['qnum'][$r['dep_qid']];
-            $this->data['edep']['value'][] = $this->SfStr->getSafeString($r['value'],$this->data['question_data']['survey_text_mode']);
+            $answer_value = isset($r['value'])? $this->SfStr->getSafeString($r['value'],$this->data['question_data']['survey_text_mode']) : "???";
+            // A selector dependency is satisfied for any answer:
+            if($r['dep_option'] === DEPEND_MODE_SELECTOR)
+            { $answer_value = $this->lang('whatever'); } 
+            $this->data['edep']['value'][] = $answer_value; 
         }
     }
 
