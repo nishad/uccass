@@ -435,7 +435,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 $is_dynamic = ($input['is_dynamic'])? 1 : 0;
                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}answer_types SET
-                          name={$input['name']},type={$input['type']},label={$input['label']}
+                          name={$input['name']},type={$input['type']},label={$input['label']},
                           is_dynamic=$is_dynamic WHERE aid = $aid";
                 $rs = $this->db->Execute($query);
                 if($rs === FALSE)
@@ -512,6 +512,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             }
 
             $this->smarty->assign_by_ref('answer',$input);
+            
+            // Process file uploads
+            $upload_errors = $this->_handle_uploaded_files();	// TODO: do also for a new answ. type
+            foreach ($upload_errors as $single_error)
+			{ $error .= $single_error;  }
         }
 
         //////////////////////////////////
@@ -683,6 +688,47 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             return true;
         } // if-else answer the type inserted with success
     } // db_insert_answer_type
+    
+    /**
+     * Process answer values [and selectors] defined in uploaded files.
+     */
+    function _handle_uploaded_files()
+    {
+    	$errors = array();
+    	// TODO: get+use the max upload size
+    	/*
+    	if(isset($_FILES['answervaluesfile']) || isset($_FILES['selectorsfile']))
+    	{
+    	
+	    	ini_set("include_path", 'classes/PEAR' . PATH_SEPARATOR . ini_get("include_path"));
+	    	require 'HTTP/Upload.php';
+	    	
+	    	$upload = new http_upload('en');	// use english for errors
+			$file = $upload->getFiles('answervaluesfile');	// TODO: repeat for selectorsfile
+			if ($file->isError()) 
+			{ $errors[] = $file->getMessage(); return $errors; }
+			
+			if ($file->isValid()) 
+			{
+				$filename = $file->setName('uniq');		// a new, unique name
+				$dest_dir = './templates/';
+				$dest_name = $file->moveTo($dest_dir);
+				if (PEAR::isError($dest_name)) 
+				{ $errors[] = $dest_name->getMessage(); return $errors; }
+				
+				echo "<p>The file ".$file->getProp('real')." uploaded as $dest_name to $dest_dir</p>";
+				// TODO: Open the file and copy it into the DB
+				
+			} 
+			elseif ($file->isMissing()) 
+			{ $errors[] = "No file selected for upload!"; } // TODO: L10N 
+			elseif ($file->isError()) 
+			{ $errors[] = $file->errorMsg(); }
+			print_r($file->getProp());
+    	}
+    	*/
+    	return $errors;
+    }
 
 }
 
