@@ -55,6 +55,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $input['sid'] = (int)$sid;
         $input['allowable_images'] = $this->get_image_names();
         
+        // Check that the user hasn't just tried to upload a file > max post size
+        // - that's detected so that both $_POST and $_FILE are empty
+        if(!is_numeric($sid))
+        { $show['errors'][] = $this->lang('err.over_max_post'); }
+        
         // Preprocess data from the request
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
@@ -254,6 +259,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $show['errors'] = array();
         $show['warning'] = FALSE;
         $load_answer = TRUE;
+        
+        // Check that the user hasn't just tried to upload a file > max post size
+        // - that's detected so that both $_POST and $_FILE are empty
+        if(!is_numeric($sid))
+        { $show['errors'][] = $this->lang('err.over_max_post'); }
 
         //The following values are also set
         //upon a successful submission to "reset"
@@ -787,11 +797,16 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 				
 				$file->setValidExtensions( array('csv', 'CSV', 'Csv') );
 				if ($file->isValid()) 
-				{ $upld_files[$uploaded_file] = $file->getProp('tmp_name');	 } 
-				elseif ($file->isMissing()) 
-				{ $errors[] = "No file selected for upload!"; } // TODO: L10N 
+				{ $upld_files[$uploaded_file] = $file->getProp('tmp_name');	 }
 				elseif ($file->isError()) 
-				{ $errors[] = $file->errorMsg(); }
+				{ $errors[] = $file->errorMsg(); } 
+				elseif ($file->isMissing()) 
+				{  
+					if($_FILES[$uploaded_file]['error'] == UPLOAD_ERR_INI_SIZE)
+					{ $errors[] = $this->lang('err.upload_too_large'); }
+					else
+					{ $errors[] = $this->lang('err.upload_no_file'); } 
+				}
 	    	}
 	    	
 	    	// 2. Process the uploaded files

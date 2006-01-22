@@ -52,6 +52,9 @@ $lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contai
 $lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
 $lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
 $lang['err.nondynamic-selectors_uploaded'] = "Selectors can only be assigned to a dynamic answer type; haven't you forgotten to check the 'is dynamic' checkbox?";
+$lang['err.upload_too_large'] = 'The uploaded file is too large.';
+$lang['err.upload_no_file'] = "No file selected for upload!";
+$lang['err.over_max_post'] = "It seems that you've just tried to upload a file that is too large.";
 
 //Page Titles
 $lang['title_new_answer_type'] = 'New Answer Type';
