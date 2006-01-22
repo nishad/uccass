@@ -308,6 +308,9 @@ form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.ph
 
 
 <h4>If the tests fail</h4>
+Note: If the tests fail it doesn't necessarily mean that there's anything bad with the code. It may only 
+mean that the code/functionality changed and the tests grow obsolete. It may happen if a label that is 
+hard-coded in a web test changes or if a sql query hard-coded in a test mock object changes. 
 
   <ul>
     <li>Check that you really use the database/tables (prefix) you think you do - see survey.ini.php
@@ -316,6 +319,12 @@ form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.ph
     max(id field of the table).
     </li>
     <li>Call <code>$this->showSource()</code> at the problematic place.</li>
+    <li>Call <code>$this->showRequest()</code> to see the final request sent to the server including 
+    any encoded form. If the server issues a redirect in response - which is often the case in uccass - 
+    you won't see your original request but the final one, triggered by the redirect (it will start 
+    with GET, not POST). You can call <code>WebTestCase::setMaximumRedirects(0)</code> to disable 
+    redirects and see the first request but then you won't receive the page uccass wants to dispaly
+    to you - the only response you'll receive will be the redirect.</li>
   </ul>
   
   
