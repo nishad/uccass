@@ -952,7 +952,7 @@ class UCCASS_Main
     { return count($this->error); }
 
     function lang($key)
-    { return (isset($this->lang[$key])) ? $this->lang[$key] : ''; }
+    { return (isset($this->lang[$key])) ? $this->lang[$key] : "(localized message error: missing message for the key $key in the template {$this->CONF['template_path']})"; }
 }
 
 ?>
