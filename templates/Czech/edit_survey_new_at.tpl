@@ -96,7 +96,7 @@
           Files with the data of answer values/selectors to use (MS and MM Answer Types only)
         </div>
 		
-		{if $data.upload_forbidden}
+		{if not $data.upload_forbidden}
         <div class="indented_cell">
         	<p>You may supply here file in the CSV format that defines answer values (and another that 
         	assignes them selectors, if this is a dynamic answer type).</p>
