@@ -166,7 +166,7 @@ class SafeString
                 break;
 
                 case SAFE_STRING_JAVASCRIPT:	// prepare for use in a JavaScript string
-                	$str = addcslashes ($str, '\'"\\');	// espace ', ", \
+                	$str = strtr(addcslashes ($str, '\'"\\'), "\n", " ");
                 break;
 
                 case SAFE_STRING_TEXT:
