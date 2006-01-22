@@ -143,7 +143,7 @@ class TestDatabaseTests extends GroupTest
 	function generateTestTablesIfNone()
 	{
 		// Test that the tables don't exist
-		$query = "SELECT count(*) FROM {$this->uccassMain->CONF['db_tbl_prefix']}surveys";
+		$query = "SELECT count(*) FROM {$this->uccassMain->CONF['db_tbl_prefix']}temp_avid_map";
         $rs = $this->uccassMain->db->GetOne($query);
         if($rs === FALSE)
         { 
