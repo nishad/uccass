@@ -21,7 +21,14 @@
 class UCCASS_AnswerTypes extends UCCASS_Main
 {
     function UCCASS_AnswerTypes()
-    { $this->load_configuration(); }
+    { 
+    	$this->load_configuration();
+    	$images = $this->get_image_names(SAFE_STRING_DB);
+    	$this->default_image =  $images[0];
+    }
+    
+    /** The image used by default for answer values from an uploaded file - ready to store into DB. */
+    var $default_image;
 
     /******************
     * NEW ANSWER TYPE *
@@ -175,9 +182,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $input['image'][$key][$_REQUEST['image'][$key]] = ' selected';
             }
 
-            $show['error'] = $error;
+            $show['errors'][] = $error;
         }
         $data['sid'] = $input['sid'];
+        $data['max_upload_size'] = $this->_get_max_upload_size();
 
         $this->smarty->assign_by_ref('input',$input);
         $this->smarty->assign_by_ref('show',$show);
@@ -230,8 +238,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         if(empty($aid))
         { return $this->edit_answer_type_choose($sid); }
 
-        $error = '';
         $show = array();
+        $show['messages'] = array(); 
+        $show['errors'] = array();
         $show['warning'] = FALSE;
         $load_answer = TRUE;
 
@@ -293,7 +302,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             return $this->edit_answer_type_choose($sid);
         }
         elseif(isset($_REQUEST['delete_submit']))
-        { $show['message'] = $this->lang['must_checkbox']; }
+        { $show['messages'][] = $this->lang['must_checkbox']; }
 
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
@@ -302,13 +311,12 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             else
             { $ss_type = SAFE_STRING_DB; }
 
-            $error = '';
             $load_answer = FALSE;
 
             if(strlen($_REQUEST['name']) > 0)
             { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
             else
-            { $error .= $this->lang['enter_name']; }
+            { $show['errors'][] = $this->lang['enter_name']; }
 
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
 
@@ -319,6 +327,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             // Note: it's only meaningful for answer types with multiple answer values to be dynamic
         	$input['is_dynamic'] = isset($_REQUEST['is_dynamic']) && !empty($_REQUEST['is_dynamic']);
 
+            //////////////////////////////////
+            //	PRE-RPOCESS SUBMITED DATA	//
+            //////////////////////////////////
             switch($_REQUEST['type'])
             {
                 case ANSWER_TYPE_T:
@@ -329,7 +340,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     $input['selected'][$_REQUEST['type']] = ' selected';
 
                     if(isset($_REQUEST['add_answers_submit']))
-                    { $error .= $this->lang['add_answer_error']; }
+                    { $show['errors'][] = $this->lang['add_answer_error']; }
                     $input['show_add_answers'] = FALSE;
                     $input['num_answers'] = 0;
                     if(isset($_REQUEST['value']))
@@ -366,7 +377,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                                 $user_image = $_REQUEST['image'][$avid];
                                 $image_key = array_search($user_image,$input['allowable_images']);
                                 if($image_key === FALSE)
-                                { $error .= $this->lang['bad_image_sel']; }
+                                { $show['errors'][] = $this->lang['bad_image_sel']; }
                                 else
                                 {
                                     $input['image'][] = $this->SfStr->getSafeString($user_image,$ss_type);
@@ -389,10 +400,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         }
 
                         if(count($input['value']) == 0)
-                        { $error .= $this->lang['answer_value_error']; }
+                        { $show['errors'][] = $this->lang['answer_value_error']; }
                     }
                     else
-                    { $error .= $this->lang['bad_answer-numeric_value']; }
+                    { $show['errors'][] = $this->lang['bad_answer-numeric_value']; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -406,7 +417,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     if($input['num_answers'] > 99)
                     {
                         $input['num_answers'] = 99;
-                        $error .= $this->lang['only_99_allowed'];
+                        $show['errors'][] = $this->lang['only_99_allowed'];
                         $input['show_add_answers'] = FALSE;
                     }
                     elseif($input['num_answers'] == 99)
@@ -426,13 +437,24 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= $this->lang['bad_answer_type'];
+                    $show['errors'][] = $this->lang['bad_answer_type'];
                 break;
             }
 
-            if(empty($error) && !isset($_REQUEST['add_answers_submit']))
+        	////////////////////////////////////////////////////////////
+        	// Process file uploads            
+            if(empty($show['errors']) && !isset($_REQUEST['add_answers_submit']))
             {
-
+	            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);	// TODO: do also for a new answ. type
+	            $show['errors'] = array_merge($show['errors'], $upload_result['errors']);
+	            $show['messages'] = array_merge($show['messages'], $upload_result['messages']);
+            }
+			
+			
+            ////////////////////////////////////////////////////////////
+        	// Update the answer type being edited            
+            if(empty($show['errors']) && !isset($_REQUEST['add_answers_submit']))
+            {
                 $is_dynamic = ($input['is_dynamic'])? 1 : 0;
                 $query = "UPDATE {$this->CONF['db_tbl_prefix']}answer_types SET
                           name={$input['name']},type={$input['type']},label={$input['label']},
@@ -507,16 +529,14 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     }
 
                     $load_answer = TRUE;
-                    $show['success']=TRUE;
+                    
+                    if(empty($show['errors']))
+                    { $show['messages'][] = $this->lang('msg.edit_answtype-ok'); }
                 }
             }
 
             $this->smarty->assign_by_ref('answer',$input);
             
-            // Process file uploads
-            $upload_errors = $this->_handle_uploaded_files();	// TODO: do also for a new answ. type
-            foreach ($upload_errors as $single_error)
-			{ $error .= $single_error;  }
         }
 
         //////////////////////////////////
@@ -567,10 +587,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $this->smarty->assign_by_ref('answer',$answer);
             }
             else
-            { $error = $this->lang['bad_answer_type']; }
+            { $show['errors'][] = $this->lang['bad_answer_type']; }
         }
 
-        if(!empty($error))
+        if(!empty($show['errors']))
         {
             $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],SAFE_STRING_TEXT);
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],SAFE_STRING_TEXT);
@@ -582,10 +602,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $input['image_selected'][$count][$_REQUEST['image'][$key]] = ' selected';
                 $count++;
             }
-            $show['error'] = $error;
         }
 
         $data['sid'] = $input['sid'];
+        $data['max_upload_size'] = $this->_get_max_upload_size();
         $this->smarty->assign_by_ref('data',$data);
         $this->smarty->assign_by_ref('show',$show);
         $data['links'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_links.tpl');
@@ -691,44 +711,272 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     
     /**
      * Process answer values [and selectors] defined in uploaded files.
+     * The uploaded files are stored the tmp_dir and should get deleted
+     * automatically when the script finishes.
+     * @param int $aid if of the answer type being edited
+     * @param bool $is_dynamic Is the answer type being edited dynamic or no?
+     * @return array array(errors =>array of errors, messages=>array of messages
+     * to display upon success)
      */
-    function _handle_uploaded_files()
+    function _handle_uploaded_files($aid, $is_dynamic = false)
     {
     	$errors = array();
-    	// TODO: get+use the max upload size
-    	/*
-    	if(isset($_FILES['answervaluesfile']) || isset($_FILES['selectorsfile']))
-    	{
+    	$messages = array();
+    	$result = array("errors" => &$errors, "messages" => &$messages);
+    	// TODO: ini_get("file_uploads") == false || (ini_get("file_uploads"), "off") == 0
+    	// TODO: 1.Try to upload a file > max upload; 2.Try to upload a file > max post
+    	// If 1. => UPLOAD_ERR_INI_SIZE; if 2. => both _FILES and _POST are empty !!!
     	
-	    	ini_set("include_path", 'classes/PEAR' . PATH_SEPARATOR . ini_get("include_path"));
-	    	require 'HTTP/Upload.php';
+    	// TODO: large file, slow link: long upload time may > ini_get('max_input_time');
+    	
+    	$answer_types_given = !empty($_FILES['answervaluesfile']['name']);
+    	$selectors_given 	= !empty($_FILES['selectorsfile']['name']);
+    	
+    	// Check that the required files were given
+    	if($answer_types_given)
+    	{
+    		if($is_dynamic && !$selectors_given)
+    		{ $errors[] = $this->lang('err.selectors_not_uploaded'); return $result; }
+    	}
+    	elseif($selectors_given)
+    	{ $errors[] = $this->lang('err.only_selectors_uploaded'); return $result; } 
+    	
+    	// Process the files
+    	if($answer_types_given)
+    	{
+	    	ini_set("include_path", 'classes/external' . PATH_SEPARATOR . ini_get("include_path"));
+	    	require_once 'HTTP/Upload.php';
+	    	require_once 'class.csv.php';
 	    	
 	    	$upload = new http_upload('en');	// use english for errors
-			$file = $upload->getFiles('answervaluesfile');	// TODO: repeat for selectorsfile
-			if ($file->isError()) 
-			{ $errors[] = $file->getMessage(); return $errors; }
-			
-			if ($file->isValid()) 
-			{
-				$filename = $file->setName('uniq');		// a new, unique name
-				$dest_dir = './templates/';
-				$dest_name = $file->moveTo($dest_dir);
-				if (PEAR::isError($dest_name)) 
-				{ $errors[] = $dest_name->getMessage(); return $errors; }
+	    	
+	    	// 1. Check the uploaded files
+	    	$upld_files = array('answervaluesfile' => false);
+	    	if($selectors_given)
+	    	{ $upld_files['selectorsfile'] = false; } 
+	    	
+	    	foreach (array_keys($upld_files) as $uploaded_file)
+	    	{
+				$file = $upload->getFiles($uploaded_file);
 				
-				echo "<p>The file ".$file->getProp('real')." uploaded as $dest_name to $dest_dir</p>";
-				// TODO: Open the file and copy it into the DB
+				if ($file->isError()) 
+				{ $errors[] = $file->getMessage(); return $errors; }
 				
-			} 
-			elseif ($file->isMissing()) 
-			{ $errors[] = "No file selected for upload!"; } // TODO: L10N 
-			elseif ($file->isError()) 
-			{ $errors[] = $file->errorMsg(); }
-			print_r($file->getProp());
-    	}
-    	*/
-    	return $errors;
+				$file->setValidExtensions( array('csv', 'CSV', 'Csv') );
+				if ($file->isValid()) 
+				{ $upld_files[$uploaded_file] = $file->getProp('tmp_name');	 } 
+				elseif ($file->isMissing()) 
+				{ $errors[] = "No file selected for upload!"; } // TODO: L10N 
+				elseif ($file->isError()) 
+				{ $errors[] = $file->errorMsg(); }
+	    	}
+	    	
+	    	// 2. Process the uploaded files
+	    	{
+	    		// Check the format of the selector file if given
+				if($selectors_given)
+				{
+					$csv = $this->_new_csv_processor($upld_files['selectorsfile']);
+					$arr_data = $csv->NextLine();
+					if($arr_data === false)
+					{ $errors[] = $this->lang('err.selectors_empty_csv'); return $result; }
+					
+					if(count($arr_data) != 2)
+					{ $errors[] = $this->lang('err.selectors_csv_bad_format-number'); return $result; }
+						
+					$csv->CloseFile();
+				}
+				
+	    		// Copy answervaluesfile to the DB
+	    		if(empty($errors))
+	    		{
+					$atype_result = $this->_import_answer_types($aid, $upld_files['answervaluesfile'], $selectors_given);
+					foreach ($atype_result['errors'] as $error)
+					{ $errors[] = $error ;  }
+					foreach ($atype_result['messages'] as $msg)
+					{ $messages[] = $msg ;  }
+	    		}
+				
+	    		// Copy selectorsfile to the DB
+				if(empty($errors) && $selectors_given)
+				{
+					$atype_result = $this->_import_selectors($aid, $upld_files['selectorsfile']);
+					foreach ($atype_result['errors'] as $error)
+					{ $errors[] = $error ;  }
+					foreach ($atype_result['messages'] as $msg)
+					{ $messages[] = $msg ;  }
+					
+					/////////////////////////////////////
+					// II. Delete the temporary mappings
+					// This is not safe if somebody else is importing selectors for the same answer type 
+					// in the same time - but it's unlikely.
+					$query = "DELETE FROM {$this->CONF['db_tbl_prefix']}temp_avid_map WHERE avid IN " .
+							"(SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid=$aid)";
+					$rs = $this->db->Execute($query);
+			    	if($rs === FALSE)
+			    	{ $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); return; }
+				} // if $selectors_given
+	    	} // Process the uploaded files
+    	} // if $answer_types_given
+    	
+    	return $result;
     }
+    
+    /**
+     * Import answer types stored in the given csv file into the database.
+     * It has 2 or 3 columns (custom key - string, answer value - string,
+     * numerical value - integer).
+     * @param int $aid if of the answer type being edited
+     * @param string $filename An absolute path to the cvs file.
+     * @param string $store_mapping Should we store the mapping original
+     * answer type key => avid in temp_avid_map?
+     * @return array array(errors =>array of errors, messages=>array of messages
+     * to display upon success)
+     */
+    function _import_answer_types($aid, $filename, $store_mapping)
+    {
+    	$errors = array();
+    	$messages = array();
+    	$result = array("errors" => &$errors, "messages" => &$messages);
+    	
+    	$query_id_map = "INSERT INTO {$this->CONF['db_tbl_prefix']}temp_avid_map (avid,key) VALUES ";
+    	$query_atype = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,numeric_value,image) VALUES ";
+    	
+    	$csv = $this->_new_csv_processor($filename);
+		$num_value = 1;
+		$generate_num_val = null;
+		
+		while ($arr_data = $csv->NextLine())
+		{
+			//echo "<br><br>Processing line ". $csv->RowCount() . "<br>";
+			if(is_null($generate_num_val))
+			{ $generate_num_val = !(isset($arr_data[2]) && is_numeric($arr_data[2])); }
+			
+			// Check format - we expect 2 or 3 columns (string,string[,number])
+			if(count($arr_data) != 2 && count($arr_data) != 3)
+			{ $errors[] = $this->lang('err.atype_csv_bad_format-number'); return $result; }
+			
+			$avid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_values_sequence');
+			
+			// Store the mapping avid <-> answer value key:
+			if($store_mapping)
+			{
+				$key = $this->SfStr->getSafeString($arr_data[0], SAFE_STRING_DB);
+				$query = $query_id_map . "($avid, $key)";
+				$rs = $this->db->Execute($query);
+	        	if($rs === FALSE)
+	        	{ $errors[] = $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"; return $result; }
+			}
+			// Store the answer value:
+			if($generate_num_val)
+			{ $numeric_value = $num_value++; }
+			else
+			{ $numeric_value = (int)($arr_data[2]); }
+			
+			$value = $this->SfStr->getSafeString($arr_data[1], SAFE_STRING_DB);
+			$query = $query_atype . "($avid, $aid, $value, $numeric_value, {$this->default_image})";
+			$rs = $this->db->Execute($query);
+        	if($rs === FALSE)
+        	{ $errors[] = $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"; return $result; }
+		}
+		
+		if($csv->RowCount() <= 0)
+		{ $errors[] = $this->lang('err.avalue_empty_csv'); return $result; }
+		
+		$messages[] = $this->lang('msg.answer_values_imported') . $csv->RowCount();
+
+		return $result;
+    }
+    
+    /**
+     * Import selectors stored in the given csv file into the database. It
+     * should have 2 (custom key - string, selector - string); the custom key is
+     * the same as used in a answer types csv file and enables us to find what
+     * answer value the selector belongs to.
+     * This must be run after answer values has been imported (and
+     * temp_avid_map filled).
+     * @param string $filename An absolute path to the cvs file.
+     * @return array array(errors =>array of errors, messages=>array of messages
+     * to display upon success)
+     */
+    function _import_selectors($aid, $filename)
+    {
+    	$errors = array();
+    	$messages = array();
+    	$result = array("errors" => &$errors, "messages" => &$messages);
+    	
+    	$query_key2avid = "SELECT avid FROM {$this->CONF['db_tbl_prefix']}temp_avid_map WHERE key=";
+    	$query_selector = "INSERT INTO {$this->CONF['db_tbl_prefix']}dyna_answer_selectors (avid,selector) VALUES ";
+    	
+		$csv = $this->_new_csv_processor($filename);
+		
+		while ($arr_data = $csv->NextLine())
+		{
+			// 1. Check format
+			if(count($arr_data) != 2)
+			{ $errors[] = $this->lang('err.selectors_csv_bad_format-number'); return $result; }
+			
+			// 2. Get id of the answer type this selector relates to
+			$key = $this->SfStr->getSafeString($arr_data[0], SAFE_STRING_DB);
+			$query = $query_key2avid . $key;
+			$avid = $this->db->GetOne($query);
+        	if($avid === FALSE)
+        	{ $errors[] = $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"; return $result; }
+        	
+        	// 3. Save the selector
+        	$selector = $this->SfStr->getSafeString($arr_data[1], SAFE_STRING_DB);
+        	$query = $query_selector . "($avid,$selector)";
+			$rs = $this->db->Execute($query);
+        	if($rs === FALSE)
+        	{ $errors[] = $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"; return $result; }
+		}
+		
+		$messages[] = $this->lang('msg.selectors_imported') . $csv->RowCount();
+		
+		return $result;
+    }
+    
+    /** Create a new CSV file processor for the given absolute file name. */
+    function &_new_csv_processor($csv_file)
+    { 
+    	// The last three fields are optional. If the last field is ommitted
+		// the MS Excel standard is assumed, i.e. a double quote is used
+		// to escape a double quote ("").
+		//$csv->SkipEmptyRows(TRUE); // Will skip empty rows. TRUE by default. (Shown here for example only).
+		//$csv->TrimFields(TRUE); // Remove leading and trailing \s and \t. TRUE by default.
+		return new csv($csv_file, ',', '"' , '"'); 
+    }
+    
+    /**
+     * Return the maximal size of a file to upload.
+     * We return the smaller of ($post_max_size/2, $upload_max_filesize) 
+     * because the user may upload up to two files.
+     */
+    function _get_max_upload_size()
+    {
+    	$upload_max_filesize = $this->_in_bytes(ini_get('upload_max_filesize'));
+    	$post_max_size = $this->_in_bytes(ini_get('post_max_size'));	// max size of a form in total
+    	$max_size = min($post_max_size/2, $upload_max_filesize);
+    	return ($max_size == 0)? 10240 : $max_size; 
+    }
+    
+    /**
+     * Return the given size in bytes; the size $val may have the suffix G, M or
+     * k.
+     */
+    function _in_bytes($val) {
+		   $val = trim($val);
+		   $last = strtolower($val{strlen($val)-1});
+		   switch($last) {
+		       case 'g':
+		           $val *= 1024;
+		       case 'm':
+		           $val *= 1024;
+		       case 'k':
+		           $val *= 1024;
+		   }
+		   return $val;
+		}
 
 }
 
