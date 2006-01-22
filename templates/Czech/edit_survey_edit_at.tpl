@@ -46,6 +46,8 @@
         </div>
 
         <div class="indented_cell">
+          <input type="text" name="name" size="40" value="{$answer.name}">
+          <br />
           The Answer Name will appear in the drop
           downs used to select the type of answer you want. It should be short
           and describe the possible answers for this type. The Label
@@ -53,10 +55,6 @@
           and possibly explain how to answer (i.e. <em>Check all that apply</em>) The
           Label will be visible to users when they take the survey. Use it
           to explain the question or answers, otherwise leave it blank.
-
-          <br />
-
-          <input type="text" name="name" size="40" value="{$answer.name}">
         </div>
 
         <div class="whitebox">
