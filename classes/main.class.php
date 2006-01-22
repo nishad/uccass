@@ -490,6 +490,8 @@ class UCCASS_Main
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+            elseif(($rs->NumRows()==0) && $selectors && !empty($selectors))
+            { $this->error($this->lang('err.selector-no_match')); }
 
             $isDynamic = false;
             while($r = $rs->FetchRow($rs))

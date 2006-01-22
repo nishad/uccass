@@ -178,4 +178,6 @@ $lang['take.msg.already_completed'] = 'You have already taken the requested surv
 $lang['take.err.required'] = 'Required questions were not answered.';
 $lang['take.err.time_limit.hdr'] = 'Time Limit Exceeded';
 $lang['take.err.time_limit.msg'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
+$lang['err.selector-no_match'] = 'Není dostupná žádná odpověď (odpovídající kritériím). Pokračujte prosím dál.';
+
 ?>
