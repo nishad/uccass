@@ -459,6 +459,25 @@ NOTE ON SEQUENCES:
     </data> -->
 </table>
 
+<!-- Temporary storage of mapings key => avid used when uploading answer values and selectors
+for a dynamic answer type -->
+<table name="temp_avid_map">
+	<!-- The key used to identify the imported answer values in the original data source. -->
+    <field name="key" type="C" size="255">
+      <NOTNULL/>
+	  <DEFAULT value=""/>
+    </field>
+	<!-- The new id used to identify the imported answer values in uccass DB. -->    
+    <field name="avid" type="I">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <index name="idx_temp_avid_map_key">
+      <col>key</col>
+    </index>
+    <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
+</table>
+
 <!-- Additional details of dynamic answer types that aren't be sored in answer_types - ->
 <table name="dyna_answer_type_details">
    <field name="aid" type="I">
