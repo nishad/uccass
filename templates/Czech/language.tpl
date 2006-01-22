@@ -1,11 +1,11 @@
 <?php
-// Czech translations (used encoding: UTF-8)
+
 $lang = array();
 
-$lang['error'] = 'Problém';
-$lang['notice'] = 'Upozornění';
-$lang['yes'] = 'Ano';
-$lang['no'] = 'Ne';
+$lang['error'] = 'Error';
+$lang['notice'] = 'Notice';
+$lang['yes'] = 'Yes';
+$lang['no'] = 'No';
 
 //Orientation Modes
 $lang['vertical'] = 'Vertical';
@@ -25,7 +25,7 @@ $lang['show'] = 'Show';
 $lang['selector'] = 'Get selector';
 
 //Database Messages
-$lang['db_query_error'] = 'Error executing datbase query: ';
+$lang['db_query_error'] = 'Error executing database query: ';
 $lang['db_table_error'] = 'Error deleting data from table: ';
 
 //User/Invitee Errors
@@ -42,6 +42,16 @@ $lang['bad_answer-numeric_value'] = ' Bad display answer value or numeric value 
 $lang['only_99_allowed'] = ' Only 99 answers are allowed.';
 $lang['bad_answer_type'] = 'Incorrect Answer Type';
 $lang['must_checkbox'] = 'Checkbox must be selected in order to delete answer.';
+$lang['msg.edit_answtype-ok'] = "Answer successfully edited.";
+$lang['err.selectors_not_uploaded'] = 'A dynamic answer type requires selectors, you must upload them at once with the answer values.';
+$lang['err.only_selectors_uploaded'] = 'You cannot upload only selectors, they may be only uploaded together with answer values.';
+$lang['msg.answer_values_imported'] = 'Answer values have been successfully imported; the number of lines processed: ';
+$lang['msg.selectors_imported'] = 'Selectors have been successfully imported; the number of lines processed: ';
+$lang['err.atype_csv_bad_format-number'] = 'The answer value csv file must have 2 or 3 columns (string, string,  optionally a number)';
+$lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contain no data!';
+$lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
+$lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
+$lang['err.nondynamic-selectors_uploaded'] = "Selectors can only be assigned to a dynamic answer type; haven't you forgotten to check the 'is dynamic' checkbox?";
 
 //Page Titles
 $lang['title_new_answer_type'] = 'New Answer Type';
@@ -91,16 +101,7 @@ $lang['question_added'] = 'Question successfully added to survey.';
 $lang['err.dep_on_textual_answer'] = 'Only a selector dependency may be bound to a textual answer.';
 $lang['err.nondynamic_selector_dep'] = 'Only a question with a dynamic answer type may have a selector dependency.';
 $lang['err.must_1_selector_dep'] = 'A question with a dynamic answer type must have exactly one selector dependency. But it has: ';
-$lang['whatever'] = 'cokoliv';
-$lang['msg.edit_answtype-ok'] = "Answer successfully edited.";
-$lang['err.selectors_not_uploaded'] = 'A dynamic answer type requires selectors, you must upload them at once with the answer values.';
-$lang['err.only_selectors_uploaded'] = 'You cannot upload only selectors, they may be only uploaded together with answer values.';
-$lang['msg.answer_values_imported'] = 'Answer values have been successfully imported; the number of lines processed: ';
-$lang['msg.selectors_imported'] = 'Selectors have been successfully imported; the number of lines processed: ';
-$lang['err.atype_csv_bad_format-number'] = 'The answer value csv file must have 2 or 3 columns (string, string,  optionally a number)';
-$lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contain no data!';
-$lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
-$lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
+$lang['whatever'] = 'whatever';
 
 //Reports
 $lang['new_report'] = 'New Report created successfully.';
@@ -164,14 +165,14 @@ $lang['dup_username'] = 'Username is already in use';
 $lang['admin_updated'] = 'Admin users updated/added.';
 
 //Taking Survey
-$lang['not_active'] = 'Požadovaná anketa v tuto chvíli není aktivní.';
-$lang['empty_survey'] = 'Požadovaná anketa neexistuje či neobsahuje žádné otázky.';
-$lang['take.bttn.quit'] = 'Ukončit anketu - neukládat odpovědi';
-$lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Předchozí stránka';
-$lang['take.bttn.next'] = 'Následující stránka&nbsp;&gt;&gt;';
-$lang['take.bttn.finish'] = 'Dokončit';
-$lang['take.msg.already_completed'] = 'Požadovanou anketu jste již vyplnil(a)..';
-$lang['take.err.required'] = 'Povinné otázky nebyly zodpovězeny.';
-$lang['take.err.time_limit.hdr'] = 'Překročen časový limit na vyplnění ankety.';
-$lang['take.err.time_limit.msg'] = 'Překročil(a) jste časový limit na vyplnění této ankety. Poslední stránka s Vašimi odpovědmi nebyla uložena.';
+$lang['not_active'] = 'The requested survey is not active at this time.';
+$lang['empty_survey'] = 'The requested survey does not exist or does not have any questions.';
+$lang['take.bttn.quit'] = 'Quit Survey - Do not save answers';
+$lang['take.bttn.previous'] = '&lt;&lt;&nbsp;Previous Page';
+$lang['take.bttn.next'] = 'Next Page&nbsp;&gt;&gt;';
+$lang['take.bttn.finish'] = 'Finish';
+$lang['take.msg.already_completed'] = 'You have already taken the requested survey.';
+$lang['take.err.required'] = 'Required questions were not answered.';
+$lang['take.err.time_limit.hdr'] = 'Time Limit Exceeded';
+$lang['take.err.time_limit.msg'] = 'You exceeded the time limit set for the survey. Your last page of results were not saved.';
 ?>

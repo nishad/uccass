@@ -42,6 +42,16 @@ $lang['bad_answer-numeric_value'] = ' Bad display answer value or numeric value 
 $lang['only_99_allowed'] = ' Only 99 answers are allowed.';
 $lang['bad_answer_type'] = 'Incorrect Answer Type';
 $lang['must_checkbox'] = 'Checkbox must be selected in order to delete answer.';
+$lang['msg.edit_answtype-ok'] = "Answer successfully edited.";
+$lang['err.selectors_not_uploaded'] = 'A dynamic answer type requires selectors, you must upload them at once with the answer values.';
+$lang['err.only_selectors_uploaded'] = 'You cannot upload only selectors, they may be only uploaded together with answer values.';
+$lang['msg.answer_values_imported'] = 'Answer values have been successfully imported; the number of lines processed: ';
+$lang['msg.selectors_imported'] = 'Selectors have been successfully imported; the number of lines processed: ';
+$lang['err.atype_csv_bad_format-number'] = 'The answer value csv file must have 2 or 3 columns (string, string,  optionally a number)';
+$lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contain no data!';
+$lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
+$lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
+$lang['err.nondynamic-selectors_uploaded'] = "Selectors can only be assigned to a dynamic answer type; haven't you forgotten to check the 'is dynamic' checkbox?";
 
 //Page Titles
 $lang['title_new_answer_type'] = 'New Answer Type';
@@ -92,15 +102,6 @@ $lang['err.dep_on_textual_answer'] = 'Only a selector dependency may be bound to
 $lang['err.nondynamic_selector_dep'] = 'Only a question with a dynamic answer type may have a selector dependency.';
 $lang['err.must_1_selector_dep'] = 'A question with a dynamic answer type must have exactly one selector dependency. But it has: ';
 $lang['whatever'] = 'whatever';
-$lang['msg.edit_answtype-ok'] = "Answer successfully edited.";
-$lang['err.selectors_not_uploaded'] = 'A dynamic answer type requires selectors, you must upload them at once with the answer values.';
-$lang['err.only_selectors_uploaded'] = 'You cannot upload only selectors, they may be only uploaded together with answer values.';
-$lang['msg.answer_values_imported'] = 'Answer values have been successfully imported; the number of lines processed: ';
-$lang['msg.selectors_imported'] = 'Selectors have been successfully imported; the number of lines processed: ';
-$lang['err.atype_csv_bad_format-number'] = 'The answer value csv file must have 2 or 3 columns (string, string,  optionally a number)';
-$lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contain no data!';
-$lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
-$lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
 
 //Reports
 $lang['new_report'] = 'New Report created successfully.';
