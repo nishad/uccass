@@ -33,7 +33,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     /******************
     * NEW ANSWER TYPE *
     ******************/
-    function new_answer_type($sid)	// TODO: add handle upload; error, message -> arrays
+    function new_answer_type($sid)
     {
         $show['errors'] = array();
         $show['messages'] = array();
@@ -153,7 +153,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         if(isset($_REQUEST['submit']) && empty($show['errors']))
         {
             $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
-            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);	// TODO: do also for a new answ. type
+            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);
             $show['errors'] = array_merge($show['errors'], $upload_result['errors']);
             $show['messages'] = array_merge($show['messages'], $upload_result['messages']);
             
@@ -202,6 +202,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         
         $data['sid'] = $input['sid'];
         $data['max_upload_size'] = $this->_get_max_upload_size();
+        $data['upload_forbidden'] = ini_get("file_uploads") == false || strcasecmp(ini_get("file_uploads"), "off") == 0;
 
         $this->smarty->assign_by_ref('input',$input);
         $this->smarty->assign_by_ref('show',$show);
@@ -466,7 +467,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         	// Process file uploads            
             if(empty($show['errors']) && !isset($_REQUEST['add_answers_submit']))
             {
-	            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);	// TODO: do also for a new answ. type
+	            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);
 	            $show['errors'] = array_merge($show['errors'], $upload_result['errors']);
 	            $show['messages'] = array_merge($show['messages'], $upload_result['messages']);
             }
@@ -628,6 +629,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
         $data['sid'] = $input['sid'];
         $data['max_upload_size'] = $this->_get_max_upload_size();
+        $data['upload_forbidden'] = ini_get("file_uploads") == false || strcasecmp(ini_get("file_uploads"), "off") == 0;
         $this->smarty->assign_by_ref('data',$data);
         $this->smarty->assign_by_ref('show',$show);
         $data['links'] = $this->smarty->Fetch($this->CONF['template'].'/edit_survey_links.tpl');
@@ -754,11 +756,6 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     	$errors = array();
     	$messages = array();
     	$result = array("errors" => &$errors, "messages" => &$messages);
-    	// TODO: ini_get("file_uploads") == false || (ini_get("file_uploads"), "off") == 0
-    	// TODO: 1.Try to upload a file > max upload; 2.Try to upload a file > max post
-    	// If 1. => UPLOAD_ERR_INI_SIZE; if 2. => both _FILES and _POST are empty !!!
-    	
-    	// TODO: large file, slow link: long upload time may > ini_get('max_input_time');
     	
     	$answer_values_given = $this->answer_values_uploaded();
     	$selectors_given 	= $this->selectors_uploaded();

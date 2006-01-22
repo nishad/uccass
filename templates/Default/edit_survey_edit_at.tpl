@@ -117,11 +117,13 @@
           Files with the data of answer values/selectors to use (MS and MM Answer Types only)
         </div>
 
+        {if $data.upload_forbidden}
         <div class="indented_cell">
         	<p>You may supply here file in the CSV format that defines answer values (and another that 
         	assignes them selectors, if this is a dynamic answer type).</p>
         	<p>Note: the maximal file size is {math equation="size / 1024" size=$data.max_upload_size format="%d"} KB. 
-        	Ask the server administrator if you need to increase it.</p>
+        	Ask the server administrator if you need to increase it. Also, if you try to upload a large 
+        	file over a slow connection, the server may reject it after a period of time as too long.</p>
 	        <input type="hidden" name="MAX_FILE_SIZE" value="{$data.max_upload_size}">        	
    				<div style="float:left; width: 12em"><label for="avfile">Answer values file: </label></div>
    				<input name="answervaluesfile" type="file" id="avfile" style="margin: 0px 3px">
@@ -130,6 +132,9 @@
    				<input name="selectorsfile" type="file" id="sfile" style="margin: 0px 3px">
 				Selectors are needed for a dynamic question type.
 		</div>
+		{else}
+			<p>Uploading of files is forbidden by the server administrator.</p>
+		{/if}
 		
 		<br />
 
