@@ -33,9 +33,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     /******************
     * NEW ANSWER TYPE *
     ******************/
-    function new_answer_type($sid)
+    function new_answer_type($sid)	// TODO: add handle upload; error, message -> arrays
     {
-        $error = '';
+        $show['errors'] = array();
+        $show['messages'] = array();
 
         //Ensure user is logged in with valid privileges
         //for the requested survey or is an administrator
@@ -53,7 +54,8 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         $input['show_add_answers'] = TRUE;
         $input['sid'] = (int)$sid;
         $input['allowable_images'] = $this->get_image_names();
-
+        
+        // Preprocess data from the request
         if(isset($_REQUEST['submit']) || isset($_REQUEST['add_answers_submit']))
         {
             if(isset($_REQUEST['add_answers_submit']))
@@ -64,7 +66,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             if(strlen($_REQUEST['name']) > 0)
             { $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],$ss_type); }
             else
-            { $error .= $this->lang['enter_name']; }
+            { $show['errors'][] = $this->lang['enter_name']; }
 
             $input['label'] = $this->SfStr->getSafeString($_REQUEST['label'],$ss_type);
             
@@ -78,7 +80,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 case ANSWER_TYPE_N:
                     $input['type'] = $this->SfStr->getSafeString($_REQUEST['type'],$ss_type);
                     if(isset($_REQUEST['add_answers_submit']))
-                    { $error .= $this->lang['add_answer_error']; }
+                    { $show['errors'][] = $this->lang['add_answer_error']; }
                 break;
                 case ANSWER_TYPE_MM:
                 case ANSWER_TYPE_MS:
@@ -99,7 +101,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                                 $image_key = array_search($_REQUEST['image'][$key],$input['allowable_images']);
                                 if($image_key === FALSE)
-                                { $error .= $this->lang['bad_image']; }
+                                { $show['errors'][] = $this->lang['bad_image']; }
                                 else
                                 {
                                     $input['image'][] = $this->SfStr->getSafeString($_REQUEST['image'][$key],$ss_type);
@@ -113,11 +115,11 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                             }
                         }
 
-                        if(count($input['value']) == 0)
-                        { $error .= $this->lang['answer_value_error']; }
+                        if( (count($input['value']) == 0) && !$this->answer_values_uploaded())
+                        { $show['errors'][] = $this->lang['answer_value_error']; }
                     }
                     else
-                    { $error .= $this->lang['bad_answer-numeric_value']; }
+                    { $show['errors'][] = $this->lang['bad_answer-numeric_value']; }
 
                     if(!isset($input['num_answers']))
                     { $input['num_answers'] = 6; }
@@ -128,7 +130,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     if($input['num_answers'] > 99)
                     {
                         $input['num_answers'] = 99;
-                        $error .= $this->lang['only_99_allowed'];
+                        $show['errors'][] = $this->lang['only_99_allowed'];
                         $input['show_add_answers'] = FALSE;
                     }
                     elseif($input['num_answers'] == 99)
@@ -136,17 +138,26 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
                 break;
                 default:
-                    $error .= $this->lang['bad_answer_type'];
+                    $show['errors'][] = $this->lang['bad_answer_type'];
                 break;
             }
+        }
 
-            if(!isset($_REQUEST['add_answers_submit']) && (!isset($error) || strlen($error) == 0))
+    	////////////////////////////////////////////////////////////
+    	// Process file uploads & save data           
+        if(isset($_REQUEST['submit']) && empty($show['errors']))
+        {
+            $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+            $upload_result = $this->_handle_uploaded_files($aid, $input['is_dynamic']);	// TODO: do also for a new answ. type
+            $show['errors'] = array_merge($show['errors'], $upload_result['errors']);
+            $show['messages'] = array_merge($show['messages'], $upload_result['messages']);
+            
+            if(empty($show['errors']))
             {
             	// Store the answer into the databese
-            	if( $this->db_insert_answer_type($input) === true )
+            	if( $this->db_insert_answer_type($input, $aid) === true )
                 {
-                    $success=TRUE;
-                    $this->smarty->assign('success',$success);
+                    $show['messages'][] = "New answer type successfully added.";	// L10N
 
                     $allowable_images = $input['allowable_images'];
 
@@ -161,15 +172,16 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                     $input['allowable_images'] = $allowable_images;
                 }
             }
-        }
+    	}
 
         if(isset($_REQUEST['type']))
         {
             $selected[$_REQUEST['type']] = ' selected';
             $this->smarty->assign('selected',$selected);
         }
-
-        if(strlen($error)>0)
+		
+		// Handle errors
+        if(!empty($show['errors']))
         {
             //Encode $input values so they are safe to "reshow"
             //in the form in case of an error
@@ -181,9 +193,8 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                 $input['numeric_value'][$key] = $this->SfStr->getSafeString($_REQUEST['numeric_value'][$key],SAFE_STRING_TEXT);
                 $input['image'][$key][$_REQUEST['image'][$key]] = ' selected';
             }
-
-            $show['errors'][] = $error;
         }
+        
         $data['sid'] = $input['sid'];
         $data['max_upload_size'] = $this->_get_max_upload_size();
 
@@ -590,6 +601,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             { $show['errors'][] = $this->lang['bad_answer_type']; }
         }
 
+		// Handle errors
         if(!empty($show['errors']))
         {
             $input['name'] = $this->SfStr->getSafeString($_REQUEST['name'],SAFE_STRING_TEXT);
@@ -659,15 +671,16 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     * 
     * @param array $input An associative array representing the input form with
     * answer type/values data.
+    * @param int $aid Id of the answer type to create (likely newly generated) 
     * @return True upon success
     * 
     * @access private
     * @author Jakub Holy
     * ***************************/
-    function db_insert_answer_type($input) 
+    function db_insert_answer_type($input, $aid) 
     {
         $is_dynamic = ($input['is_dynamic'])? 1 : 0;
-        $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+        //$aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
         $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid, is_dynamic) VALUES"
                   ."($aid, {$input['name']},{$input['type']},{$input['label']},{$input['sid']}, $is_dynamic)";
         $rs = $this->db->Execute($query);
@@ -709,6 +722,14 @@ class UCCASS_AnswerTypes extends UCCASS_Main
         } // if-else answer the type inserted with success
     } // db_insert_answer_type
     
+    /** Return true if a file with answer values uploaded. */
+    function answer_values_uploaded()
+    { return !empty($_FILES['answervaluesfile']['name']); }
+    
+    /** Return true if a file with selectors uploaded. */
+    function selectors_uploaded()
+    { return !empty($_FILES['selectorsfile']['name']); }
+    
     /**
      * Process answer values [and selectors] defined in uploaded files.
      * The uploaded files are stored the tmp_dir and should get deleted
@@ -729,20 +750,22 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     	
     	// TODO: large file, slow link: long upload time may > ini_get('max_input_time');
     	
-    	$answer_types_given = !empty($_FILES['answervaluesfile']['name']);
-    	$selectors_given 	= !empty($_FILES['selectorsfile']['name']);
+    	$answer_values_given = $this->answer_values_uploaded();
+    	$selectors_given 	= $this->selectors_uploaded();
     	
     	// Check that the required files were given
-    	if($answer_types_given)
+    	if($answer_values_given)
     	{
     		if($is_dynamic && !$selectors_given)
     		{ $errors[] = $this->lang('err.selectors_not_uploaded'); return $result; }
+    		if(!$is_dynamic && $selectors_given)
+    		{ $errors[] = $this->lang('err.nondynamic-selectors_uploaded'); return $result; }
     	}
     	elseif($selectors_given)
     	{ $errors[] = $this->lang('err.only_selectors_uploaded'); return $result; } 
     	
     	// Process the files
-    	if($answer_types_given)
+    	if($answer_values_given)
     	{
 	    	ini_set("include_path", 'classes/external' . PATH_SEPARATOR . ini_get("include_path"));
 	    	require_once 'HTTP/Upload.php';
@@ -817,7 +840,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 			    	{ $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); return; }
 				} // if $selectors_given
 	    	} // Process the uploaded files
-    	} // if $answer_types_given
+    	} // if $answer_values_given
     	
     	return $result;
     }

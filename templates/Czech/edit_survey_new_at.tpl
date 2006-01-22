@@ -4,12 +4,22 @@
           <div class="message">New answer type successfully added.</div>
         {/section}
       {* / SUCCESS MESSAGE *}
+          {section name="success" loop=$show.messages show=TRUE}
+            <div class="message">
+              {$show.messages[success]}
+            </div>
+          {/section}
+        {* / SUCCESS MESSAGE *}
+
+        {section name="error" loop=$show.errors show=TRUE}
+          <div class="error">{$show.errors[error]}</div>
+        {/section}
 
       {section name="error" loop=1 show=$show.error}
         <div class="error">{$show.error}</div>
       {/section}
 
-      <form method="POST" action="{$conf.html}/new_answer_type.php">
+      <form method="POST" action="{$conf.html}/new_answer_type.php" enctype="multipart/form-data">
 
         <input type="hidden" name="sid" value="{$input.sid}">
 
@@ -86,6 +96,28 @@
         <div style="text-align:center">
           <input type="submit" name="submit" value="Add Answer">
         </div>
+
+		<br />
+		
+		{* UPLOAD DATA FILES *}
+        <div class="whitebox">
+          Files with the data of answer values/selectors to use (MS and MM Answer Types only)
+        </div>
+
+        <div class="indented_cell">
+        	<p>Note: the maximal file size is {math equation="size / 1024" size=$data.max_upload_size format="%d"} KB. 
+        	Ask the server administrator if you need to increase it.</p>
+	        <input type="hidden" name="MAX_FILE_SIZE" value="{$data.max_upload_size}">        	
+   				<div style="float:left; width: 12em"><label for="avfile">Answer values file: </label></div>
+   				<input name="answervaluesfile" type="file" id="avfile" style="margin: 0px 3px">
+   				<br>
+   				<div style="float:left; width: 12em"><label for="sfile">Selectors file: </label></div>
+   				<input name="selectorsfile" type="file" id="sfile" style="margin: 0px 3px">
+				Selectors are needed for a dynamic question type.
+		</div>
+        {* UPLOAD DATA FILES *}
+		
+		<br />
 
         <div class="whitebox">
           Answer Values (MS and MM Answer Types Only)
