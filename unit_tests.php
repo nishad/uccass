@@ -291,12 +291,16 @@ error_reporting(E_ALL ^ E_NOTICE);	// ignore notices
 </p>
 <hr>
 
-<h4>NOTICE: Don't forget to check the server log to discover any PHP errors that have occured.</h4>
+<h4 style="color:blue">NOTICE: Don't forget to check the server log to discover any PHP errors that have occured.</h4>
 <p>The tests make take up to 5-10 minutes. The default memory limit 8MB doesn't need to be 
 sufficient but 16MB should be ok (I'll try to increase it by ini_set("memory_limit","16M")).</p>
+
 <h4>Some things need to be checked manually:</h4>
 <ul>
  <li>Dependencies: add a dependency that's satisfied for 2 or more values to a question</li>
+ <li>Import answer values/selectors from uploaded csv files (both when editting nd creating a new answer type)</li>
+ <li>Create a survey based on a copy of another - are all answer types with all properties, all questions, 
+ answer types and values, selectors, dependencies copied correctly?</li>
 </ul>
 <h4>If there are problems with SimpleTest in WebTests:</h4>
 <p>If it seems that the SimpleTest's internal browser doesn't set a field correctly:
@@ -307,7 +311,7 @@ form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.ph
  is sent most likely in SimpleHttpRequest::_dispatchRequest (http.php).</p>
 
 
-<h4>If the tests fail</h4>
+<h4>If the tests fail:</h4>
 Note: If the tests fail it doesn't necessarily mean that there's anything bad with the code. It may only 
 mean that the code/functionality changed and the tests grow obsolete. It may happen if a label that is 
 hard-coded in a web test changes or if a sql query hard-coded in a test mock object changes. 
