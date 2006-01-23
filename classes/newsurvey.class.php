@@ -226,22 +226,23 @@ class UCCASS_NewSurvey extends UCCASS_Main
     function _copyAnswerTypes($copy_survey, $sid, &$new)
     {
 
-        $query = "SELECT aid, name, type, label FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = {$copy_survey}";
+        $query = "SELECT aid, name, type, label, is_dynamic FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = {$copy_survey}";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('1:' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+        { $this->error('1:' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
         while($r = $rs->FetchRow($rs))
         {
             $name = $this->SfStr->getSafeString($r['name'],SAFE_STRING_ESC);
             $type = $this->SfStr->getSafeString($r['type'],SAFE_STRING_ESC);
             $label = $this->SfStr->getSafeString($r['label'],SAFE_STRING_ESC);
             $aid = $this->db->GenID($this->CONF['db_tbl_prefix'].'answer_types_sequence');
+            $is_dynamic = $r['is_dynamic'];
 
-            $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid) VALUES
-                      ($aid, $name,$type,$label,$sid)";
+            $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_types (aid, name, type, label, sid, is_dynamic) VALUES
+                      ($aid, $name,$type,$label,$sid,$is_dynamic)";
             $rs2 = $this->db->Execute($query);
             if($rs2 === FALSE)
-            { $this->error('2: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+            { $this->error('2: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
 
             $new['new_aid'][$r['aid']] = $aid;
 
@@ -258,7 +259,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('3: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+        { $this->error('3: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
         while($r = $rs->FetchRow($rs))
         {
             $value = $this->SfStr->getSafeString($r['value'],SAFE_STRING_ESC);
@@ -269,9 +270,31 @@ class UCCASS_NewSurvey extends UCCASS_Main
                       VALUES ($avid, {$aid_new},$value,{$r['numeric_value']},$image)";
             $rs2 = $this->db->Execute($query);
             if($rs2 === FALSE)
-            { $this->error('5: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+            { $this->error('5: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
 
             $new['new_avid'][$r['avid']] = $avid;
+
+            $this->_copySelectors($r['avid'], $avid);
+        }
+        return;
+    }
+
+    function _copySelectors($avid_old, $avid_new)
+    {
+        $query = "SELECT avid, selector FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors
+                  WHERE avid = {$avid_old}";
+
+        $rs = $this->db->Execute($query);
+        if($rs === FALSE)
+        { $this->error('4: ' . $this->lang('db_query_error') . $this->db->ErrorMsg() . "($query)"); }
+        while($r = $rs->FetchRow($rs))
+        {
+            $selector = $this->SfStr->getSafeString($r['selector'],SAFE_STRING_ESC);
+            $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}dyna_answer_selectors (avid, selector)
+                      VALUES ($avid_new, $selector)";
+            $rs2 = $this->db->Execute($query);
+            if($rs2 === FALSE)
+            { $this->error('5: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
         }
         return;
     }
@@ -288,7 +311,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
                   WHERE sid = {$copy_survey} ORDER BY page, oid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('6: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+        { $this->error('6: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); return FALSE; }
 
         while($r = $rs->FetchRow($rs))
         {
@@ -362,7 +385,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
                   WHERE sid = {$copy_survey}";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('8: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
+        { $this->error('8: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); return; }
 
         $dep_insert = '';
         while($r = $rs->FetchRow($rs))
@@ -371,10 +394,12 @@ class UCCASS_NewSurvey extends UCCASS_Main
             //new question IDs of questions just inserted above
             $qid = $new['new_qid'][$r['qid']];
             $dep_qid = $new['new_qid'][$r['dep_qid']];
-            $dep_aid = $new['new_avid'][$r['dep_aid']];
 
             $dep_id = $this->db->GenID($this->CONF['db_tbl_prefix'].'dependencies_sequence');
             $dep_option = $this->SfStr->getSafeString($r['dep_option'], SAFE_STRING_DB);
+            
+            $dep_aid = ($dep_option==DEPEND_MODE_SELECTOR)? $new['new_avid'][$r['dep_aid']] 
+            	:SELECTOR_DEP_AVID;
             $dep_insert .= "($dep_id, $sid, $qid, $dep_qid, $dep_aid, $dep_option),";
 
             //Insert query if INSERT list gets over 500 characters
@@ -400,7 +425,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
               VALUES " . substr($dep_insert,0,-1);
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error('9: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+        { $this->error('9: ' . $this->lang['db_query_error'] . $this->db->ErrorMsg() . "($query)"); }
 
         return;
     }
