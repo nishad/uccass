@@ -323,6 +323,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 
 <h4><a href="#toc" name="installation_upgrade108_182">2.6 Upgrade from v1.8.0 to v1.8.2</a></h4>
 <p>There were some tables and table columns added so you need to run first "Upgrade From v1.8.0" than "Upgrade From v1.8.1".</p>
+<p>More importantly, if you've created your own template, you need to do a couple of changes: Add all lines of templates/Default/language.tpl not in your template's language.tpl to it. Also you should copy the files edit_survey_edit_at.tpl, edit_survey_new_at.tpl, edit_survey_questions.tpl, edit_survey_edit_question.tpl, display_answers.tpl from the Default template and do your modifications again.</p>
 <!-- End Installation -->
 <!-- Using UCCASS  -->
 <hr>
@@ -664,13 +665,14 @@ ability to use them. </p>
   the first question has no previous questions to base dependencies on. You can
   add additional dependencies by editing the question after it's been added to
   the survey. Dependencies can be deleted by editing the question, also. </p>
-<p>To create a dependency, you must first choose whether you want to hide or require
-  the question based upon the answer to a previous question. If you're thinking
+<p>To create a dependency, you must first choose whether you want to hide or require 
+  the question (or get a selector for it) based upon the answer to a previous question. 
+  If you're thinking
   you need to <em><strong>show</strong></em> a question or <em><strong>not require</strong></em>
   a question based upon previous answers, that's still possible. The dependencies
   to show a question are just the opposite of what they are to hide it, so that's
   why only two options are required. For instance, if you want to only show question
-  2 if question 1 is answered yet, then your dependency will be to hide question
+  2 if question 1 is answered yes, then your dependency will be to hide question
   2 if question one is answered with anything but yes. This works the same way
   for required versus not required, too. If you want to not require question 2
   if question 1 is answered yes, then you choose to require question 2 if question
@@ -682,19 +684,29 @@ ability to use them. </p>
   and then <strong>show</strong> based upon the remaining. Simply choosing <strong>hide</strong>
   for MM type questions will not work unless the user chooses each and every one of the
   hide options.</p>
+ <p>There's is a special type of dependency called <strong>selector dependency</strong>
+ . You use it for a question of a dynamic answer type to determine where it should 
+ take its selector from (the selector is used to select some subset of all possible 
+ answers to present to the current respondent). In other words, the value of answer
+ to the first question is used to determine which answers of the depending question
+ to present to the respondent. The selector dependency may be only defined for a 
+ dynamic answer type question. And, contrary to the others, it's possible to depend 
+ on a text-answer question (e.g. the Sentence answer type). It's also possible to 
+ depend on a multiple-choice multiple/single answer question.
+ </p>
 <p>After deciding if you want to hide or require the question, you next need to
   choose what question number to base this dependency on. Remember that you can
   only choose questions that are going to appear before the question you are adding
   or editing. Once you choose a question number, the possible answers for that
   question will be shown. Here you can choose which answer values you want to
-  hide or require the question for. On Widows, hold down the Control key while
+  hide or require the question for. The answer values are ignored by a selector 
+  dependency even though you still need to select some to satisfy the application. 
+  On Widows and Linux, hold down the Control key while
   choosing answer values to select multiple values. </p>
 <p>Any question, except for the very first one, can have any amount of dependencies.
   However, you can only base those dependencies upon questions that have a multiple
   choice answer. You cannot choose to hide or require question 2, for example,
-  based upon what the user enters in a text box for question 1. In fact, questions
-  that do not have a multiple choice answer will not even show up in the list
-  of available question numbers. </p>
+  based upon what the user enters in a text box for question 1. </p>
 <p>Dependencies can be deleted by editing the question. From the edit question
   interface, you can delete individual dependencies or add new ones. If a question
   requires more than three dependencies, the additional dependencies will need
@@ -704,6 +716,8 @@ ability to use them. </p>
   a dependency on question 1 it's supposed to be hidden, the user will go directly
   from the page one to page 3. You may want to explain this to users or just remove
   the page count entirely from your template. </p>
+  
+  
 <h4><a href="#toc" name="page_break">3.3.2.5 Adding A Page Break</a></h4>
 <p>Page breaks are useful to break up long surveys into manageable parts. To create
   a page break in your survey, you must enter a certain text in the new question
@@ -866,11 +880,11 @@ ability to use them. </p>
   concerned about losing results. </p>
   <h4><a href="#toc" name="dynamic_answer_type">3.3.3.3 Dynamic Answer Types</a></h4>
 <p>
-  Since v1.8.2 you can mark an answer type as dynamic, which means, that only a subset of all possible answers is presented to a particular respondent based on some of his/her previous answers. The answer to the previous question serves as a "selector" that determines what answers are shown. (When you create the dynamic answer type, you assign each answer value a set of selectors that it should match.)<br>
+  Since v1.8.2 you can mark an answer type as dynamic, which means that only a subset of all possible answers is presented to a particular respondent based on some of his/her previous answers. The answer to the previous question serves as a "selector" that determines what answers are shown. (When you create the dynamic answer type, you assign each answer value a set of selectors for which it should be displayed.)<br>
   When you create a question of a dynamic answer type, you must define a selector dependency for it so that it will know from which answer it should take the selector.
 </p>
 <p>
-  Let's take an example. You prepare an end-of-term evaluation survey at a university. Students should evaluate their courses and you want to show to each student only those courses s/he has studied in the given term. You ask the university IT departement to give you the list of all courses (including their internal identification) and a list of pairs student_id - his/her course id). The first list (the list of answer values), stored e.g. in the file courses.csv, may look like this:
+  Let's take an example. You prepare an end-of-term evaluation survey at a university. Students should evaluate their courses and you want to present to each student only those courses s/he has studied in the given term. You ask the university IT departement to give you the list of all courses (including their internal identification) and a list of pairs student id - his/her course id. The first list (the list of answer values), stored e.g. in the file courses.csv, may look like this:
   <pre>
   course001, "History of the Czech Republic"
   course002, "The life and work of Jara Cimrman"
@@ -883,15 +897,16 @@ ability to use them. </p>
   course002, student01
   </pre>
   (The student 1 has taken both courses, 2 only the second.)<br>
-  You create a new answer (called e.g. dynamic_courses) type checking the field 'is_dynamic' and uploading the two files. Then you create the first question: "Enter your student id; its type is Sentence. Next you create the question "Select you favourite course" of the type dynamic_courses and define a selector dependency on the first question (Get selector if question 1 is [a text]). The last thing to do is to activate the survey.<br>
+  You create a new answer type (called e.g. dynamic_courses) checking the field 'is_dynamic' and uploading the two files. Then you create the first question: "Enter your student id"; its type is Sentence. Next you create the question "Select you favourite course" of the type dynamic_courses and define a selector dependency on the first question (Get selector if question 1 is [a text]). The last thing to do is to activate the survey.<br>
   When a student takes the survey and enters 'student02' as his/her student id, s/he will see the courses History of the Czech Republic and The life and work of Jara Cimrman.
 </p>
+
 <h4><a href="#toc" name="csv_import4answer">3.3.3.4 Import of Answer Values (and Selectors)</a></h4>
 <p>
-  Since v1.8.2 you may import answer values (and selectors) that should be assigned to an answer type. They must be stored in the <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV format</a> (comma-separated values) - records are separated by line breaks (Enter), individual fields of a record are separated by commas ('0; if you need to use comma as a part of a value, the whole value must be enclosed by quotes ("). If you need a quote as  part of a value, the whole value must be enclosed by quotes and the quote must be doubled: "value""&amp;quote". The files may not include a header line, they must start directly with values.<br>
-  If there're any whitespace characters around a value they're ignored unless inside a quoted value: ..,	value1 , becomes 'value1' while ..,"	value2 ", becomes '	value2 '.
+  Since v1.8.2 you may import files defining the answer values (and selectors) that should be assigned to an answer type. They data to import must be stored in the files in the <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV format</a> (comma-separated values): records are separated by line breaks (Enter), individual fields of a record are separated by commas (,); if you need to use comma as a part of a value, the whole value must be enclosed by quotes ("). If you need a quote as a part of a value, the whole value must be enclosed by quotes and the quote must be doubled: "value with""quote". The files may not include a header line, they must start directly with values.<br>
+  If there're any whitespace characters around a value they're ignored unless inside a quoted value: <samp>..,	value1 ,</samp> becomes 'value1' while <samp>..,"	value2 ",</samp> becomes '	value2 '.
 </p>
-<p>The csv file with answer values must contain 2 or 3 columns (values): the first is an id of the answer value, the second is the value of the answer value and the third (optional) is its numeric value (if numeric values are not given, they'll be generated started from 1). The id is only relevant for dynamic answer types because it makes it possible to connect a selector to the answer value. For non-dynamic answer values there can by any string (e.g. 1, 2 ...).<br>
+<p>The csv file with answer values must contain 2 or 3 columns (values): the first is an id of the answer value, the second is the value of the answer value and the third (optional) is its numeric value (if numeric values are not given, they'll be generated started from 1). The id is only relevant for dynamic answer types because it makes it possible to connect a selector to the answer value. For non-dynamic answer values it can be empty (so there'd be e.g. (don't ommit the leading comma): ,"History...", 100).<br>
  Example 1 - generated numeric values:
   <pre>
   course001, "History of the Czech Republic"
