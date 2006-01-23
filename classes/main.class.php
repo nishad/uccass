@@ -97,6 +97,8 @@ define('DEPEND_MODE_HIDE', 'Hide');
 define('DEPEND_MODE_REQUIRE', 'Require');
 define('DEPEND_MODE_SHOW', 'Show');
 define('DEPEND_MODE_SELECTOR', 'Selector');
+/** avid used by default for selector dependencies (they don't depend on a particular answer value). */
+define('SELECTOR_DEP_AVID', 0);
 
 //Hack to get rid of cookies named "sid"
 if(isset($_POST['sid']))
