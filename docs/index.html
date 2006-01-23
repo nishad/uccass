@@ -43,10 +43,11 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <blockquote>
   <h4><a href="#installation_requirements">2.1 Requirements</a> </h4>
   <h4><a href="#installation_webbased">2.2 Web-based Installation</a> </h4>
-  <h4><a href="#installation_manual">2.3 Manual Installation</a></h4>
+  <h4><a href="#installation_manual" class="depr">2.3 Manual Installation</a></h4>
   <h4><a href="#installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
   <h4><a href="#installation_upgrade105_106">2.5 Upgrade from v1.05 to v1.06</a></h4>
   <h4><a href="#installation_upgrade106_180">2.6 Upgrade from v1.06 to v1.8.0</a></h4>
+  <h4><a href="#toc" name="installation_upgrade108_182">2.6 Upgrade from v1.8.0 to v1.8.2</a></h4>
 </blockquote>
 
 
@@ -87,6 +88,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
     <blockquote>
       <h4><a href="#new_answer_type">3.3.3.1 Adding A New Answer Type</a></h4>
       <h4><a href="#edit_answer_type">3.3.3.2 Editing An Answer Type or Value</a></h4>
+	  <h4><a href="#dynamic_answer_type">3.3.3.3 Dynamic Answer Types</a> <strong>** New with v1.8.2! **</strong></h4>
     </blockquote>
 
     <h4><a href="#access_control">3.3.4 Access Control</a> <strong>** New with v1.8.0! **</strong></h4>
@@ -175,6 +177,10 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>* Unlimited surveys, unlimited questions per survey and unlimited answer types.
   Theme based system allows surveys to have their own look and feel once new themes
   are made.</p>
+<p>* <strong>New with v1.8.2:</strong> Database independency - UCCASS was made as database independent as possible and all major databases (those <a href="http://phplens.com/lens/adodb/docs-adodb.htm#drivers">supported by ADOdb</a>) should work with it (tested only with MySQL, PostgreSQL). Dynamic answer types and import of answer values from a csv file.
+	Unit tests: from the page unit_tests.php you can run a number of tests that 
+	should prove that uccass functions correctly - you can use it to test whether 
+	uccass works with your database. (Let us know.)</p>
 <p>* <strong>New with v1.8.0:</strong> Complete access control system allowing for the
   creation of multiple administrator users, public or private access to creating surveys,
   multiple users with individual permissions to take surveys, view results, and edit surveys.
@@ -230,7 +236,7 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <h4 name="installation_requirements" href="#toc"><a name="installation_requirements" href="#toc">2.1
   Requirements</a> </h4>
 <p>* PHP 4.3.4 available from <a href="http://www.php.net">www.php.net</a></p>
-<p>* MySQL 3.23 or higher available from <a href="http://www.mysql.com">www.mysql.com</a></p>
+<p>* Database such as <a href="http://www.postgresql.org/">PostgreSQL</a> or MySQL (3.23 or higher available from <a href="http://www.mysql.com">www.mysql.com</a>)</p>
 <p>* Smarty Template Engine 2.3.0 (included) available from <a href="http://smarty.php.net">smarty.php.net</a></p>
 <p>* ADOdb Database Abstraction Layer (included) available from <a href="http://adodb.sourceforge.net/">php.weblogs.com</a></p>
 <h4 name="installation_webbased" href="#toc"><a name="installation_webbased" href="#toc">2.2
@@ -238,8 +244,8 @@ details, documentation, demo and download can be found at <a href="http://www.bi
 <p>1. Place all files into a directory under your web root. </p>
 <p>2. If you are installing the database tables into a new database, create the
   database.</p>
-<p>3. Only MySQL is supported for the web-based setup. To use any other database
-  system, you will have to create the database and tables manually. The <em><strong>survey.sql</strong></em>
+<p>3. The web-based setup should run on all databases supported by ADOdb. 
+	The <em><strong>survey-adodb_schema.xml</strong></em>
   file has the table definitions and initial data. </p>
 <p>4. Ensure your web server can write to the <em><strong>survey.ini.php</strong></em>
   file. </p>
@@ -276,38 +282,9 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   directory.</p>
 <p>10. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
   browser and make your surveys.</p>
-<h4 name="installation_manual" href="#toc"><a name="installation_manual" href="#toc">2.3
+<h4 name="installation_manual" href="#toc" class="depr"><a name="installation_manual" href="#toc">2.3
   Manual Installation</a> </h4>
-<p>1. Place all files into a directory under your web root. </p>
-<p>2. If you are installing the database tables into a new database, create the
-  database.</p>
-<p>3. If this is a new installation, the <strong>survey.sql file</strong> contains the table definitions and
-  initial data. You must import this file into the database you created in Step
-  2. With MySQL, this is normally done from the command line with a &quot;<em><strong>mysql
-  -u</strong></em>user<em><strong> -p</strong></em>password<em><strong> </strong></em>database_name<em><strong>
-  &lt; survey.sql</strong></em>&quot; command (where user, password, and database_name
-  are the actual values for your server). If you or your host provides a program
-  like PHPMyAdmin, then the file can be imported through there, also. </p>
-<p>4. If this is an upgrade, it is recommended you use the web-based installation process. If using
-  the manual process, each upgrade file in the /upgrades/ folder must be run to bring your database
-  up to date. upgrade_104_105.php must be run to upgrade from v1.04 to v1.05, for example. You must
-  run all of the files in sequence until you get to the version you are upgrading to.</p>
-<p>5. Table prefixes are not supported when doing a manual installation unless
-  you physically rename each of the tables to include the prefix and then include
-  that prefix into the <em><strong>survey.ini.php</strong></em> file. </p>
-<p>6. Edit the fields in the <em><strong>survey.ini.php</strong></em> file to
-  match the setting of your site and server. See section 4.1 Site Settings for
-  an explanation of each setting in the <em><strong>survey.ini.php</strong></em>
-  file. </p>
-<p>7. You must move or rename the <em><strong>install.php</strong></em> file that
-  is used for web-based installation. The program will not run if <strong><em>install.php</em></strong>
-  is present.. </p>
-<p>8. If you are using the version of Smarty included with this distribution,
-  ensure the web-server can write to the <em><strong>Smarty/templates_c/</strong></em>
-  directory. See Step 4 of section <a href="#installation_webbased">2.2 Web Based
-  Installation</a> for instructions. </p>
-<p>9. Load http://&lt;server name&gt;/&lt;path to files&gt;/index.php into your
-  browser and make your surveys.</p>
+<p>Since v1.8.2 the manual installation is no more supported because if the web-based installation doesn't run then UCCASS won't run either. But if you persist, you can create the install sql script based on the file survey-adodb_schema.xml. For details of its format see <a href="http://phplens.com/lens/adodb/docs-datadict.htm#xmlschema">ADOdb XML Schema</a> (but notice that we've improved it to support sequences).</p>
 <h4><a href="#toc" name="installation_upgrade104_105">2.4 Upgrade from v1.04 to v1.05</a></h4>
 <p>To upgrade from v1.04 to v1.05, all files associated with the old version must be deleted. The v1.04 templates
   and <strong><em>survey.ini.php</em></strong> file are not compatible with with v1.05 because of the extensive changes. All of your
@@ -343,6 +320,9 @@ details, documentation, demo and download can be found at <a href="http://www.bi
   the access controls for each of existing surveys. <strong>No survey data will be lost</strong> during
   the upgrade except for the previous access control settings.
 </p>
+
+<h4><a href="#toc" name="installation_upgrade108_182">2.6 Upgrade from v1.8.0 to v1.8.2</a></h4>
+<p>There were some tables and table columns added so you need to run first "Upgrade From v1.8.0" than "Upgrade From v1.8.1".</p>
 <!-- End Installation -->
 <!-- Using UCCASS  -->
 <hr>
@@ -669,7 +649,8 @@ ability to use them. </p>
   in any user supplied HTML being injected into your question. </p>
 <p>The syntax for lookbacks can be changed by editing the constants in the
   <strong><i>main.class.php</i></strong> file. </p>
-<h4><a href="#toc" name="dependencies">3.3.2.4 Dependencies</a></h4>
+
+  <h4><a href="#toc" name="dependencies">3.3.2.4 Dependencies</a></h4><!-- TODO: dyna at -->
 <p>Dependencies allow you to add conditions to your questions. You can choose
   to optionally hide, require or show certain questions based upon the answer to previous
   questions. By adding multiple dependencies to your questions, you can create
@@ -764,7 +745,8 @@ ability to use them. </p>
   added a question. You can choose to hide or require the question based upon
   answers to any previous multiple choice question. Only questions that are before
   the question you're editing will be listed in the dependency list. </p>
-<h4><a href="#toc" name="answer_types">3.3.3 Answer Types and Values</a></h4>
+
+  <h4><a href="#toc" name="answer_types">3.3.3 Answer Types and Values</a></h4>
 <p>Answer types and values are created separately from the actual questions. You
   may have 100 questions in your survey, but only use a set of five to ten answer
   types. Creating them separately allows you to use one specific answer type for
@@ -775,7 +757,8 @@ ability to use them. </p>
   surveys that are created blank and not copied from an existing survey will
   be given a default set of answer types and values that will fulfill most needs.
   You can always add or delete from them as you create your survey. </p>
-<h4><a href="#toc" name="new_answer_type">3.3.3.1 Adding A New Answer Type</a></h4>
+
+  <h4><a href="#toc" name="new_answer_type">3.3.3.1 Adding A New Answer Type</a></h4>
 <p>The first thing you'll need when adding a new answer type is a unique name.
   The name can not match the name of any other answer type that already exists
   in your survey. This name is the value you'll see in the drop down when adding
@@ -860,7 +843,8 @@ ability to use them. </p>
   the time to select an answer that applies. This also means that if the question
   is not marked as required, it is possible for the user to not answer the question
   at all. </p>
-<h4><a href="#toc" name="edit_answer_type">3.3.3.2 Editing An Answer Type and Values</a></h4>
+
+  <h4><a href="#toc" name="edit_answer_type">3.3.3.2 Editing An Answer Type and Values</a></h4>
 <p>Editing answer types and values presents the same interface as adding answers,
   yet you're allowed to edit the name and possible values along with delete the
   answer type entirely. After choosing the answer type that you want to edit,
@@ -880,6 +864,58 @@ ability to use them. </p>
   a multiple choice type answer to a text answer and vise versa. It's advised
   that you only switch between the MM and MS types unless you do not need to be
   concerned about losing results. </p>
+  <h4><a href="#toc" name="dynamic_answer_type">3.3.3.3 Dynamic Answer Types</a></h4>
+<p>
+  Since v1.8.2 you can mark an answer type as dynamic, which means, that only a subset of all possible answers is presented to a particular respondent based on some of his/her previous answers. The answer to the previous question serves as a "selector" that determines what answers are shown. (When you create the dynamic answer type, you assign each answer value a set of selectors that it should match.)<br>
+  When you create a question of a dynamic answer type, you must define a selector dependency for it so that it will know from which answer it should take the selector.
+</p>
+<p>
+  Let's take an example. You prepare an end-of-term evaluation survey at a university. Students should evaluate their courses and you want to show to each student only those courses s/he has studied in the given term. You ask the university IT departement to give you the list of all courses (including their internal identification) and a list of pairs student_id - his/her course id). The first list (the list of answer values), stored e.g. in the file courses.csv, may look like this:
+  <pre>
+  course001, "History of the Czech Republic"
+  course002, "The life and work of Jara Cimrman"
+  course003, "Tolkien and the mines of Ostrava"
+  </pre>
+  And the second one (the list of selectors), stored e.g. in the file studentsofcourses.csv, like this:
+  <pre>
+  course001, student01
+  course001, student02
+  course002, student01
+  </pre>
+  (The student 1 has taken both courses, 2 only the second.)<br>
+  You create a new answer (called e.g. dynamic_courses) type checking the field 'is_dynamic' and uploading the two files. Then you create the first question: "Enter your student id; its type is Sentence. Next you create the question "Select you favourite course" of the type dynamic_courses and define a selector dependency on the first question (Get selector if question 1 is [a text]). The last thing to do is to activate the survey.<br>
+  When a student takes the survey and enters 'student02' as his/her student id, s/he will see the courses History of the Czech Republic and The life and work of Jara Cimrman.
+</p>
+<h4><a href="#toc" name="csv_import4answer">3.3.3.4 Import of Answer Values (and Selectors)</a></h4>
+<p>
+  Since v1.8.2 you may import answer values (and selectors) that should be assigned to an answer type. They must be stored in the <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV format</a> (comma-separated values) - records are separated by line breaks (Enter), individual fields of a record are separated by commas ('0; if you need to use comma as a part of a value, the whole value must be enclosed by quotes ("). If you need a quote as  part of a value, the whole value must be enclosed by quotes and the quote must be doubled: "value""&amp;quote". The files may not include a header line, they must start directly with values.<br>
+  If there're any whitespace characters around a value they're ignored unless inside a quoted value: ..,	value1 , becomes 'value1' while ..,"	value2 ", becomes '	value2 '.
+</p>
+<p>The csv file with answer values must contain 2 or 3 columns (values): the first is an id of the answer value, the second is the value of the answer value and the third (optional) is its numeric value (if numeric values are not given, they'll be generated started from 1). The id is only relevant for dynamic answer types because it makes it possible to connect a selector to the answer value. For non-dynamic answer values there can by any string (e.g. 1, 2 ...).<br>
+ Example 1 - generated numeric values:
+  <pre>
+  course001, "History of the Czech Republic"
+  course002, "The life and work of Jara Cimrman"
+  course003, "Tolkien and the ""Mines of Ostrava"""
+  </pre>
+   Example 2 - defined numeric values:
+  <pre>
+  course001, "History of the Czech Republic", 100
+  course002, "The life and work of Jara Cimrman", 101
+  course003, "Tolkien and the ""Mines of Ostrava""", 102
+  </pre>
+</p>
+<p>The csv file with selectors must contain 2 columns (values): the first is an id of an answer value (corresponds to the id of answer values, mentioned above), the second is the selector itself.<br> 
+Example:
+  <pre>
+  course001, student01
+  course001, student02
+  course002, student01
+  </pre></p>
+<p>
+  As of now, this is the only way how to define selectors. For a dynamic answer type you must import both answer values and their selectors at once. 
+</p>
+  
 <h4><a href="#toc" name="access_control">3.3.4 Access Control</a></h4>
 <p>Access Control is a new feature added in v1.8.0 that allows you to control
   administrative users, who can create surveys, take surveys, view results, and
