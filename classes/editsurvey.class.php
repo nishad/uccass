@@ -161,10 +161,10 @@ class UCCASS_EditSurvey extends UCCASS_Main
         { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
         else
         {
-            $aid_list = '';
+            $aid_array = array();
             while($r = $rs->FetchRow($rs))
-            { $aid_list .= $r['aid'] . ','; }
-            $this->delete_answer_values($aid_list);
+            { $aid_array[] = $r['aid']; }
+            $this->delete_answer_values(implode(',', $aid_array));
         }
 
         $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = $sid";
@@ -1530,7 +1530,7 @@ class UCCASS_EditSurvey extends UCCASS_Main
 	            
 			case ANSWER_TYPE_S:
 				// A selector dependancy of a dynamic answer type question also needs st. to display:
-	        	$this->data['dep_avid'][$row['qid']][] = 0;	// dummy id
+	        	$this->data['dep_avid'][$row['qid']][] = SELECTOR_DEP_AVID;	// dummy id
 	        	$this->data['dep_value'][$row['qid']][] = '[a text]'; // L10N: text_answer_label
 	        	break;
 	        	
