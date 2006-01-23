@@ -963,7 +963,7 @@ class UCCASS_Main
     	{
 	    	// 1. Delete selectors
 	    	$query_selectors = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
-	                		"SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
+	                		"(SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list))";
 	        $rs = $this->db->Execute($query_selectors);
 	        if($rs === FALSE)
 	        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg(). "($query_selectors)"); return; }
