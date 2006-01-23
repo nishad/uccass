@@ -48,9 +48,10 @@ if(count($_POST) > 0)
                 break;
 
                 case 'upgrade_181': //upgrade from 1.8.1 to 1.8.2
-                	// TODO: implement - add this option to the select tag and language.default.php
+                	$successMsg = $c->lang('install_181_good');
                 case 'upgrade_182': // upgrade from 1.8.2 to any higher
-                	$successMsg = $c->lang('upgrade_182_good');
+            		if(!isset($successMsg))
+            		{ $successMsg = $c->lang('upgrade_182_good'); }
                 	$ignoreData = true;
                 case 'newinstallation':
                 	require('classes/databasecreator.class.php');
@@ -63,7 +64,7 @@ if(count($_POST) > 0)
                     	if($success)
                     	{
                     		if(!isset($successMsg))
-                    		{ $successMsg = $c->lang('install_v181_good'); } 
+                    		{ $successMsg = $c->lang('install_v182_good'); } 
                     		echo $successMsg; 
                     	}
                     }

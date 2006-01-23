@@ -18,6 +18,7 @@ $lang['conf_form_begin'] = '<html><head><title>UCCASS Configuration</title></hea
                                    <option value="upgrade_105">Upgrade From v1.05</option>
                                    <option value="upgrade_106">Upgrade From v1.06</option>
                                    <option value="upgrade_180">Upgrade From v1.8.0</option>
+                                   <option value="upgrade_181">Upgrade From v1.8.1</option>
                                    <option value="upgrade_182">Upgrade From v1.8.2</option>
                                  </select>
                                </td></tr><tr><td>
@@ -58,8 +59,10 @@ $lang['install_v106_v180_good'] = '<p><strong>Upgrade from v1.06 to v1.8.0 succe
                                    If you had private surveys or public results, use the default Admin user to recreate
                                    those access controls with the new system.<br /><br />';
 $lang['install_v180_v181_good'] = '<p><strong>Upgrade from v1.8.0 to v1.8.1 successful.</strong></p>';
+$lang['install_181_good'] = '<p><strong>Upgrade from v1.8.1 to v1.8.2 successful.</strong></p>';
 $lang['upgrade_182_good'] = '<p><strong>Upgrade successful.</strong></p>';
 $lang['install_v181_good'] = '<p><strong>New installation of v1.8.1 completed (and database tables were created) successfully.</strong></p>';
+$lang['install_v182_good'] = '<p><strong>New installation of v1.8.2 completed (and database tables were created) successfully.</strong></p>';
 $lang['install_config_only'] = '<p><strong>Configuration updated successfully.</strong></p>';
 $lang['install_no_choose'] = '<p>You did not choose an installation type. Please go back to the installation page
                               and choose an installation type at the top of the page.</p>';
