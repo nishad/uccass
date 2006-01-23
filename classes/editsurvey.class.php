@@ -153,15 +153,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
     {
         $error = array();
 
-        //Delete all references to this survey in database
-        $tables = array('questions','results','results_text','ip_track','surveys','dependencies','time_limit','users','completed_surveys');
-        foreach($tables as $tbl)
-        {
-            $rs = $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}$tbl WHERE sid = $sid");
-            if($rs === FALSE)
-            { $error[] = $this->lang['db_table_error'] .  $this->CONF['db_tbl_prefix'] . $tbl; }
-        }
-
         //Loop through answer types assigned to survey and delete answer_values
         //assigned to each answer type. Then delete all answer types assigned to survey
         $query1 = "SELECT aid FROM {$this->CONF['db_tbl_prefix']}answer_types at WHERE at.sid = $sid";
@@ -173,20 +164,22 @@ class UCCASS_EditSurvey extends UCCASS_Main
             $aid_list = '';
             while($r = $rs->FetchRow($rs))
             { $aid_list .= $r['aid'] . ','; }
-            if(!empty($aid_list))
-            {
-                $aid_list = substr($aid_list,0,-1);
-                $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
-                $rs = $this->db->Execute($query2);
-                if($rs === FALSE)
-                { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
-            }
+            $this->delete_answer_values($aid_list);
         }
 
         $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE sid = $sid";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
         { $error[] = $this->lang['db_query_error'] . $this->db->ErrorMsg(); }
+
+        //Delete all references to this survey in database
+        $tables = array('questions','results','results_text','ip_track','surveys','dependencies','time_limit','users','completed_surveys');
+        foreach($tables as $tbl)
+        {
+            $rs = $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}$tbl WHERE sid = $sid");
+            if($rs === FALSE)
+            { $error[] = $this->lang['db_table_error'] .  $this->CONF['db_tbl_prefix'] . $tbl; }
+        }
 
         //If no errors, redirect back to index or admin page
         //based upon whether the user is logged in as an admin or not

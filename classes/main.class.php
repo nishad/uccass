@@ -955,6 +955,26 @@ class UCCASS_Main
 
     function lang($key)
     { return (isset($this->lang[$key])) ? $this->lang[$key] : "(localized message error: missing message for the key $key in the template {$this->CONF['template_path']})"; }
+    
+    /** Delete answer values[and their selectors, if any] for the given answer types. */
+    function delete_answer_values($aid_list)
+    {
+    	if(!empty($aid_list))
+    	{
+	    	// 1. Delete selectors
+	    	$query_selectors = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
+	                		"SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
+	        $rs = $this->db->Execute($query_selectors);
+	        if($rs === FALSE)
+	        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg(). "($query_selectors)"); return; }
+	        
+	        // 2. Delete the answer values
+	        $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
+	        $rs = $this->db->Execute($query2);
+	        if($rs === FALSE)
+	        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
+    	}
+    }
 }
 
 ?>
