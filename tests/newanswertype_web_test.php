@@ -136,7 +136,6 @@ class TestOfNewAnswerType extends UCCASS_WebTestCase
     	$images = array_fill ( 1, $answer_count, 'aquabar.gif' );
     	$answer_values = array('value[]' => $this->dynaanswer_values, 
 			'numeric_value[]' => range(1, $answer_count), 'image[]' => $images);
-    	// TODO: set the selectors for $this->dynaanswer_values
     	
     	// Submit
     	$this->assertTrue( $this->clickSubmitByName('submit', $answer_values)/*, 'Submit the new answer type failed. %s'*/ );
@@ -146,7 +145,7 @@ class TestOfNewAnswerType extends UCCASS_WebTestCase
     	$success = $this->assertWantedText('New answer type successfully added.');		// L10N
     	$success = $success && $this->assertNoUnwantedText('Error');	// L10N
     	if($success)
-    	{ $this->assertTrue($this->_insert_selectors(), 'Failed to insrt selectors for the dynamic answer type' ); }
+    	{ $this->assertTrue($this->_insert_selectors(), 'Failed to insert selectors for the dynamic answer type' ); }
     	else
     	{ $this->showSource(); }
     }

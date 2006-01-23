@@ -3,7 +3,7 @@
      *	Base include file for SimpleTest.
      *	@package	SimpleTest
      *	@subpackage	WebTester
-     *	@version	$Id: form.php,v 1.1 2006/01/09 15:11:38 malyvelky Exp $
+     *	@version	$Id: form.php,v 1.2 2006/01/23 09:15:30 malyvelky Exp $
      */
      
     /**#@+
@@ -352,7 +352,7 @@
             for ($i = 0, $count = count($this->_widgets); $i < $count; $i++) {
                 $encoding->add(
                         $this->_widgets[$i]->getName(),
-                        $this->_widgets[$i]->getValue());//echo "Form._getEncoding: add ".$this->_widgets[$i]->getName()." = ".$this->_widgets[$i]->getValue()."<br>";//TODO: smaz
+                        $this->_widgets[$i]->getValue());
             } 
             return $encoding;
         }

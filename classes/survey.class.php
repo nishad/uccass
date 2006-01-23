@@ -444,7 +444,6 @@ class UCCASS_Survey extends UCCASS_Main
                             $selector = isset($dependencyActions[DEPEND_MODE_SELECTOR])? 
                             	$dependencyActions[DEPEND_MODE_SELECTOR]
                             	: false;
-                            // FIXME: if it's a dynamic answer type and we got no value for the selector throw an error
                             // TODO: Make it possible to get the selector's value also from other sources, e.g.
                             // 	the respondent's credentials (id from an invitation mail...)
 
@@ -524,7 +523,7 @@ class UCCASS_Survey extends UCCASS_Main
 
                             if(isset($_SESSION['take_survey']['answer'][$r['qid']]))
                             {
-                                switch($r['type'])	// TODO: handle ANSWER_TYPE_DYNAMIC
+                                switch($r['type'])
                                 {
                                     case ANSWER_TYPE_MM:
                                         foreach($_SESSION['take_survey']['answer'][$r['qid']] as $value)

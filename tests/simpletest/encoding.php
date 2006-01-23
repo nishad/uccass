@@ -3,7 +3,7 @@
      *	base include file for SimpleTest
      *	@package	SimpleTest
      *	@subpackage	WebTester
-     *	@version	$Id: encoding.php,v 1.2 2006/01/20 14:52:43 malyvelky Exp $
+     *	@version	$Id: encoding.php,v 1.3 2006/01/23 09:15:30 malyvelky Exp $
      */
 
     /**
@@ -149,7 +149,7 @@
                     $statements[] = "$key=" . urlencode($value);
                 }
             }
-            $coords = ($this->_x !== false) ? '?' . $this->_x . ',' . $this->_y : '';//echo implode('&', $statements) . $coords.'<br>';//TODO: sma�
+            $coords = ($this->_x !== false) ? '?' . $this->_x . ',' . $this->_y : '';
             return implode('&', $statements) . $coords;
         }
     }

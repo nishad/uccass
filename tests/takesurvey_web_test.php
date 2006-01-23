@@ -208,7 +208,6 @@ class TestOfTakeSurvey extends UCCASS_WebTestCase
     	$this->assertWantedText('question6_dynamic');
     	$this->assertField('next', 'Finish', 'This should be the last page ".%s');	// L10N
     	$question_name = $this->find_question_field_name();
-    	// TODO: use $this->dynaanswer_values; also in setting the selector determining text field in q2
     	$answers = array_values($this->dynaanswer_values);
     	$this->assertTrue( $this->setField($question_name, array($answers[0])) ); // answer matching the selector set in subtest_question2_text
     	$this->assertFalse( $this->setField($question_name, array($answers[1])) ); // this answer should be excluded by the selector

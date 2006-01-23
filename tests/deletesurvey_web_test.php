@@ -83,55 +83,7 @@ class TestOfDeleteSurvey extends UCCASS_WebTestCase
     	}
     } // test_delete_survey
     
-    /**
-     * Delete the survey with the given name from the database.
-     * 
-     * @param string $survey_name Name of the survey to delete.
-     * @return True upon success
-     */
-    /*function delete_survey($survey_name = false)
-    {
-    	if($survey_name === false)
-    	{ $survey_name = $this->testSurveyName; }
-    	
-    	$success = true;
-    	$error_msg = "TestOfCreateSurvey::delete_survey problem with ";
-    	$tbl_prefix = $this->uccassMain->CONF['db_tbl_prefix'];
-    	// Get the survey
-    	$sid = $this->selectOne('surveys', "name='{$this->testSurveyName}'", 'sid');
-    	if($sid)
-    	{
-    		// TODO: delete all answer_types of this query and their answer_values
-    		// TODO: Delete survey contents: answer types, answer values, questions and dependencies
-    		// Get all survey answer types
-    		if( $this->exists_in_table('answer_types', "sid=$sid") )
-    		{
-			// Delete the survey answers
-			$query = "DELETE FROM {$tbl_prefix}answer_values " .
-		    			" WHERE aid IN (SELECT aid $answer_types_from)";
-		    	$this->query($query, "$error_msg delete survey's answer values (none exist?)", E_USER_NOTICE);
-    		}
-
-		// Delete all entities depending on this survey	    	
-	    	foreach($this->dependant_tables as $table2delete)
-	    	{
-	    		if($this->exists_in_table($table2delete, "sid=$sid"))
-	    		{
-	    			$success = $success && $this->query("DELETE FROM {$tbl_prefix}$table2delete WHERE sid=$sid", 
-					"$error_msg delete survey's $table2delete", 
-	    				E_USER_WARNING);
-	    		}	
-	    	} // for each dependant table
-	    
-	    	// Delete the survey itself
-	    	$rs_del_survey = $this->query("DELETE $from WHERE sid=$sid", "$error_msg delete survey", E_USER_WARNING);
-    	}
-    	else
-    	{ $success = false; }
-    	
-    	return $success;
-    }
-    */
+   
     
 } // TestOfDeleteSurvey
 ?>

@@ -448,7 +448,7 @@ class UCCASS_Main
     * 0 => '1', 1 => '2', ), 'image' => array ( 0 => 'bar.gif', 1 => 'bar.gif',
     * ), 1 => 'A blondie', 2 => 'A brunette', )
     * 
-    *************************/ // FIXME: $selector is false or an array of answers
+    *************************/
     function get_answer_values($id,$by=BY_AID,$mode=SAFE_STRING_TEXT, $selectors = false)
     {
         $retval = FALSE;
@@ -501,7 +501,7 @@ class UCCASS_Main
                 $retval['numeric_value'][] = $r['numeric_value'];
                 $retval['image'][] = $r['image'];
                 $retval[$r['avid']] = $r['value'];
-                $isDynamic = $isDynamic || ($r['is_dynamic'] == 1); // FIXME: check the field is_dynamic instead
+                $isDynamic = $isDynamic || ($r['is_dynamic'] == 1);
             }
 
             if(!$isDynamic)

@@ -58,7 +58,6 @@ class TestOfDynamicAnswerType extends UnitTestCase
      * Test that test_get_answer_values returns what expected for a dynamic
      * answer type.
      * Note: We assume the operator used to match selectors is '='.
-     * TODO: test that caching doesn't do bad things - select 2* for the same
      * aid and different selector
      */
     function test_get_answer_values_dynamic()

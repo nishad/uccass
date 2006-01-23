@@ -1007,7 +1007,6 @@ class UCCASS_EditSurvey extends UCCASS_Main
             }while($r = $rs->FetchRow($rs));
 
             //load dependencies for current survey (note: selector dependencies haven't a valid avid)
-            // FIXME: modify to select => display also selector dependencies [on S questions]
             $query = "SELECT d.qid, d.dep_qid, av.value, d.dep_option FROM {$this->CONF['db_tbl_prefix']}dependencies d
                       LEFT JOIN {$this->CONF['db_tbl_prefix']}answer_values av ON (d.dep_aid = av.avid) WHERE d.sid = $sid";
             $rs = $this->db->Execute($query);
