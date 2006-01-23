@@ -885,7 +885,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     	$messages = array();
     	$result = array("errors" => &$errors, "messages" => &$messages);
     	
-    	$query_id_map = "INSERT INTO {$this->CONF['db_tbl_prefix']}temp_avid_map (avid,key) VALUES ";
+    	$query_id_map = "INSERT INTO {$this->CONF['db_tbl_prefix']}temp_avid_map (avid,avkey) VALUES ";
     	$query_atype = "INSERT INTO {$this->CONF['db_tbl_prefix']}answer_values (avid,aid,value,numeric_value,image) VALUES ";
     	
     	$csv = $this->_new_csv_processor($filename);
@@ -951,7 +951,7 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     	$messages = array();
     	$result = array("errors" => &$errors, "messages" => &$messages);
     	
-    	$query_key2avid = "SELECT avid FROM {$this->CONF['db_tbl_prefix']}temp_avid_map WHERE key=";
+    	$query_key2avid = "SELECT avid FROM {$this->CONF['db_tbl_prefix']}temp_avid_map WHERE avkey=";
     	$query_selector = "INSERT INTO {$this->CONF['db_tbl_prefix']}dyna_answer_selectors (avid,selector) VALUES ";
     	
 		$csv = $this->_new_csv_processor($filename);

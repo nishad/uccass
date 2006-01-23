@@ -463,7 +463,7 @@ NOTE ON SEQUENCES:
 for a dynamic answer type -->
 <table name="temp_avid_map">
 	<!-- The key used to identify the imported answer values in the original data source. -->
-    <field name="key" type="C" size="255">
+    <field name="avkey" type="C" size="255">
       <NOTNULL/>
 	  <DEFAULT value=""/>
     </field>
@@ -472,8 +472,8 @@ for a dynamic answer type -->
       <NOTNULL/>
       <DEFAULT value="0"/>
     </field>
-    <index name="idx_temp_avid_map_key">
-      <col>key</col>
+    <index name="idx_temp_avid_map_avkey">
+      <col>avkey</col>
     </index>
     <opt platform="mysql">CHARACTER SET latin1 type=MyISAM</opt>
 </table>
