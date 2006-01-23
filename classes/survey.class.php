@@ -409,20 +409,6 @@ class UCCASS_Survey extends UCCASS_Main
 
                         $q['num_answers'] = $r['num_answers'];
 
-                        if($require_question)
-                        { $r['num_required'] = $r['num_answers']; }
-
-                        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
-                        {
-                            $_SESSION['take_survey']['req'][$page][$r['qid']] = $r['num_required'];
-                            $q['num_required'] = $r['num_required'];
-
-                            if($r['num_answers'] > 1)
-                            { $q['req_label'] = $r['num_required']; }
-
-                            $q['required_text'] = $this->smarty->Fetch($this->CONF['template'].'/question_required.tpl');
-                        }
-
                         $q['label'] = $this->SfStr->getSafeString($r['label'],$survey['survey_text_mode']);
 
                         //
@@ -464,6 +450,29 @@ class UCCASS_Survey extends UCCASS_Main
 
                             // 2. Load the answers
                             $tmp = $this->get_answer_values($r['aid'],BY_AID,$survey['survey_text_mode'], $selector);
+                            
+                            // If get_answer_values returned no answers do not require it
+                            if(!$tmp)
+                            { 
+                            	$q['num_required'] = 0;
+                            	unset($_SESSION['take_survey']['req'][$page][$r['qid']]);
+                            }
+                            elseif($require_question)
+	                        { 
+	                        	$r['num_required'] = $r['num_answers'];
+	
+		                        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
+		                        {
+		                            $_SESSION['take_survey']['req'][$page][$r['qid']] = $r['num_required'];
+		                            $q['num_required'] = $r['num_required'];
+		
+		                            if($r['num_answers'] > 1)
+		                            { $q['req_label'] = $r['num_required']; }
+		
+		                            $q['required_text'] = $this->smarty->Fetch($this->CONF['template'].'/question_required.tpl');
+		                        }
+	                        }
+                            
                             $q['value'] = $tmp['value'];
                             $q['avid'] = $tmp['avid'];
 
