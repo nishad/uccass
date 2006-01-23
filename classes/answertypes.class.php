@@ -306,7 +306,15 @@ class UCCASS_AnswerTypes extends UCCASS_Main
             {
                 while($r = $rs->FetchRow($rs))
                 { $aid_list = $r['aid'] . ','; }
+                
                 $aid_list = substr($aid_list,0,-1);
+                // 1. Delete also selectors if any
+                $query_selectors = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
+                		"SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
+                $rs = $this->db->Execute($query_selectors);
+                if($rs === FALSE)
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg(). "($query_selectors)"); return; }
+                // 2. Delete the answer values
                 $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
                 $rs = $this->db->Execute($query2);
                 if($rs === FALSE)
@@ -493,7 +501,12 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         case ANSWER_TYPE_T:
                         case ANSWER_TYPE_S:
                         case ANSWER_TYPE_N:
-                            $query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid";
+                            $query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
+                							"SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid";
+                			$query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid = $aid";
+                $rs = $this->db->Execute($query_selectors);
+                if($rs === FALSE)
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg(). "($query_selectors)"); return; }
                         break;
 
                         case ANSWER_TYPE_MS:
@@ -539,7 +552,12 @@ class UCCASS_AnswerTypes extends UCCASS_Main
 
 
                             if(count($input['delete_avid']))
-                            { $query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE avid IN (" . implode(',',$input['delete_avid']) . ')'; }
+                            {
+                            	$avid_list = implode(',',$input['delete_avid']);
+                            	$query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
+                					"SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";  
+                            	$query[] = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE avid IN ($avid_list)"; 
+                            }
                         break;
                     }
 
@@ -722,7 +740,10 @@ class UCCASS_AnswerTypes extends UCCASS_Main
                         $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_types WHERE aid = $aid");
                         // Delete the answer values already successfully inserted, if any
                         foreach($inserted_answers_ids as $inserted_avid) 
-                        { $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE avid = $inserted_avid"); }
+                        { 
+                        	$this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid = $inserted_avid");
+                        	$this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE avid = $inserted_avid"); 
+                        }
                         return false;
                     } 
                     else	// Store the id of the successfully inserted value for deletion on error 
