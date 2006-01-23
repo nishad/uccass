@@ -78,8 +78,8 @@ class TestOfAnswerTypes extends UnitTestCase
     	$answerId = 99;
     	$prefix = $this->uccassMain->CONF['db_tbl_prefix'];
 
-    	$this->mockADOConnection->expectArgumentsAt(0, 'GenID',array($prefix.'answer_types_sequence')); // * => any prefix
-    	$this->mockADOConnection->setReturnValueAt(0, 'GenID', $answerId);
+    	//$this->mockADOConnection->expectArgumentsAt(0, 'GenID',array($prefix.'answer_types_sequence')); // * => any prefix
+    	//$this->mockADOConnection->setReturnValueAt(0, 'GenID', $answerId);
     	$query = "INSERT INTO {$prefix}answer_types (aid, name, type, label, sid, is_dynamic) VALUES"
                  . "($answerId, {$input['name']},{$input['type']},{$input['label']},{$input['sid']}, {$input['is_dynamic']})";
         $this->mockADOConnection->expectArgumentsAt(0,'Execute',array($query));
@@ -87,9 +87,9 @@ class TestOfAnswerTypes extends UnitTestCase
              
     	// Insert 2 answer values: 2* (GenID + Execute an insert)
     	$answerValuesIds = array(1000,1001);
-    	$this->mockADOConnection->expectArgumentsAt(1, 'GenID',array($prefix.'answer_values_sequence')); // * => any prefix    	
+    	$this->mockADOConnection->expectArgumentsAt(0, 'GenID',array($prefix.'answer_values_sequence')); // * => any prefix    	
     	$this->mockADOConnection->setReturnValueAt(0, 'GenID', $answerValuesIds[0]);
-    	$this->mockADOConnection->expectArgumentsAt(2, 'GenID',array($prefix.'answer_values_sequence')); // * => any prefix
+    	$this->mockADOConnection->expectArgumentsAt(1, 'GenID',array($prefix.'answer_values_sequence')); // * => any prefix
     	$this->mockADOConnection->setReturnValueAt(1, 'GenID', $answerValuesIds[1]);
         $query = "INSERT INTO {$prefix}answer_values (avid, aid, value, numeric_value, image) VALUES ";
         for($x = 0; $x < 2; $x++) 
@@ -100,7 +100,7 @@ class TestOfAnswerTypes extends UnitTestCase
         }
         
         // The test itself
-        $this->assertTrue( $this->answerTypes->db_insert_answer_type($input) );
+        $this->assertTrue( $this->answerTypes->db_insert_answer_type($input, $answerId) );
         
         // Verify the number of calls
     	$this->mockADOConnection->tally(); // check we got the expected calls
