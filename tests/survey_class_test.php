@@ -18,7 +18,7 @@ require_once(SIMPLE_TEST . 'reporter.php');
 require_once('classes/survey.class.php');
 
 /**
- * Test of the class TAnswerType (dynamic vs. norm. type)
+ * Test methods of UCCASS_Survey.
  */
 class TestOfSurveyClass extends UnitTestCase 
 {
