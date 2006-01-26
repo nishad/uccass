@@ -411,6 +411,9 @@ class UCCASS_Survey extends UCCASS_Main
 
                         $q['label'] = $this->SfStr->getSafeString($r['label'],$survey['survey_text_mode']);
 
+                        // Check whether the question shall be required and set it so
+                        $this->_prepare_required($q, $r, $page, $require_question);
+                        
                         //
                         //		Prepare text-answer questions
                         //
@@ -452,26 +455,7 @@ class UCCASS_Survey extends UCCASS_Main
                             
                             // If get_answer_values returned no answers do not require it
                             if(!$tmp)
-                            { 
-                            	$q['num_required'] = 0;
-                            	unset($_SESSION['take_survey']['req'][$page][$r['qid']]);
-                            }
-                            else
-	                        { 
-	                        	if($require_question)
-	                        	{ $r['num_required'] = $r['num_answers']; }
-	
-		                        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
-		                        {
-		                            $_SESSION['take_survey']['req'][$page][$r['qid']] = $r['num_required'];
-		                            $q['num_required'] = $r['num_required'];
-		
-		                            if($r['num_answers'] > 1)
-		                            { $q['req_label'] = $r['num_required']; }
-		
-		                            $q['required_text'] = $this->smarty->Fetch($this->CONF['template'].'/question_required.tpl');
-		                        }
-	                        }
+                            { $this->_unset_required($q, $r, $page); }
                             
                             $q['value'] = $tmp['value'];
                             $q['avid'] = $tmp['avid'];
@@ -987,6 +971,50 @@ class UCCASS_Survey extends UCCASS_Main
             }
         }
 	} // save_answers2session
+	
+	/**
+	 * No answers to the question will be required.
+	 * @param array $q The array where question info is stored
+	 * @param array $r Result row containing info of the current question
+	 * @param int $page Number of the current survey page
+	 * 
+	 * @see _prepare_required
+	 */
+	function _unset_required(&$q, &$r, $page)
+	{
+		unset($_SESSION['take_survey']['req'][$page][$r['qid']]);
+		$q['num_required'] = 0;
+		unset($q['req_label']);
+		unset($q['required_text']);	
+	}
+	
+	/**
+	 * Check whether an answer to the question should be required and if yes,
+	 * do require it.
+	 * @param array $q The array where question info is stored
+	 * @param array $r Result row containing info of the current question
+	 * @param int $page Number of the current survey page
+	 * @param bool $require_question Shall the question be required? Usually
+	 * true if a 'require' dependency is satisfied. 
+	 * 
+	 * @see _unset_required
+	 */
+	function _prepare_required(&$q, &$r, $page, $require_question)
+	{
+		if($require_question)
+    	{ $r['num_required'] = $r['num_answers']; }
+
+        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
+        {
+            $_SESSION['take_survey']['req'][$page][$r['qid']] = $r['num_required'];
+            $q['num_required'] = $r['num_required'];
+
+            if($r['num_answers'] > 1)
+            { $q['req_label'] = $r['num_required']; }
+
+            $q['required_text'] = $this->smarty->Fetch($this->CONF['template'].'/question_required.tpl');
+        }
+	}
 
 }
 
