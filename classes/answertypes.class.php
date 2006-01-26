@@ -785,9 +785,9 @@ class UCCASS_AnswerTypes extends UCCASS_Main
     	// Process the files
     	if($answer_values_given)
     	{
-	    	ini_set("include_path", 'classes/external' . PATH_SEPARATOR . ini_get("include_path"));
-	    	require_once 'HTTP/Upload.php';
-	    	require_once 'class.csv.php';
+	    	// @ini_set("include_path", 'classes/external' . PATH_SEPARATOR . ini_get("include_path")); // fails if php safe mode on
+	    	require_once 'classes/external/HTTP/Upload.php';
+	    	require_once 'classes/external/class.csv.php';
 	    	
 	    	$upload = new http_upload('en');	// use english for errors
 	    	
