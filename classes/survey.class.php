@@ -456,9 +456,10 @@ class UCCASS_Survey extends UCCASS_Main
                             	$q['num_required'] = 0;
                             	unset($_SESSION['take_survey']['req'][$page][$r['qid']]);
                             }
-                            elseif($require_question)
+                            else
 	                        { 
-	                        	$r['num_required'] = $r['num_answers'];
+	                        	if($require_question)
+	                        	{ $r['num_required'] = $r['num_answers']; }
 	
 		                        if($r['num_required'] > 0 && $r['type'] != ANSWER_TYPE_N)
 		                        {
