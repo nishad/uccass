@@ -312,6 +312,8 @@ form.php (and SimpleFormEncoding::add(key,value) and its asString in encoding.ph
 
 
 <h4>If the tests fail:</h4>
+<p style="color:red">NOTICE: If PHP safe mode is on, the web test will always fail (because the emulated browser is not allowed to send requests to the server, I guess).</p>
+
 Note: If the tests fail it doesn't necessarily mean that there's anything bad with the code. It may only 
 mean that the code/functionality changed and the tests grow obsolete. It may happen if a label that is 
 hard-coded in a web test changes or if a sql query hard-coded in a test mock object changes. 
