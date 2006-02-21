@@ -793,7 +793,7 @@ class UCCASS_Survey extends UCCASS_Main
         $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}time_limit (sequence,sid,elapsed_time) VALUES ($id,{$survey['sid']},$etime)";
         $rs = $this->db->Execute($query);
         if($rs === FALSE)
-        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
+        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg() . " (sql:$query)"); }
 
         if(isset($_SESSION['priv'][$survey['sid']][TAKE_PRIV]))
         { unset($_SESSION['priv'][$survey['sid']][TAKE_PRIV]); }
