@@ -1,12 +1,23 @@
 <?php
-
-/*
+/**
  * Smarty plugin
- * -------------------------------------------------------------
- * Type:     function
- * Name:     math
- * Purpose:  handle math computations in template
- * -------------------------------------------------------------
+ * @package Smarty
+ * @subpackage plugins
+ */
+
+
+/**
+ * Smarty {math} function plugin
+ *
+ * Type:     function<br>
+ * Name:     math<br>
+ * Purpose:  handle math computations in template<br>
+ * @link http://smarty.php.net/manual/en/language.function.math.php {math}
+ *          (Smarty online manual)
+ * @author   Monte Ohrt <monte at ohrt dot com>
+ * @param array
+ * @param Smarty
+ * @return string
  */
 function smarty_function_math($params, &$smarty)
 {
@@ -25,13 +36,13 @@ function smarty_function_math($params, &$smarty)
     }
 
     // match all vars in equation, make sure all are passed
-    preg_match_all("![a-zA-Z][a-zA-Z0-9]*!",$equation, $match);
+    preg_match_all("!(?:0x[a-fA-F0-9]+)|([a-zA-Z][a-zA-Z0-9_]+)!",$equation, $match);
     $allowed_funcs = array('int','abs','ceil','cos','exp','floor','log','log10',
                            'max','min','pi','pow','rand','round','sin','sqrt','srand','tan');
-
-    foreach($match[0] as $curr_var) {
-        if (!in_array($curr_var,array_keys($params)) && !in_array($curr_var, $allowed_funcs)) {
-            $smarty->trigger_error("math: parameter $curr_var not passed as argument");
+    
+    foreach($match[1] as $curr_var) {
+        if ($curr_var && !in_array($curr_var, array_keys($params)) && !in_array($curr_var, $allowed_funcs)) {
+            $smarty->trigger_error("math: function call $curr_var not allowed");
             return;
         }
     }
@@ -47,7 +58,7 @@ function smarty_function_math($params, &$smarty)
                 $smarty->trigger_error("math: parameter $key: is not numeric");
                 return;
             }
-            $equation = preg_replace("/\b$key\b/",$val, $equation);
+            $equation = preg_replace("/\b$key\b/", " \$params['$key'] ", $equation);
         }
     }
 
@@ -55,7 +66,7 @@ function smarty_function_math($params, &$smarty)
 
     if (empty($params['format'])) {
         if (empty($params['assign'])) {
-            echo $smarty_math_result;
+            return $smarty_math_result;
         } else {
             $smarty->assign($params['assign'],$smarty_math_result);
         }
