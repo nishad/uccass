@@ -33,6 +33,7 @@ $lang['config_change_success'] = 'Configuration values have been saved.<br><br>
 
 //Configuration Warnings (main.class.php)
 $lang['error'] = 'Error';
+$lang['no_survey'] = 'Requested survey does not exist.';
 $lang['install_warning'] = 'WARNING: install.php file still exists. UCCASS will not run with this file present.
                             Click <a href="install.php">here</a> to run the installation program or move/rename the install.php
                             file so that the installation program can not be re-run.';
@@ -46,9 +47,9 @@ $lang['template_path_writable_warning'] = 'WARNING: Smarty compiled template dir
 $lang['db_connect_error'] = 'Error connecting to database: ';
 
 //Installation Version Notices
-$lang['install_v104_v105_good'] = '<p><strong>Upgrade from v1.04 to v1.05 successful.</strong></p>';
-$lang['install_v105_v106_good'] = '<p><strong>Upgrade from v1.05 to v1.06 successful.</strong></p>';
-$lang['install_v106_v180_good'] = '<p><strong>Upgrade from v1.06 to v1.8.0 successful.</strong></p>
+$lang['upgrade_v104_v105_good'] = '<p><strong>Upgrade from v1.04 to v1.05 successful.</strong></p>';
+$lang['upgrade_v105_v106_good'] = '<p><strong>Upgrade from v1.05 to v1.06 successful.</strong></p>';
+$lang['upgrade_v106_v180_good'] = '<p><strong>Upgrade from v1.06 to v1.8.0 successful.</strong></p>
                                    <strong>v1.8.0 Notice</strong>: A default administrator user was created with a
                                    username of &quot;admin&quot; and a password of &quot;password&quot;. Because
                                    of the changes in the access controls for v1.8.0, you will need to use the default
@@ -58,11 +59,15 @@ $lang['install_v106_v180_good'] = '<p><strong>Upgrade from v1.06 to v1.8.0 succe
                                    no access control (anyone can take them) and private results (only admin can see them).
                                    If you had private surveys or public results, use the default Admin user to recreate
                                    those access controls with the new system.<br /><br />';
+$lang['upgrade_v180_v181_good'] = '<p><strong>Upgrade from v1.8.0 to v1.8.1 successful.</strong></p>';
+$lang['upgrade_v181_v182_good'] = '<p><strong>Upgrade from v1.8.1 to v1.8.2 successful.</strong></p>';
+$lang['install_v182_good'] = '<p><strong>New installation of v1.8.2 completed (and database tables were created) successfully.</strong></p>';
 $lang['install_v180_v181_good'] = '<p><strong>Upgrade from v1.8.0 to v1.8.1 successful.</strong></p>';
 $lang['install_181_good'] = '<p><strong>Upgrade from v1.8.1 to v1.8.2 successful.</strong></p>';
 $lang['upgrade_182_good'] = '<p><strong>Upgrade successful.</strong></p>';
 $lang['install_v181_good'] = '<p><strong>New installation of v1.8.1 completed (and database tables were created) successfully.</strong></p>';
 $lang['install_v182_good'] = '<p><strong>New installation of v1.8.2 completed (and database tables were created) successfully.</strong></p>';
+
 $lang['install_config_only'] = '<p><strong>Configuration updated successfully.</strong></p>';
 $lang['install_no_choose'] = '<p>You did not choose an installation type. Please go back to the installation page
                               and choose an installation type at the top of the page.</p>';
@@ -77,4 +82,8 @@ $lang['install_good'] = '<p>Installation sucessful. To complete the installation
                          </blockquote>
                          It is advised that you change the login and password immediately.</p>
                          <p>Click on the link below to begin using your Survey System.</p>';
+$lang['begin'] = 'Begin using UCCASS';
+
+$lang['smarty_sub_dir_warning'] = 'WARNING: Installation was successful, but Smarty is unable to create sub-directories in the compiled templates folder. You must set $use_sub_dirs to FALSE
+    on line 151 of the smarty/Smarty.class.php file before continuing. ';
 ?>

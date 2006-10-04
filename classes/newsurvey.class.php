@@ -255,7 +255,7 @@ class UCCASS_NewSurvey extends UCCASS_Main
     function _copyAnswerValues($sid, $aid_old, $aid_new, &$new)
     {
         $query = "SELECT avid, value, numeric_value, image FROM {$this->CONF['db_tbl_prefix']}answer_values
-                  WHERE aid = {$aid_old}";
+                  WHERE aid = {$aid_old} ORDER BY avid ASC";
 
         $rs = $this->db->Execute($query);
         if($rs === FALSE)

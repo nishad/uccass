@@ -8,11 +8,9 @@
         &nbsp;|&nbsp;
         <a href="{$conf.html}/changelog.txt">Change Log</a>
         &nbsp;|&nbsp;
-        <a href="{$conf.html}/todo.txt">To Do List</a>
-        &nbsp;|&nbsp;
-        <a href="{$conf.html}/bugs.txt">Bugs</a> ]
+        <a href="{$conf.html}/todo.txt">To Do List</a> ]
       <br />
-      Powered by <a href="http://www.bigredspark.com/survey.html">UCCASS {$conf.version}</a>. Copyright &copy; 2003-2005 <a href="http://www.bigredspark.com/">John W. Holmes</a>, All Rights Reserved
+      Powered by <a href="http://www.bigredspark.com/survey.html">UCCASS {$conf.version}</a>. Copyright &copy; 2003-2006 <a href="http://www.bigredspark.com/">John W. Holmes</a>, All Rights Reserved
       <!-- YOU MAY NOT REMOVE THIS COPYRIGHT NOTICE WITHOUT PERMISSION FROM THE UCCASS AUTHOR -->
     </div>
   </body>

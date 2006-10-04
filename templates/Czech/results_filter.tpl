@@ -25,12 +25,12 @@
           </select>
           <input type="submit" name="results_action" value="Go">
           <a href="{$conf.html}/docs/index.html#filter_results">[?]</a>
-          <span style="margin-left:20px">
+          <!-- <span style="margin-left:20px">
             <select name="report_id" size="1">
               {section name="r" loop=$survey.report_id}
                 <option value="{$survey.report_id[r]}">{$survey.report_name[r]}</option>
               {/section}
             </select>
             <input type="submit" name="report_submit" value="Load Custom Report">
-          </span>
+          </span> -->
         </div>

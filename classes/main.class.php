@@ -2,6 +2,7 @@
 
 //======================================================
 // Copyright (C) 2004 John W. Holmes, All Rights Reserved
+// - Some parts Copyright (C) 2005 Jakub Holy. All Rights Reserved
 //
 // This file is part of the Unit Command Climate
 // Assessment and Survey System (UCCASS)
@@ -81,6 +82,7 @@ define('LOOKBACK_END_DELIMITER','}');
 //Export CSV Settings
 define('EXPORT_CSV_TEXT',1);
 define('EXPORT_CSV_NUMERIC',2);
+define('EXPORT_SPSS',3);				// Added by Claudio Redaelli
 define('MULTI_ANSWER_SEPERATOR',', ');
 
 //HTML Constants
@@ -118,7 +120,7 @@ class UCCASS_Main
     *********************/
     function load_configuration()
     {
-        require('language.default.php');
+        require_once('language.default.php');
         $this->lang = &$lang;
 
         //Ensure install.php file has be removed
@@ -187,13 +189,13 @@ class UCCASS_Main
         $conn = $this->db->Connect($this->CONF['db_host'],$this->CONF['db_user'],$this->CONF['db_password'],$this->CONF['db_database']);
         if(!$conn)
         { $this->error($this->lang['db_connect_error'] . $this->db->ErrorMsg()); return; }
-        // MySQL: It's very important that both database tables and the client (php) use 
+        // MySQL: It's very important that both database tables and the client (php) use
         // the same encoding - if they were different, MySQL would convert from one to the other.
         // The client encoding is determined by php - by default it's latin1 but may be changed;
         // you can find out you current encoding - call mysql_client_encoding().
         // This holds even if you've set utf-8 in uccass config - it doesn't matter (I hope) that
         // the data is in utf-8 and the DB believes it's in latin1 - the important point is that
-        // MySQL doesn't perform any destructive conversions.    
+        // MySQL doesn't perform any destructive conversions.
         if( strcasecmp($this->CONF['db_type'], 'mysql') == 0 )
         { $this->db->Execute("SET NAMES 'latin1'"); /*Expect/send data in latin1 == don't perform any conversions.*/ }
 
@@ -266,6 +268,8 @@ class UCCASS_Main
                 $this->CONF['template'] = $r['template'];
                 $this->CONF['survey_name'] = $this->SfStr->getSafeString($r['name'],$r['survey_text_mode']);
                 $this->CONF['sid'] = $sid;
+            } else {
+                $this->error($this->lang['no_survey']); return;
             }
         }
         else
@@ -310,7 +314,7 @@ class UCCASS_Main
     {
         $this->error_occurred = 1;
 
-        if(is_object($this->smarty))
+        if(isset($this->smarty) && is_object($this->smarty) && isset($this->CONF['template']))
         {
             $this->smarty->assign("error",$msg);
             echo $this->smarty->fetch($this->CONF['template'].'/error.tpl');
@@ -442,15 +446,15 @@ class UCCASS_Main
     * @param mixed $selectors (array/bool) Either an array of strings used to
     * limit the number of selected dynamic answer type answers or false (==
     * select all).
-    * 
+    *
     * @return mixed: Failure => FALSE; Success => array (keys: avid, value,
-    * numeric_value, image, the value of avid; values: arrays). 
+    * numeric_value, image, the value of avid; values: arrays).
     * Ex. (2 answers): array ('avid' => array ( 0=> '1', 1 => '2', ), 'value' =>
     * array ( 0 => 'A blondie', 1 => 'A brunette', ), 'numeric_value' => array (
     * 0 => '1', 1 => '2', ), 'image' => array ( 0 => 'bar.gif', 1 => 'bar.gif',
     * ), 1 => 'A blondie', 2 => 'A brunette', )
-    * 
-    *************************/
+    *
+    *************************/ // FIXME: $selector is false or an array of answers
     function get_answer_values($id,$by=BY_AID,$mode=SAFE_STRING_TEXT, $selectors = false)
     {
         $retval = FALSE;
@@ -471,24 +475,24 @@ class UCCASS_Main
         		$selector_join_atype = " ";
         		$operator = '=';
         		$selector_where_clause = "("; // will be: (avs.selector = val1 [OR ...] OR avs.selector is null))
-        		
+
         		foreach($selectors as $selector_value)
             {
-        			$selector_value = $this->SfStr->getSafeString($selector_value, SAFE_STRING_DB); 
-        			$selector_where_clause .= "avs.selector $operator $selector_value OR "; 
+        			$selector_value = $this->SfStr->getSafeString($selector_value, SAFE_STRING_DB);
+        			$selector_where_clause .= "avs.selector $operator $selector_value OR ";
             }
         		$selector_where_clause .= "avs.selector is null)";
         	}
 
         	// Create the query
-    		$query = "SELECT av.avid, av.value, av.numeric_value, av.image, atype.is_dynamic 
+    		$query = "SELECT av.avid, av.value, av.numeric_value, av.image, atype.is_dynamic
     				  FROM {$this->CONF['db_tbl_prefix']}answer_values av $selector_join_av" .
-    				  	(($by==BY_QID)? "JOIN {$this->CONF['db_tbl_prefix']}questions q ON (q.aid = av.aid) " : "") .  
+    				  	(($by==BY_QID)? "JOIN {$this->CONF['db_tbl_prefix']}questions q ON (q.aid = av.aid) " : "") .
             			"JOIN {$this->CONF['db_tbl_prefix']}answer_types atype ON (atype.aid = av.aid)".
                       "WHERE $selector_where_clause AND " .
                       	(($by==BY_QID)? "q.qid = $id AND q.sid = $sid " : "av.aid = $id ") .
                       "ORDER BY av.avid ASC";
-			
+
             $rs = $this->db->Execute($query);
             if($rs === FALSE)
             { return $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); }
@@ -678,68 +682,72 @@ class UCCASS_Main
             else
             { $sid_check = " sid = $sid "; }
 
-            $input['username'] = $this->SfStr->getSafeString($_REQUEST['username'],SAFE_STRING_DB);
-            $input['password'] = $this->SfStr->getSafeString($_REQUEST['password'],SAFE_STRING_DB);
-            $query = "SELECT password, uid, name, email, admin_priv, create_priv, take_priv, results_priv, edit_priv FROM
-                      {$this->CONF['db_tbl_prefix']}users WHERE {$sid_check} AND username = {$input['username']}
-                      and password={$input['password']}";
+            if(!empty($_REQUEST['username']) && !empty($_REQUEST['password'])) {
 
-            $rs = $this->db->Execute($query);
-            if($rs === FALSE)
-            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+                $input['username'] = $this->SfStr->getSafeString($_REQUEST['username'],SAFE_STRING_DB);
+                $input['password'] = $this->SfStr->getSafeString($_REQUEST['password'],SAFE_STRING_DB);
 
-            if($r = $rs->FetchRow($rs))
-            {
-                //Case sensitive compare done in PHP
-                //to be compatible across different databases
-                if(!strcmp($_REQUEST['password'],$r['password']))
+                $query = "SELECT password, uid, name, email, admin_priv, create_priv, take_priv, results_priv, edit_priv FROM
+                          {$this->CONF['db_tbl_prefix']}users WHERE {$sid_check} AND username = {$input['username']}
+                          and password={$input['password']}";
+
+                $rs = $this->db->Execute($query);
+                if($rs === FALSE)
+                { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+
+                if($r = $rs->FetchRow($rs))
                 {
-                    if($r['admin_priv'])
+                    //Case sensitive compare done in PHP
+                    //to be compatible across different databases
+                    if(!strcmp($_REQUEST['password'],$r['password']))
                     {
-                        $_SESSION['priv'][0] = array(ADMIN_PRIV => 1, CREATE_PRIV => 1);
-                        if($sid != 0)
-                        { $_SESSION['priv'][$sid] = array(TAKE_PRIV => 1, EDIT_PRIV => 1, RESULTS_PRIV => 1); }
-                        $retval = TRUE;
-                    }
-                    elseif($priv == TAKE_PRIV && $numallowed)
-                    {
-                        if($numallowed && $numseconds==0)
-                        { $lim = 0; }
-                        else
-                        { $lim = time() - $numseconds; }
-
-                        $query = "SELECT COUNT(uid) AS count_uid FROM {$this->CONF['db_tbl_prefix']}completed_surveys WHERE uid={$r['uid']} AND completed > $lim GROUP BY uid";
-                        $rs = $this->db->Execute($query);
-                        if($rs === FALSE)
-                        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
-                        elseif($r2 = $rs->FetchRow($rs))
+                        if($r['admin_priv'])
                         {
-                            if($r2['count_uid'] < $numallowed)
-                            { $retval = TRUE; }
+                            $_SESSION['priv'][0] = array(ADMIN_PRIV => 1, CREATE_PRIV => 1);
+                            if($sid != 0)
+                            { $_SESSION['priv'][$sid] = array(TAKE_PRIV => 1, EDIT_PRIV => 1, RESULTS_PRIV => 1); }
+                            $retval = TRUE;
+                        }
+                        elseif($priv == TAKE_PRIV && $numallowed)
+                        {
+                            if($numallowed && $numseconds==0)
+                            { $lim = 0; }
                             else
-                            { $retval = ALREADY_COMPLETED; }
+                            { $lim = time() - $numseconds; }
+
+                            $query = "SELECT COUNT(uid) AS count_uid FROM {$this->CONF['db_tbl_prefix']}completed_surveys WHERE uid={$r['uid']} AND completed > $lim GROUP BY uid";
+                            $rs = $this->db->Execute($query);
+                            if($rs === FALSE)
+                            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return FALSE; }
+                            elseif($r2 = $rs->FetchRow($rs))
+                            {
+                                if($r2['count_uid'] < $numallowed)
+                                { $retval = TRUE; }
+                                else
+                                { $retval = ALREADY_COMPLETED; }
+                            }
+                            else
+                            { $retval = TRUE; }
+
+                            if($retval === TRUE)
+                            {
+                                $_SESSION['priv'][$sid] = array(TAKE_PRIV => $r['take_priv'], EDIT_PRIV => $r['edit_priv'],
+                                                                RESULTS_PRIV => $r['results_priv']);
+                            }
                         }
                         else
-                        { $retval = TRUE; }
-
-                        if($retval === TRUE)
                         {
                             $_SESSION['priv'][$sid] = array(TAKE_PRIV => $r['take_priv'], EDIT_PRIV => $r['edit_priv'],
-                                                            RESULTS_PRIV => $r['results_priv']);
+                                                            RESULTS_PRIV => $r['results_priv'], CREATE_PRIV => $r['create_priv']);
+
+                            if(isset($_SESSION['priv'][$sid][$priv]) && $_SESSION['priv'][$sid][$priv] == 1)
+                            { $retval = TRUE; }
                         }
-                    }
-                    else
-                    {
-                        $_SESSION['priv'][$sid] = array(TAKE_PRIV => $r['take_priv'], EDIT_PRIV => $r['edit_priv'],
-                                                        RESULTS_PRIV => $r['results_priv'], CREATE_PRIV => $r['create_priv']);
 
-                        if(isset($_SESSION['priv'][$sid][$priv]) && $_SESSION['priv'][$sid][$priv] == 1)
-                        { $retval = TRUE; }
+                        $_SESSION['priv'][$sid]['name'] = $r['name'];
+                        $_SESSION['priv'][$sid]['email'] = $r['email'];
+                        $_SESSION['priv'][$sid]['uid'] = $r['uid'];
                     }
-
-                    $_SESSION['priv'][$sid]['name'] = $r['name'];
-                    $_SESSION['priv'][$sid]['email'] = $r['email'];
-                    $_SESSION['priv'][$sid]['uid'] = $r['uid'];
                 }
             }
         }
@@ -752,7 +760,7 @@ class UCCASS_Main
         $sid = (int)$sid;
         $retval = FALSE;
 
-        if(isset($_REQUEST['invite_code']))
+        if(!empty($_REQUEST['invite_code']))
         {
             $input['invite_code'] = $this->SfStr->getSafeString($_REQUEST['invite_code'],SAFE_STRING_DB);
             $query = "SELECT uid, name, email, take_priv, results_priv FROM {$this->CONF['db_tbl_prefix']}users WHERE sid=$sid AND invite_code = {$input['invite_code']}";
@@ -956,27 +964,7 @@ class UCCASS_Main
     { return count($this->error); }
 
     function lang($key)
-    { return (isset($this->lang[$key])) ? $this->lang[$key] : "(localized message error: missing message for the key $key in the template {$this->CONF['template_path']})"; }
-    
-    /** Delete answer values[and their selectors, if any] for the given answer types. */
-    function delete_answer_values($aid_list)
-    {
-    	if(!empty($aid_list))
-    	{
-	    	// 1. Delete selectors
-	    	$query_selectors = "DELETE FROM {$this->CONF['db_tbl_prefix']}dyna_answer_selectors WHERE avid IN " .
-	                		"(SELECT avid FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list))";
-	        $rs = $this->db->Execute($query_selectors);
-	        if($rs === FALSE)
-	        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg(). "($query_selectors)"); return; }
-	        
-	        // 2. Delete the answer values
-	        $query2 = "DELETE FROM {$this->CONF['db_tbl_prefix']}answer_values WHERE aid IN ($aid_list)";
-	        $rs = $this->db->Execute($query2);
-	        if($rs === FALSE)
-	        { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
-    	}
-    }
+    { return (isset($this->lang[$key])) ? $this->lang[$key] : ''; }
 }
 
 ?>

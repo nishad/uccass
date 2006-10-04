@@ -8,7 +8,7 @@
             {/section}
 
             {section name="req" loop=1 show=$qdata.num_required}
-              {$data.survey.required}
+              {$survey.required}
             {/section}
 
             {$qdata.question}

@@ -40,11 +40,11 @@
 ; ex: /home/user/name/public_html/uccass
 ; ex: c:/program files/apache group/apache/htdocs/uccass
 ; (write . (dot) if you don't know the absolute path)
-path =
+path = "c:/program files/apache group/apache/htdocs/uccass"
 
 ; HTML Path to UCCASS installation
 ; ex: https://www.youdomain.com/subdir/uccass
-html = 
+html = "http://blueberry/uccass"
 ; Site Name
 ;
 ; Will appear in Title Bar and Main Page
@@ -56,7 +56,7 @@ site_name = "Unit Command Climate Assessment and Survey System (UCCASS)"
 ; main site and surveys. This must
 ; match the name of a Directory in
 ; the templates/ folder.
-default_template = Default
+default_template = "Default"
 
 ; Page Break Text
 ;
@@ -189,7 +189,7 @@ create_access = private
 
 
 ; Database Type (mysql, mssql, postgres7, etc)
-; For each supported database type there's a file adodb-<database type>.inc.php in the directory ADOdb/drivers 
+; For each supported database type there's a file adodb-<database type>.inc.php in the directory ADOdb/drivers
 db_type = mysql
 
 ; Database Host (hostname[:port])
@@ -203,7 +203,7 @@ db_user = root
 db_password = password
 
 ; Database Name
-db_database = uccass
+db_database = "uccass182"
 
 ; Database Table Prefix
 ;
@@ -214,9 +214,9 @@ db_database = uccass
 ; programs in the same database. Leave
 ; blank for no prefix and to use the
 ; default table names.
-; Max. length 20 characters (determined by 
+; Max. length 20 characters (determined by
 ; XMLS_PREFIX_MAXLEN in ADOdb/adodb-xmlschema.inc.php).
-db_tbl_prefix =
+db_tbl_prefix = "uc_"
 
 ; Database / HTML Character Set
 ;

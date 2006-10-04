@@ -1,0 +1,6 @@
+<-- Example CSV User Export - Remove first 3 lines to Import! -->
+UID, Name, Email, Login, Password, Take_Priv, Results_Priv, Edit_Priv
+<---------------------------------------------------------------->
+97,"Smith","smith@example.org","smith","password",0,1,1
+103,"Jones","jones@example.org","jones","password",0,0,1
+104,"Holmes","holmes@example.org","holmes","password",0,0,1

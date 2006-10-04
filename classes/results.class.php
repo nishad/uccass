@@ -19,6 +19,8 @@
 // Affero General Public License for more details.
 //======================================================
 
+require('classes/pager.class.php');
+
 define('ACTION_HIDE_QUESTIONS','hide_questions');
 define('ACTION_SHOW_QUESTIONS','show_questions');
 define('ACTION_SHOW_ALL_QUESTIONS','show_all_questions');
@@ -28,6 +30,9 @@ define('ACTION_CLEAR_FILTER','clear_filter');
 define('DEFAULT_ANSWER_TIME_SORT', 'DESC');
 define('ASCENDING', 'ASC');
 define('DESCENDING', 'DESC');
+
+define('DEFAULT_NUM_RESULTS', 25);
+define('BEFORE_AFTER_CURRENT_PAGE',3);
 
 class UCCASS_Results extends UCCASS_Main
 {
@@ -43,6 +48,7 @@ class UCCASS_Results extends UCCASS_Main
         $survey['sid'] = (int)$sid;
         $survey['export_csv_text'] = EXPORT_CSV_TEXT;
         $survey['export_csv_numeric'] = EXPORT_CSV_NUMERIC;
+        $survey['export_spss'] = EXPORT_SPSS;				// Added by Claudio Redaelli
 
         if(!$this->_CheckAccess($sid,RESULTS_PRIV,"results.php?sid={$survey['sid']}"))
         {
@@ -273,9 +279,15 @@ class UCCASS_Results extends UCCASS_Main
         if($rs === FALSE) { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return;}
         while($r = $rs->FetchRow($rs))
         {
-            $k = array_search($r['avid'],$data[$r['qid']]['answer']['avid']);
-            if($k !== FALSE)
-            { $data[$r['qid']]['count'][$k] = $r['c']; }
+            //QUICK FIX - If question is changed from S/T to MM/MS and has answers in each,
+            //the above query will not match anything and the answer is excluded from the results
+            //Quick fix is to just supress warning messages about undefined indexes in $data.
+            //Still researching complete solution. Sorry!
+            if(isset($data[$r['qid']])) {
+                $k = array_search($r['avid'],$data[$r['qid']]['answer']['avid']);
+                if($k !== FALSE)
+                { $data[$r['qid']]['count'][$k] = $r['c']; }
+            }
         }
 
         foreach($data as $qid=>$q_data)
@@ -368,10 +380,11 @@ class UCCASS_Results extends UCCASS_Main
     {
         $sid = (int)$sid;
         $qid = (int)$qid;
+        $qnum = (int)$_REQUEST['qnum'];
 
         $answer['delete_access'] = $this->_hasPriv(EDIT_PRIV,$sid) | $this->_hasPriv(ADMIN_PRIV);
 
-        if(!empty($_REQUEST['delete_rid']) && $answer['delete_access'])
+        if(!empty($_POST['delete_rid']) && $answer['delete_access'])
         {
             $rid_list = '';
             foreach($_REQUEST['delete_rid'] as $rid)
@@ -379,8 +392,13 @@ class UCCASS_Results extends UCCASS_Main
             $rid_list = substr($rid_list,0,-1);
             $query = "DELETE FROM {$this->CONF['db_tbl_prefix']}results_text WHERE rid IN ($rid_list) AND sid = $sid AND qid = $qid";
             $rs = $this->db->Execute($query);
+
+            $this->setMessageRedirect("results.php?sid=$sid&qnum={$qnum}&qid={$qid}");
+
             if($rs === FALSE)
-            { $this->error($this->lang['db_query_error'] . $this->db->ErrorMsg()); return; }
+            { $this->setMessage($this->lang['text_answers_not_deleted'] . $this->lang['db_query_error'] . $this->db->ErrorMsg(), MSGTYPE_ERROR); }
+            else
+            { $this->setMessage($this->lang['notice'], $this->lang['text_answers_deleted'], MSGTYPE_NOTICE); }
         }
 
         $query = "SELECT q.question, a.type, s.survey_text_mode, s.user_text_mode
@@ -500,10 +518,12 @@ class UCCASS_Results extends UCCASS_Main
         { $button['previous'] = FALSE; }
         else
         { $button['previous'] = TRUE; }
-
-
-        $qnum = (int)$_REQUEST['qnum'];
-
+/*
+        $Pager = New UCCASS_Pager($_SESSION['results']['page'], $pgr['num_pages'], BEFORE_AFTER_CURRENT_PAGE, 'results_table.php');
+        $Pager->showRecordCount(TRUE, $pgr['per_page'], $pgr['total_results']);
+        $Pager->setData('sid', $sid);
+        $data['prev_next_text'] = $Pager->getPager();
+*/
         $this->smarty->assign('question',$question);
         $this->smarty->assign('qnum',$qnum);
 

@@ -8,3 +8,4 @@
         <input type="radio" name="answer[{$q.qid}][0]" value="{$q.avid[ms]}" {$q.selected[0][ms]}>
       </td>
     {/section}
+  </tr>

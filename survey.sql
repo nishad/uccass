@@ -5,6 +5,21 @@
 -- Server version	4.0.20a-nt
 
 --
+-- Table structure for table `_sequence`
+--
+
+DROP TABLE IF EXISTS `_sequence`;
+CREATE TABLE `_sequence` (
+  `id` int(11) NOT NULL default '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `_sequence`
+--
+
+INSERT INTO `_sequence` VALUES (407);
+
+--
 -- Table structure for table `answer_types`
 --
 
@@ -15,6 +30,7 @@ CREATE TABLE answer_types (
   type varchar(5) NOT NULL default 'T',
   label varchar(255) NOT NULL default '',
   sid int(10) unsigned NOT NULL default '0',
+  is_dynamic int(11) NOT NULL default '0',
   PRIMARY KEY  (aid)
 ) CHARACTER SET latin1
 TYPE=MyISAM;
@@ -536,6 +552,23 @@ CREATE TABLE dependencies_sequence (
 --
 
 INSERT INTO dependencies_sequence VALUES (159);
+
+--
+-- Table structure for table `dyna_answer_selectors`
+--
+
+DROP TABLE IF EXISTS `dyna_answer_selectors`;
+CREATE TABLE `dyna_answer_selectors` (
+  `avid` int(11) NOT NULL default '0',
+  `selector` varchar(255) NOT NULL default '',
+  KEY `idx_dyna_answer_selectors_avid` (`avid`),
+  KEY `idx_dyna_answer_selectors_selector` (`selector`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `dyna_answer_selectors`
+--
+
 
 --
 -- Table structure for table `ip_track`
@@ -1349,7 +1382,7 @@ CREATE TABLE results_text (
   rid int(11) NOT NULL default '0',
   sid int(11) NOT NULL default '0',
   qid int(11) NOT NULL default '0',
-  answer text NOT NULL,
+  answer longtext NOT NULL,
   entered int(11) NOT NULL default '0',
   sequence int(11) NOT NULL default '0',
   PRIMARY KEY  (rid),
@@ -1500,6 +1533,7 @@ CREATE TABLE surveys (
   survey_limit_number int(11) NOT NULL default '0',
   survey_limit_unit int(11) NOT NULL default '0',
   survey_limit_seconds int(11) NOT NULL default '0',
+  manual_codes int(11) NOT NULL default '0',
   PRIMARY KEY  (sid)
 ) CHARACTER SET latin1
 TYPE=MyISAM;

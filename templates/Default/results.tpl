@@ -16,8 +16,9 @@
           <a href="{$conf.html}/docs/index.html#table_results">[?]</a> ]
         &nbsp;&nbsp;
         [ Export Results to CSV as
-          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_text}">Text</a> or
-          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_numeric}">Numeric</a> Values
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_text}">Text</a>,
+          <a href="{$conf.html}/results_csv.php?sid={$survey.sid}&export_type={$survey.export_csv_numeric}">Numeric</a> or
+          <a href="{$conf.html}/parameters_spss.php?sid={$survey.sid}&export_type={$survey.export_spss}">SPSS</a> importable format
           <a href="{$conf.html}/docs/index.html#csv_export">[?]</a> ]
       </div>
 

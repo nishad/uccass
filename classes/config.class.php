@@ -144,7 +144,7 @@ class UCCASS_Config
             $file = file($sql_file);
             foreach($file as $line)
             {
-                if(strlen($line) > 0 && $line{0} != '#' && substr($line,0,2) != '--')
+                if(strlen($line) > 0 && $line{0} != '#' && substr($line,0,2) != '--' && substr($line,0,3) != '/*!')
                 {
                     $query .= trim($line);
                     if(substr($query,-1) == ";")
@@ -153,7 +153,7 @@ class UCCASS_Config
                         $query = preg_replace('/^INSERT INTO (`?)/','\\0' . $survey->CONF['db_tbl_prefix'],$query);
                         $query = preg_replace('/^DROP TABLE IF EXISTS (`?)/','\\0' . $survey->CONF['db_tbl_prefix'],$query);
                         $query = preg_replace('/FROM (`?)([a-z_]+)(`?);$/',"FROM \\1{$survey->CONF['db_tbl_prefix']}\\2\\3;",$query);
-                        $query = str_replace('CHARACTER SET latin1',"CHARACTER SET {$charset}\n",$query);
+                        $query = str_replace('CHARACTER SET latin1',"CHARACTER SET {$charset}",$query);
                         $query = substr($query,0,-1);
 
                         if($parse_sequence)

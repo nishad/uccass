@@ -29,43 +29,44 @@ if(count($_POST) > 0)
                     $sql_error2 = $c->load_sql_file('upgrades/upgrade_104_105-2.sql',TRUE);
                     $error = !$upgrade_104_105 | $sql_error1 | $sql_error2;
                     if(!$error)
-                    { echo $c->lang('install_v104_v105_good'); }
+                    { echo $c->lang('upgrade_v104_v105_good'); }
 
                 case 'upgrade_105': // upgrade from 1.05 to 1.06
-                    echo $c->lang('install_v105_v106_good');
+                    echo $c->lang('upgrade_v105_v106_good');
 
                 case 'upgrade_106': //upgrade from 1.06 to 1.8.0
                     $sql_error = $c->load_sql_file('upgrades/upgrade_106_180.sql',TRUE);
                     $error = $error | $sql_error;
                     if(!$error)
-                    { echo $c->lang('install_v106_v180_good'); }
+                    { echo $c->lang('upgrade_v106_v180_good'); }
 
                 case 'upgrade_180': //upgrade from 1.8.0 to 1.8.1
                     $sql_error = $c->load_sql_file('upgrades/upgrade_180_181.sql',TRUE);
                     $error = $error | $sql_error;
                     if(!$error)
-                    { echo $c->lang('install_v180_v181_good'); }
-                break;
+                    { echo $c->lang('upgrade_v180_v181_good'); }
 
                 case 'upgrade_181': //upgrade from 1.8.1 to 1.8.2
-                	$successMsg = $c->lang('install_181_good');
-                case 'upgrade_182': // upgrade from 1.8.2 to any higher
-            		if(!isset($successMsg))
-            		{ $successMsg = $c->lang('upgrade_182_good'); }
+                    $sql_error = $c->load_sql_file('upgrades/upgrade_181_182.sql',TRUE);
+                    $error = $error | $sql_error;
+                    if(!$error) {
+                        $successMsg = $c->lang('upgrade_v181_v182_good');
+                    }
                 	$ignoreData = true;
+
                 case 'newinstallation':
                 	require('classes/databasecreator.class.php');
                 	$dbCreator = Uccass_DbCreator::createInstance();
                 	if(isset($ignoreData))
-                	{ $dbCreator->SetIgnoreData($ignoreData); }
+                	{ ;$dbCreator->SetIgnoreData($ignoreData); }
                     if($dbCreator)
                     {
-                    	$success = $dbCreator->createDatabase($survey->CONF['db_tbl_prefix']);
+                        $success = $dbCreator->createDatabase($survey->CONF['db_tbl_prefix']);
                     	if($success)
                     	{
                     		if(!isset($successMsg))
-                    		{ $successMsg = $c->lang('install_v182_good'); } 
-                    		echo $successMsg; 
+                    		{ $successMsg = $c->lang('install_v182_good'); }
+                    		echo $successMsg;
                     	}
                     }
                 break;
@@ -83,8 +84,16 @@ if(count($_POST) > 0)
             { echo $c->lang('install_bad'); }
             else
             {
+                //Attempt to create directory to see if $use_sub_dirs needs to be turned off within Smarty
+                $oldmask = umask(0);
+                $dir = $survey->smarty->compile_dir;
+                if(!mkdir($dir . '/test', 0777)) {
+                    echo $c->lang('smarty_sub_dir_warning');
+                }
+                umask($oldmask);
+
                 echo $c->lang('install_good');
-                echo "<p><a href={$survey->CONF['html']}/>Begin using UCCASS</a></p>";
+                echo "<p><a href=\"{$survey->CONF['html']}\">" . $c->lang('begin') . '</a></p>';
             }
         }
     }

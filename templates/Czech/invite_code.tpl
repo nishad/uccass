@@ -29,5 +29,5 @@
   </tr>
 </table>
 <script language="JavaScript">
-document.login_form.username.focus();
+document.login_form.invite_code.focus();
 </script>

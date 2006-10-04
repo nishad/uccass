@@ -1,11 +1,12 @@
 <?php
-
+// Czech translations (used encoding: UTF-8)
 $lang = array();
 
-$lang['error'] = 'Error';
-$lang['notice'] = 'Notice';
-$lang['yes'] = 'Yes';
-$lang['no'] = 'No';
+$lang['error'] = 'Problém';
+$lang['notice'] = 'Upozornění';
+$lang['yes'] = 'Ano';
+$lang['no'] = 'Ne';
+$lang['failed'] = '<span class="error">Failed</span>';
 
 //Orientation Modes
 $lang['vertical'] = 'Vertical';
@@ -25,7 +26,7 @@ $lang['show'] = 'Show';
 $lang['selector'] = 'Get selector';
 
 //Database Messages
-$lang['db_query_error'] = 'Error executing database query: ';
+$lang['db_query_error'] = 'Error executing datbase query: ';
 $lang['db_table_error'] = 'Error deleting data from table: ';
 
 //User/Invitee Errors
@@ -42,19 +43,6 @@ $lang['bad_answer-numeric_value'] = ' Bad display answer value or numeric value 
 $lang['only_99_allowed'] = ' Only 99 answers are allowed.';
 $lang['bad_answer_type'] = 'Incorrect Answer Type';
 $lang['must_checkbox'] = 'Checkbox must be selected in order to delete answer.';
-$lang['msg.edit_answtype-ok'] = "Answer successfully edited.";
-$lang['err.selectors_not_uploaded'] = 'A dynamic answer type requires selectors, you must upload them at once with the answer values.';
-$lang['err.only_selectors_uploaded'] = 'You cannot upload only selectors, they may be only uploaded together with answer values.';
-$lang['msg.answer_values_imported'] = 'Answer values have been successfully imported; the number of lines processed: ';
-$lang['msg.selectors_imported'] = 'Selectors have been successfully imported; the number of lines processed: ';
-$lang['err.atype_csv_bad_format-number'] = 'The answer value csv file must have 2 or 3 columns (string, string,  optionally a number)';
-$lang['err.avalue_empty_csv'] = 'The csv file with answer values seems to contain no data!';
-$lang['err.selectors_csv_bad_format-number'] = 'The csv file with selectors must have 2 columns (string, string)';
-$lang['err.selectors_empty_csv'] = 'The csv file with selectors seems to contain no data!';
-$lang['err.nondynamic-selectors_uploaded'] = "Selectors can only be assigned to a dynamic answer type; haven't you forgotten to check the 'is dynamic' checkbox?";
-$lang['err.upload_too_large'] = 'The uploaded file is too large.';
-$lang['err.upload_no_file'] = "No file selected for upload!";
-$lang['err.over_max_post'] = "It seems that you've just tried to upload a file that is too large.";
 
 //Page Titles
 $lang['title_new_answer_type'] = 'New Answer Type';
@@ -101,10 +89,6 @@ $lang['page_break_first'] = 'Cannot insert PAGE BREAK as first question. Please 
 $lang['page_break_inserted'] = 'PAGE BREAK inserted successfully.';
 $lang['page_break_end'] = 'Cannot insert PAGE BREAK as last question.';
 $lang['question_added'] = 'Question successfully added to survey.';
-$lang['err.dep_on_textual_answer'] = 'Only a selector dependency may be bound to a textual answer.';
-$lang['err.nondynamic_selector_dep'] = 'Only a question with a dynamic answer type may have a selector dependency.';
-$lang['err.must_1_selector_dep'] = 'A question with a dynamic answer type must have exactly one selector dependency. But it has: ';
-$lang['whatever'] = 'whatever';
 
 //Reports
 $lang['new_report'] = 'New Report created successfully.';
@@ -133,6 +117,10 @@ $lang['no_questions'] = 'No questions for this survey.';
 $lang['csv_filename'] = 'Export.csv';
 $lang['datetime'] = 'Datetime';
 
+//Special Results
+$lang['records_deleted'] = 'Records deleted successfully.';
+$lang['records_not_deleted'] = 'Some records were not deleted.';
+
 //New Survey
 $lang['survey_name_used'] = 'A survey already exists with that name.';
 $lang['invalid_copy_survey'] = 'Invalid survey chosen to copy from.';
@@ -152,7 +140,7 @@ $lang['users_deleted'] = ' users deleted.';
 $lang['users_emailed'] = ' users emailed.';
 $lang['users_moved'] = ' users moved.';
 $lang['users_invited'] = ' users sent invitations.';
-$lang['send_email'] = 'Unable to send email to';
+$lang['send_email'] = 'Unable to send email to ';
 $lang['no_email'] = 'Username does not have a valid email address';
 $lang['email_subject'] = 'Survey Information';
 $lang['invitee_email'] = 'Email address is required for invitee.';
@@ -160,6 +148,22 @@ $lang['invitee_bad_email'] = 'Incorrect email address format.';
 $lang['invitee_added'] = 'Invitees added/updated';
 $lang['invite_no_send'] = 'Unable to send invitation to invitee';
 $lang['invite_no_code'] = 'Unable to get invitation template and/or code for inviteee';
+$lang['no_flag_logins'] = 'Unable to flag users to be emailed login due to database error: ';
+$lang['no_users_matched'] = 'No additional users remaining to be emailed.';
+$lang['users_loaded'] = ' users loaded successfully from file.';
+$lang['no_users_matched'] = 'No users identified in uploaded file. Please check CSV format of file.';
+
+//File Handling
+$lang['file_error'] = 'Error processing uploaded file: ';
+$lang['file_open'] = 'Cannot open file for reading.';
+$lang['file_errors'.UPLOAD_ERR_OK] = 'There is no error, the file uploaded with success. ';
+$lang['file_errors'.UPLOAD_ERR_INI_SIZE] = 'The uploaded file exceeds the upload_max_filesize directive in php.ini. ';
+$lang['file_errors'.UPLOAD_ERR_FORM_SIZE] = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form. ';
+$lang['file_errors'.UPLOAD_ERR_PARTIAL] = 'The uploaded file was only partially uploaded. ';
+$lang['file_errors'.UPLOAD_ERR_NO_FILE] = 'No file was uploaded. ';
+$lang['file_errors'.UPLOAD_ERR_NO_TMP_DIR] = 'Missing a temporary folder.';
+$lang['file_errors'.UPLOAD_ERR_CANT_WRITE] = 'Failed to write file to disk.';
+$lang['error_line'] = 'Error processing user information on line: ';
 
 //Administration Section
 $lang['delete_admin'] = 'You cannot delete all admin users.';
@@ -178,5 +182,7 @@ $lang['take.msg.already_completed'] = 'Požadovanou anketu jste již vyplnil(a).
 $lang['take.err.required'] = 'Povinné otázky nebyly zodpovězeny.';
 $lang['take.err.time_limit.hdr'] = 'Překročen časový limit na vyplnění ankety.';
 $lang['take.err.time_limit.msg'] = 'Překročil(a) jste časový limit na vyplnění této ankety. Poslední stránka s Vašimi odpovědmi nebyla uložena.';
-$lang['err.selector-no_match'] = 'Není dostupná žádná odpověď (odpovídající kritériím). Pokračujte prosím dál.';
+
+//SPSS Export
+$lang['spss_title'] = 'SPSS Export File Parameters';
 ?>

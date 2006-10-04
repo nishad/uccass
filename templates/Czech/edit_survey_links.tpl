@@ -10,8 +10,8 @@
       &nbsp;|&nbsp;
       <a href="{$conf.html}/access_control.php?sid={$data.sid}">Access Control</a>
       &nbsp;|&nbsp;
-      <a href="{$conf.html}/reports.php?sid={$data.sid}">Reports</a>
-      &nbsp;|&nbsp;
+      <!-- <a href="{$conf.html}/reports.php?sid={$data.sid}">Reports</a>
+      &nbsp;|&nbsp; -->
       <a href="{$conf.html}/survey.php?sid={$data.sid}&preview_survey=1" target="_blank">Preview Survey</a>
       &nbsp;|&nbsp;
       <a href="{$conf.html}/index.php">Return to Main</a>

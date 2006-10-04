@@ -1,17 +1,17 @@
-      <form method="POST" action="{$conf.html}/edit_answer.php" enctype="multipart/form-data">
+      <form method="POST" action="{$conf.html}/edit_answer.php">
         <input type="hidden" name="aid" value="{$answer.aid}">
         <input type="hidden" name="sid" value="{$answer.sid}">
 
         {* SUCCESS MESSAGE *}
-          {section name="success" loop=$show.messages show=TRUE}
+          {section name="success" loop=1 show=$show.success}
             <div class="message">
-              {$show.messages[success]}
+              Answer successfully edited.
             </div>
           {/section}
         {* / SUCCESS MESSAGE *}
 
-        {section name="error" loop=$show.errors show=TRUE}
-          <div class="error">{$show.errors[error]}</div>
+        {section name="error" loop=1 show=$show.error}
+          <div class="error">{$show.error}</div>
         {/section}
 
 
@@ -46,8 +46,6 @@
         </div>
 
         <div class="indented_cell">
-          <input type="text" name="name" size="40" value="{$answer.name}">
-          <br />
           The Answer Name will appear in the drop
           downs used to select the type of answer you want. It should be short
           and describe the possible answers for this type. The Label
@@ -55,6 +53,10 @@
           and possibly explain how to answer (i.e. <em>Check all that apply</em>) The
           Label will be visible to users when they take the survey. Use it
           to explain the question or answers, otherwise leave it blank.
+
+          <br />
+
+          <input type="text" name="name" size="40" value="{$answer.name}">
         </div>
 
         <div class="whitebox">
@@ -92,51 +94,9 @@
           </ul>
         </div>
 
-        <div class="whitebox">
-          Is Dynamic
-        </div>
-
-        <div class="indented_cell">
-          <input type="checkbox" name="is_dynamic" {if $answer.is_dynamic}checked{/if} value="1"> is dynamic
-          <p>
-          With a dynamic answer type only a subset of all possible answers is 
-          presented to the respondent, based on some selector (for example his/her answer 
-          to a previous question). A question of a dynamic answer type requires a selector 
-          dependency. Also selectors must be assigned to the individual answer values in 
-          the table (prefix)dyna_answer_selectors.
-          </p>
-        </div>
-
         <div style="text-align:center">
           <input type="submit" name="submit" value="Edit Answer">
         </div>
-
-        <br />
-        
-        <div class="whitebox">
-          Files with the data of answer values/selectors to use (MS and MM Answer Types only)
-        </div>
-
-        {if not $data.upload_forbidden}
-        <div class="indented_cell">
-        	<p>You may supply here file in the CSV format that defines answer values (and another that 
-        	assignes them selectors, if this is a dynamic answer type).</p>
-        	<p>Note: the maximal file size is {math equation="size / 1024" size=$data.max_upload_size format="%d"} KB. 
-        	Ask the server administrator if you need to increase it. Also, if you try to upload a large 
-        	file over a slow connection, the server may reject it after a period of time as too long.</p>
-	        <input type="hidden" name="MAX_FILE_SIZE" value="{$data.max_upload_size}">        	
-   				<div style="float:left; width: 12em"><label for="avfile">Answer values file: </label></div>
-   				<input name="answervaluesfile" type="file" id="avfile" style="margin: 0px 3px">
-   				<br>
-   				<div style="float:left; width: 12em"><label for="sfile">Selectors file: </label></div>
-   				<input name="selectorsfile" type="file" id="sfile" style="margin: 0px 3px">
-				Selectors are needed for a dynamic question type.
-		</div>
-		{else}
-			<p>Uploading of files is forbidden by the server administrator.</p>
-		{/if}
-		
-		<br />
 
         <div class="whitebox">
           Answer Values (MS and MM Answer Types only)
@@ -196,7 +156,7 @@
         </div>
 
         <br />
-        
+
         <div style="text-align:center">
           <input type="submit" name="submit" value="Edit Answer">
         </div>

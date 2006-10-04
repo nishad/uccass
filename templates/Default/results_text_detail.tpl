@@ -1,4 +1,4 @@
-<form method="GET" action="{$conf.html}/results.php">
+<form method="POST" action="{$conf.html}/results.php">
   <input type="hidden" name="qnum" value="{$qnum}">
   <input type="hidden" name="sid" value="{$sid}">
   <input type="hidden" name="qid" value="{$qid}">

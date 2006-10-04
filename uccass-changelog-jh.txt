@@ -56,7 +56,7 @@ classes/safestring.class.php:
 
 classes/editsurvey.class.php:
  - correction: the mode SAFE_STRING_JAVASCRIPT used instead of SAFE_STRING_TEXT for escaping of answer 
- values shown in a <selcet> when defining a new dependency
+ values shown in a <select> when defining a new dependency
  (the string was escaped twice: for the 2nd time by JavaScript in Option's constructor)
 
 survey.ini.php:

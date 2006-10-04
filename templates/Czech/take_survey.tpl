@@ -39,30 +39,20 @@
 
         <br />
 
-        {*WELCOME MESSAGE*}
-        {section name="welcome" loop=1 show=$show.welcome|default:FALSE}
-          <div>{$survey.welcome_text}</div>
-        {/section}
-
         {*QUESTIONS*}
-        {section name="question" loop=1 show=$show.question|default:FALSE}
+        {section name="question" loop=1 show=$show.question}
           <div>{$question_text}</div>
         {/section}
 
-        {*THANK YOU MESSAGE*}
-        {section name="thank_you" loop=1 show=$show.thank_you|default:FALSE}
-          <div>{$survey.thank_you_text}</div>
-        {/section}
-
         {*QUIT SURVEY MESSAGE*}
-        {section name="quit" loop=1 show=$show.quit|default:FALSE}
+        {section name="quit" loop=1 show=$show.quit}
           <div>
             Ukončil(a) jste vyplňování ankety. Vaše odpovědi nebyly uloženy.
           </div>
         {/section}
 
         {*MAIN LINK*}
-        {section name="main_url" loop=1 show=$show.main_url|default:FALSE}
+        {section name="main_url" loop=1 show=$show.main_url}
           <div style="text-align:center">
             <br />
             [ <a href="{$conf.html}/index.php">Návrat na hlavní stránku</a> ]

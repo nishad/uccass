@@ -20,7 +20,11 @@
             <form method="GET" action="{$conf.html}/edit_survey.php">
             <input type="hidden" name="mode" value="{$data.mode_edit_question}">
             <input type="hidden" name="sid" value="{$data.sid}">
-            <tr bgcolor="{cycle values="#F9F9F9,#FFFFFF"}">
+            {section name="row" loop=1 show=$data.page_break[p]}
+              <tr bgcolor="#CCCCCC">
+            {sectionelse}
+              <tr bgcolor="{cycle values="#F9F9F9,#FFFFFF"}">
+          {/section}
               <td style="text-align:center;">
                 {$data.qnum[p]}
                 <input type="hidden" name="qid" value="{$data.qid[p]}">
@@ -170,7 +174,7 @@
               button above after the question has been added to the survey.
             </span>
             <br />
-            
+
             {section name="dep" loop=3 show=TRUE}
               ({$smarty.section.dep.iteration})
               &nbsp;&nbsp;&nbsp;

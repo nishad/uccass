@@ -1,22 +1,92 @@
 Version 1.8.2
 
+  2006-09-16
+
+    Upgraded packaged version of Smarty to 2.6.14
+
+    TPL: Removed Welcome and Thank you section from
+    take_survey.tpl (they are not used anymore). Removed
+    "default:FALSE" from sections within template since it is
+    not compatible with Smarty v2.6.14 and not needed
+    Files: take_survey.tpl
+
+    TPL: Modified template to better highlight pagebreaks
+    Files: edit_survey_questions.tpl
+
+    Fixed bug with dependencies that added page break whether
+    one was actually required or not
+
+  2006-09-14
+
+    Added check to see if PHP can create subdirectories
+    during installation. If making a directory fails, a
+    warning is shown to the user telling them to set
+    $use_sub_dirs to false in smarty/Smarty.class.php
+
+  2006-09-12
+
+    Added SPSS Export code by Claudio Redaelli
+
+        TPL: added link for SPSS export to results.tpl file
+        Files: results.tpl
+
+        FILE: .\classes\results.class.php added:
+        $survey['export_spss'] = EXPORT_SPSS;
+
+        FILE: .\classes\main.class.php added:
+        define('EXPORT_SPSS',3);
+
+        FILES ADDED:
+        .\parameters_spss.php
+        .\results_spss.php
+        .\classes\spss_results.class.php
+        TPL: .\templates\spss_parameters.tpl
+
+  2006-07-20
+
+    Changed ADODB prefix checking to allow _ as first character
+
+    TPL: Fixed template bug in results_question.tpl. Change line 11
+    from {$data.survey.required} to {$survey.required}.
+    Files: results_question.tpl
+
+    TPL: Added previous/next links and page numbers to table results view
+    Files: results_table.tpl
+
+    TPL: Added edit_survey_refresh.tpl template to templates/Default directory
+
+    TPL: Added code to separate sending of bulk emails into separate
+    requests. This will prevent timeout issues of sending too many
+    emails at one time.
+    Files: edit_survey_refresh.tpl
+
+    DB: Added integer column "manual_codes" to surveys table
+
+    TPL: Added ability to manually add/edit invitation codes
+    Files: edit_survey_access_control.tpl
+
   2005-06-14
 
     Extensive re-write of newsurvey.class.php to match
     new format and use language files
 
-    Added ability for user to enter a number to limit the
+    TPL: Added ability for user to enter a number to limit the
     number of text answers shown per page
+    Files: results_text_detail.tpl
 
-    Added ability to sort text answers by newest or oldest
+    TPL: Added ability to sort text answers by newest or oldest
     answer first
+    Files: results_text_detail.tpl
 
     Fixed bug with loopbacks not being replaced properly
     when survey was set to LimitedHTML mode
 
+    Fixed bug where answer values can be reordered when
+    copying a survey
+
   2005-05-01
 
-    Added code to create custom reports. Users can choose
+    Added beginning of code to create custom reports. Users can choose
     multiple questions, layout type (bar graph, numeric only
     or crosstab) and display type (percentage, total, average)
 
@@ -34,10 +104,11 @@ Version 1.8.2
     Removed hardcoded output strings from main.class.php
     and put them in language.default.php or langauge.tpl
 
-    Added code to check/uncheck all user/invitee checkboxes
+    TPL: Added code to check/uncheck all user/invitee checkboxes
     on access control page. Thanks to "ChiefWigs1982" for
     showing me the code here:
     http://forums.devshed.com/showthread.php?p=1004233
+    Files: edit_survey_ac_invite.tpl, edit_survey_ac_users.tpl
 
 Version 1.8.1
 

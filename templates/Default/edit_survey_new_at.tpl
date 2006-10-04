@@ -1,19 +1,16 @@
-<!-- edit_survey_new_at.tpl-BEGIN -->
-      <form method="POST" action="{$conf.html}/new_answer_type.php" enctype="multipart/form-data">
-        <input type="hidden" name="sid" value="{$input.sid}">
-
-        {* SUCCESS MESSAGE *}
-          {section name="success" loop=$show.messages show=TRUE}
-            <div class="message">
-              {$show.messages[success]}
-            </div>
-          {/section}
-        {* / SUCCESS MESSAGE *}
-
-        {section name="error" loop=$show.errors show=TRUE}
-          <div class="error">{$show.errors[error]}</div>
+      {* SUCCESS MESSAGE *}
+        {section name="success" loop=1 show=$success}
+          <div class="message">New answer type successfully added.</div>
         {/section}
+      {* / SUCCESS MESSAGE *}
 
+      {section name="error" loop=1 show=$show.error}
+        <div class="error">{$show.error}</div>
+      {/section}
+
+      <form method="POST" action="{$conf.html}/new_answer_type.php">
+
+        <input type="hidden" name="sid" value="{$input.sid}">
 
         <div class="whitebox">
            <a href="{$conf.html}/docs/index.html#new_answer_type">[Help]</a>
@@ -70,53 +67,9 @@
           </ul>
         </div>
 
-        <div class="whitebox">
-          Is Dynamic
-        </div>
-
-        <div class="indented_cell">
-          <input type="checkbox" name="is_dynamic" {if $answer.is_dynamic}checked{/if} value="1"> is dynamic
-          <p>
-          With a dynamic answer type only a subset of all possible answers is 
-          presented to the respondent, based on some selector (for example his/her answer 
-          to a previous question). A question of a dynamic answer type requires a selector 
-          dependency. Also selectors must be assigned to the individual answer values in 
-          the table (prefix)dyna_answer_selectors.
-          </p>
-        </div>
-
         <div style="text-align:center">
           <input type="submit" name="submit" value="Add Answer">
         </div>
-
-		<br />
-		
-		{* UPLOAD DATA FILES *}
-        <div class="whitebox">
-          Files with the data of answer values/selectors to use (MS and MM Answer Types only)
-        </div>
-		
-		{if not $data.upload_forbidden}
-        <div class="indented_cell">
-        	<p>You may supply here file in the CSV format that defines answer values (and another that 
-        	assignes them selectors, if this is a dynamic answer type).</p>
-        	<p>Note: the maximal file size is {math equation="size / 1024" size=$data.max_upload_size format="%d"} KB. 
-        	Ask the server administrator if you need to increase it. Also, if you try to upload a large 
-        	file over a slow connection, the server may reject it after a period of time as too long.</p>
-	        <input type="hidden" name="MAX_FILE_SIZE" value="{$data.max_upload_size}">        	
-   				<div style="float:left; width: 12em"><label for="avfile">Answer values file: </label></div>
-   				<input name="answervaluesfile" type="file" id="avfile" style="margin: 0px 3px">
-   				<br>
-   				<div style="float:left; width: 12em"><label for="sfile">Selectors file: </label></div>
-   				<input name="selectorsfile" type="file" id="sfile" style="margin: 0px 3px">
-				Selectors are needed for a dynamic question type.
-		</div>
-		{else}
-			<p>Uploading of files is forbidden by the server administrator.</p>
-		{/if}
-        {* UPLOAD DATA FILES *}
-		
-		<br />
 
         <div class="whitebox">
           Answer Values (MS and MM Answer Types Only)
@@ -177,4 +130,3 @@
         </div>
 
       </form>
-<!-- edit_survey_new_at.tpl-END -->

@@ -107,7 +107,7 @@ class UCCASS_Survey extends UCCASS_Main
 
             if($check === ALREADY_COMPLETED || ($ac_control != AC_USERNAMEPASSWORD && $ac_control != AC_INVITATION))
             {
-                $this->setMessageRedirect("index.php");                
+                $this->setMessageRedirect("index.php");
                 $this->setMessage($this->lang('notice'), $this->lang('take.msg.already_completed'));
             }
             else
@@ -130,6 +130,7 @@ class UCCASS_Survey extends UCCASS_Main
         $show['quit_button'] = TRUE;
         $show['page_num'] = TRUE;
         $show['quit'] = FALSE;
+        $show['main_url'] = FALSE;
         $now = time();
         $stay_on_same_page = 0;
 
@@ -156,9 +157,9 @@ class UCCASS_Survey extends UCCASS_Main
             s.active, MAX(q.page) AS max_page, s.survey_text_mode, s.user_text_mode, s.time_limit
             FROM {$this->CONF['db_tbl_prefix']}surveys s, {$this->CONF['db_tbl_prefix']}questions q
             WHERE s.sid = $sid AND s.sid = q.sid GROUP BY q.sid
-			, s.name, s.start_date, s.end_date, s.redirect_page, s.active, 
+			, s.name, s.start_date, s.end_date, s.redirect_page, s.active,
 			s.template, s.survey_text_mode, s.user_text_mode, s.time_limit");
-        /* 
+        /*
          * OR use a subselect:
 		"SELECT s.name, s.start_date, s.end_date, s.redirect_page, " .
         "s.active, maxpage.max_page, s.template, s.survey_text_mode, s.user_text_mode, s.time_limit " .
@@ -202,7 +203,7 @@ class UCCASS_Survey extends UCCASS_Main
             {
                 //Check for no answers submitted or less than required
                 if(!isset($_REQUEST['answer'][$qid]))
-                {                    
+                {
                     $error = $this->lang('take.err.required');
                     $stay_on_same_page = 1;
                 }
@@ -227,7 +228,7 @@ class UCCASS_Survey extends UCCASS_Main
                     }
 
                     if($num_answered < $num_required)
-                    {                        
+                    {
                         $error = $this->lang('take.err.required');
                         $stay_on_same_page = 1;
                     }
@@ -239,7 +240,7 @@ class UCCASS_Survey extends UCCASS_Main
         //save answers into session if time limit hasn't
         //been passed
         if(isset($_REQUEST['answer']) && ($survey['time_limit']==0 || ($now < $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5)))
-        { $this->save_answers2session(); } 
+        { $this->save_answers2session(); }
 
 		// UPDATE PAGE NUMBER
         if(!$stay_on_same_page)
@@ -253,7 +254,7 @@ class UCCASS_Survey extends UCCASS_Main
 		// CHECK TIME LIMIT NOT EXCEEDED
         if($survey['time_limit'] && ($now > $_SESSION['take_survey']['start_time'] + (60 * $survey['time_limit']) + 5))
         {
-            $_SESSION['take_survey']['page'] = $survey['total_pages']+1;            
+            $_SESSION['take_survey']['page'] = $survey['total_pages']+1;
             $this->setMessage($this->lang('take.err.time_limit.hdr'), $this->lang('take.err.time_limit.msg'));
         }
 
@@ -304,7 +305,7 @@ class UCCASS_Survey extends UCCASS_Main
                 $show['page_num'] = FALSE;
 
                 $etime = $now - $_SESSION['take_survey']['start_time'];
-                $sequence = $this->db->GenID($this->CONF['db_tbl_prefix'].'_sequence');
+                $sequence = $this->db->GenID($this->CONF['db_tbl_prefix'].'time_limit_sequence');
                 $query = "INSERT INTO {$this->CONF['db_tbl_prefix']}time_limit (sequence,sid,elapsed_time,quitflag)
                           VALUES ($sequence,$sid,$etime,1)";
                 $rs = $this->db->Execute($query);
@@ -314,7 +315,7 @@ class UCCASS_Survey extends UCCASS_Main
 
             //Display Questions onthe current page
             case $survey['total_pages']:
-                $button['next'] = $this->lang('take.bttn.finish');
+                $button['next'] = $this->lang['take.bttn.finish'];
 
             default:
                 $show['question'] = TRUE;
@@ -379,14 +380,14 @@ class UCCASS_Survey extends UCCASS_Main
                     $show_question = 0;
 
                     // Check if current question has any dependencies & decide what to do
-                    // Note: if the question is of a dynamic answer type we must check the 
+                    // Note: if the question is of a dynamic answer type we must check the
                     //	dependencies (if its selector depends on an answer to a previous question)
                     if($check_dependencies)
-                    { 
+                    {
                     	$dependencyActions = $this->check_dependencies($r['qid'], $depend_keys, $depend);
                     	$hide_question 		= $dependencyActions[DEPEND_MODE_HIDE];
                     	$require_question 	= $dependencyActions[DEPEND_MODE_REQUIRE];
-                    	$show_question 		= $dependencyActions[DEPEND_MODE_SHOW]; 
+                    	$show_question 		= $dependencyActions[DEPEND_MODE_SHOW];
                     }
 
                     if($hide_question && !$show_question)
@@ -398,7 +399,7 @@ class UCCASS_Survey extends UCCASS_Main
                     	//////////////////////////////////////////////////
                     	// Define a variable to hold the question's info
 						$q = array();
-					
+
                         $q['qid'] = $r['qid'];
 
                         //Look for lookback text within the question
@@ -438,13 +439,13 @@ class UCCASS_Survey extends UCCASS_Main
                         	//
                         	//		Prepare selection-answer questions
                         	//
-                        	
+
                             //Get arrays of answers values and answer avid numbers
                             //Answer values are returned properly escaped according
                             //to the survey_text_mode setting for the survey
-                           
+
                             // 1. Get a value for the selector if this is a dynamic question
-                            $selector = isset($dependencyActions[DEPEND_MODE_SELECTOR])? 
+                            $selector = isset($dependencyActions[DEPEND_MODE_SELECTOR])?
                             	$dependencyActions[DEPEND_MODE_SELECTOR]
                             	: false;
                             // TODO: Make it possible to get the selector's value also from other sources, e.g.
@@ -581,16 +582,16 @@ class UCCASS_Survey extends UCCASS_Main
 
         if(isset($_SESSION['take_survey']['page']))
         { $survey['page'] = $_SESSION['take_survey']['page']; }
-        
+
         // SET BUTTON LABELS
         {
         	if(!isset($button))
         	{ $button = array(); }
         	if (!isset($button['next']))			// may be set earlier to 'Finish'
         	{ $button['next'] = $this->lang('take.bttn.next'); }
-        	$button['previous'] = $this->lang('take.bttn.previous'); 
+        	$button['previous'] = $this->lang('take.bttn.previous');
         	$button['quit'] = $this->lang('take.bttn.quit');
-        	$this->smarty->assign("button",$button); 
+        	$this->smarty->assign("button",$button);
         }
 
         $this->smarty->assign('survey',$survey);
@@ -660,7 +661,7 @@ class UCCASS_Survey extends UCCASS_Main
     function process_answers($survey)
     {
         //Get sequence number to identify this answer set
-        $id = $this->db->GenID($this->CONF['db_tbl_prefix'].'_sequence');
+        $id = $this->db->GenID($this->CONF['db_tbl_prefix'].'time_limit_sequence');
         $now = time();
 
         $access_control = $this->_getAccessControl($survey['sid']);
@@ -804,26 +805,26 @@ class UCCASS_Survey extends UCCASS_Main
     /****************************
     * SAVE ANSWERS TO SURVEY *
     * Save results/result_text to the results/results_text table. In case of a
-    * failed insert delete all answers inserted so far (rollback) and 
+    * failed insert delete all answers inserted so far (rollback) and
     * $this->error is called.
-    * 
+    *
     * @param string $insert_start Beginning of the insert string starting with
     * INSERT and up to VALUES
     * @param array $results Array with values to be saved, one element per
     * answer. An element will be appended directly to 'insert... values '.
     * Must not be null, may be empty.
-    * 
+    *
     * @access private
     * @author Jakub Holy
     * ***************************/
     function save_answers($insert_start, $results_array)
     {
-    	$inserted_rids = array();	// ids of successfully inserted result text 
+    	$inserted_rids = array();	// ids of successfully inserted result text
         foreach($results_array as $rid => $single_result)
         {
         	$rs = $this->db->Execute($insert_start . $single_result);
             if($rs === FALSE)
-            { 
+            {
             	// "rollback" - delete already inserted answers
             	$rids_list = implode(',',$inserted_rids);
             	$rs = $this->db->Execute("DELETE FROM {$this->CONF['db_tbl_prefix']}results_text WHERE rid in ($rids_list)");
@@ -835,34 +836,34 @@ class UCCASS_Survey extends UCCASS_Main
     } // save_results
 
     /**
-     * Check whether dependencies of this question are satisfied 
+     * Check whether dependencies of this question are satisfied
      * and what action should be taken (hide/show/require).
-     * 
+     *
      * @param integer 	$qid id of the question under control.
      * @param array 	$depend_keys array of qids of questions that have a
      * dependancy (keys of $depend)
      * @param array 	$depend Details of dependencies:
      * array(
-     * 	$qid => array( 
+     * 	$qid => array(
      * 		'dep_qid'=>array($dep_qid1,...),
      *  	'dep_aid'=>array($dep_aid1,...),
      *  	'dep_option'=>array($dep_option1,...) ))
-     * 
-     * @return array array(DEPEND_MODE_HIDE=>0/1, DEPEND_MODE_REQUIRE=>0/1, 
+     *
+     * @return array array(DEPEND_MODE_HIDE=>0/1, DEPEND_MODE_REQUIRE=>0/1,
      * DEPEND_MODE_SHOW=>0/1, DEPEND_MODE_SELECTOR=>array of avids or false)
      *   - 0  = false, 1 = true; the array of avids = answers given to
      * the question we depend upon.
-     * 
+     *
      * @access private
      */
 	function check_dependencies($qid, &$depend_keys, &$depend)
 	{
 		$answer_actions = array(DEPEND_MODE_HIDE=>0, DEPEND_MODE_REQUIRE=>0
-			, DEPEND_MODE_SHOW=>0, DEPEND_MODE_SELECTOR => false);		
-        
+			, DEPEND_MODE_SHOW=>0, DEPEND_MODE_SELECTOR => false);
+
         // Has the question any dependencies?
         if( in_array($qid,$depend_keys) )
-        {	
+        {
 	        //current question has dependencies, so loop
 	        //through the dependent question
 	        foreach($depend[$qid]['dep_qid'] as $key => $dep_qid)
@@ -885,24 +886,24 @@ class UCCASS_Survey extends UCCASS_Main
 	                    	$dep_option = $depend[$qid]['dep_option'][$key];	// key: 1st,2nd.. dependency
 	                    	// $aid may be a single avid or an array of avids => unify:
 	                    	$avid_array =  is_array($aid)? $aid : array($aid);
-	                    	
-	                    	// If this option signifies that the question's answer type is dynamic and 
-	                    	// a value for its selector is obtained from the question it depends upon then 
+
+	                    	// If this option signifies that the question's answer type is dynamic and
+	                    	// a value for its selector is obtained from the question it depends upon then
 	                    	// get & store answers to the question.
 	                    	// Otherwise process normaly - decide whether to hide/show/require:
 	                    	if($dep_option == DEPEND_MODE_SELECTOR)
 	                    	{ $answer_actions[$dep_option] = $avid_array; }	// store the answers
 	                    	elseif( in_array($depend[$qid]['dep_aid'][$key], $avid_array) )
-                            { $answer_actions[$dep_option] = 1; }			// set the action to true 
+                            { $answer_actions[$dep_option] = 1; }			// set the action to true
 	                    }	// foreach answer block of the dependant question
 	                } // if answers to the question this one depends upon form an array
 	            } // if user has answered the question this one depends upon
 	        } // loop through the questions this question depends upon
         } // if the given question has some dependencies defined
-        
+
         return $answer_actions;
 	} 	// function check_dependency
-	
+
 	/* *
 	 * Find a value for the given dynamic answer type's selector.
 	 * The selector's value is taken from some of the previous answers so we go
@@ -910,29 +911,29 @@ class UCCASS_Survey extends UCCASS_Main
 	 * @param int Id of the dynamic answer type.
 	 * @return array Either answers to the question the selector shall be taken
 	 * from or an empty array if no answer is found.
-	 * 
+	 *
 	 * @access private
 	 * /
 	function get_selector_value($aid)
 	{
 		// 1. Find out on what question does the dynamic answer type depend.
-		
-		  
+
+
 		// 2. Find the answers
 		$answers = array();
 		if( isset($_SESSION['take_survey']['lookback'][$qid]) )
 		{ $answers = $_SESSION['take_survey']['lookback'][$qid]; }
-		
+
 		return $answers;
 	}*/
-	
+
 	/**
 	 * Save answers from request to session - call when user submits a survey's
 	 * page.
-	 * The answers are stored into 
-	 * $_SESSION['take_survey']['answer'][$qid][$answer_block_num] and 
+	 * The answers are stored into
+	 * $_SESSION['take_survey']['answer'][$qid][$answer_block_num] and
 	 * $_SESSION['take_survey']['lookback'] [$qid].
-	 * 
+	 *
 	 * @access private
 	 */
 	function save_answers2session()
@@ -950,7 +951,7 @@ class UCCASS_Survey extends UCCASS_Main
                     $cnt = 0;
                     if(is_array($avid)) // MM question: avid = array(avid1, avid2, ...) (html name: answer[qid][blocknumber][])
                     {
-                        foreach($avid as $answernum2=>$avid2) // MM question - $answernum2 is an avid's index assigned by php 
+                        foreach($avid as $answernum2=>$avid2) // MM question - $answernum2 is an avid's index assigned by php
                         {
                             if(strlen($avid2) > 0)
                             {

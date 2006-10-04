@@ -1,22 +1,17 @@
 TODO:
 
     1. Regarding Survey Properties:
-        + (bug?) Is there an issue with copying dependencies when creating a (copied) survey? (working on)
 
         + Add ability to send invitation to: (working on)
           * All invitees
           * All uninvited invitees
           * All invitees who have not participated
 
-        + Allow relative paths in "Completion Redirect Page URL" (working on)
-
         + Enable save/continue/edit feature controlled by admin option:
           ( ) Do not allow users to save/continue survey (no save feature)
           ( ) Allow users to continue/edit last saved/completed survey within [__] [minutes/hours/days]
           ( ) Allow users to continue/edit any saved/completed survey (choose which by date/time stamp)
               within [__] [minutes/hours/days]
-
-        + Import/export users and surveys from CSV file
 
         + Authentication API (allow dropin file to authenticate to vBulletin, phpBB, etc)
 
@@ -35,6 +30,8 @@ TODO:
     2. Regarding Survey Results:
         + (bug?) Changing answer type from text to MM/MS results in no results showing up (working on)
 
+        + Add ability to view results of surveys even after they are inactive
+
         + Add custom reports feature to include custom result layouts (working on)
           * Average
           * Numeric total
@@ -43,14 +40,10 @@ TODO:
 
         + Filter based on text fields (matching search, for example)
 
-        + Add ability to list text answers from newest -> latest
-          and latest -> newest.
-
         + Add more graphical representations of the answers
           to questions, such as pie graph, etc
 
     3. Regarding questions/answers:
-        + (bug?) Are lookbacks copied when new surveys are created? (working on)
 
         + Add alternate input types (working on)
           * Date w/range
@@ -95,9 +88,10 @@ TODO:
         + Match S or T answer types to regular expression (advanced)
 
     4. Regarding taking Surveys:
-        + Remove "previous page" from first page of surveys (working on)
 
         + Print version of survey (but how to handle dependencies?)
+
+        + Add ability to set start and end dates down to the second (default to midnight for each)
 
         + Ability to choose between "page x of y" or "%x complete" (or provide the relevant variables
           (so users can adjust the templates)
@@ -108,12 +102,6 @@ TODO:
           bypassed and completed-surveys are not incremented)
 
     5. PHP related:
-        + Add language file and move any strings there (working on)
-
-        + Move any magic numbers/strings to constants (working on)
-
-        + Detect ability to create subdirectories (regarding Smarty) upon installation
-          and dynamically set $use_sub_dirs to FALSE is unable
 
         + (Full) Support for alternate databases
 
@@ -123,3 +111,5 @@ TODO:
 
         + Include the (optional) use an an SMTP mailer class that'll handle authentication
           for those users who require it
+
+	+ Move all sequence number generation to one table. No need for individual tables for each sequence.
