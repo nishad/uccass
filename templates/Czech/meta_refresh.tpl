@@ -1,0 +1,1 @@
+<meta http-equiv="refresh" content="3;{$conf.html}/access_control.php?sid={$data.sid}&mode=access_control&{$data.url_variables}">
