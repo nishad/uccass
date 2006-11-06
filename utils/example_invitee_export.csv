@@ -1,0 +1,6 @@
+<-- Example Invitee Export List - Remove first 3 lines to import! -->
+UID, Name, Email, Invite_Code, Results_Priv
+<---------------------------------------->
+98,"John","john@example.org","rubber-duck",0
+99,"Mike","mike@example.org","keynoting-regionals",0
+100,"Zack","zack@example.org","valvular-poetics",0
